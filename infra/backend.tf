@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
     bucket = "tfstate-observatudo"
-    prefix = "apps/www"
+    prefix = "apps/observatudo-www-app"
   }
 }

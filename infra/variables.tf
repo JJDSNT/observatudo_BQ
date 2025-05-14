@@ -11,3 +11,8 @@ variable "image_url" {
   type = string
   description = "URL da imagem Docker publicada"
 }
+
+variable "state_label" {
+  type    = string
+  default = "observatudo-www-app"
+}

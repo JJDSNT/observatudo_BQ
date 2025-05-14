@@ -4,10 +4,22 @@ provider "google" {
 }
 
 resource "google_cloud_run_service" "www_observatudo" {
-  name = "www-observatudo"
+  name     = "www-observatudo"
   location = var.region
 
+  metadata {
+    labels = {
+      provisioned_by = var.state_label
+    }
+  }
+
   template {
+    metadata {
+      labels = {
+        provisioned_by = var.state_label
+      }
+    }
+
     spec {
       containers {
         image = var.image_url

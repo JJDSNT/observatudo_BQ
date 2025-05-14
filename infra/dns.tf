@@ -1,4 +1,3 @@
-# www.observatudo.com.br → Cloud Run
 resource "google_dns_record_set" "www" {
   name         = "www.observatudo.com.br."
   type         = "CNAME"
