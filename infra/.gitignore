@@ -1,0 +1,16 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform plan files
+*.tfplan
+
+# Terraform crash logs
+crash.log
+
+# Terraform CLI cache
+.terraform/
+
+# Override files
+terraform.tfvars
+terraform.tfvars.json
