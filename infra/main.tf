@@ -3,8 +3,8 @@ provider "google" {
   region  = var.region
 }
 
-resource "google_cloud_run_service" "nextjs" {
-  name     = "observatudo-bq"
+resource "google_cloud_run_service" "www_observatudo" {
+  name = "www-observatudo"
   location = var.region
 
   template {
@@ -26,8 +26,8 @@ resource "google_cloud_run_service" "nextjs" {
 }
 
 resource "google_cloud_run_service_iam_member" "public_access" {
-  location = google_cloud_run_service.nextjs.location
-  service  = google_cloud_run_service.nextjs.name
+  location = google_cloud_run_service.www_observatudo.location
+  service  = google_cloud_run_service.www_observatudo.name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
