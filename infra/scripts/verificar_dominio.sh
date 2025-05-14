@@ -13,15 +13,25 @@ YELLOW="\033[1;33m"
 NC="\033[0m"
 
 echo -e "${YELLOW}🔍 Verificando domainMapping do Cloud Run...${NC}"
-DOMAIN_STATUS=$(gcloud run domain-mappings describe "$DOMAIN" \
+DOMAIN_INFO=$(gcloud beta run domain-mappings describe \
+  --domain="$DOMAIN" \
   --project="$PROJECT_ID" \
   --region="$REGION" \
-  --format="value(status.resourceRecords[0].rrdata)")
+  --platform=managed \
+  --format="yaml")
 
-if [[ -z "$DOMAIN_STATUS" ]]; then
-  echo -e "${RED}❌ DomainMapping não encontrado ou sem status provisionado${NC}"
+if [[ -z "$DOMAIN_INFO" ]]; then
+  echo -e "${RED}❌ DomainMapping não encontrado${NC}"
+  DOMAIN_STATUS=""
 else
-  echo -e "${GREEN}✅ DomainMapping aponta para: $DOMAIN_STATUS${NC}"
+  RRDATA=$(echo "$DOMAIN_INFO" | grep "rrdata:" | awk '{print $2}')
+  if [[ -n "$RRDATA" ]]; then
+    DOMAIN_STATUS=$(echo "$RRDATA" | sed 's/\.$//') # Remove ponto final
+    echo -e "${GREEN}✅ DomainMapping espera CNAME para: $DOMAIN_STATUS${NC}"
+  else
+    echo -e "${YELLOW}⚠️ DomainMapping encontrado, mas sem informações de CNAME ainda${NC}"
+    DOMAIN_STATUS=""
+  fi
 fi
 
 echo -e "${YELLOW}🔍 Verificando CNAME no Cloud DNS...${NC}"
@@ -29,7 +39,7 @@ DNS_CNAME=$(gcloud dns record-sets list \
   --project="$PROJECT_ID" \
   --zone="$DNS_ZONE" \
   --name="${DOMAIN}." \
-  --format="value(rrdatas[0])")
+  --format="value(rrdatas[0])" | sed 's/\.$//')
 
 if [[ -z "$DNS_CNAME" ]]; then
   echo -e "${RED}❌ Nenhum CNAME encontrado para $DOMAIN na zona $DNS_ZONE${NC}"
@@ -38,7 +48,9 @@ else
 fi
 
 # Comparar
-if [[ "$DOMAIN_STATUS" == "$DNS_CNAME" ]]; then
+if [[ -z "$DOMAIN_STATUS" ]]; then
+  echo -e "${RED}⚠️ Não foi possível obter o valor do DomainMapping para comparação${NC}"
+elif [[ "$DOMAIN_STATUS" == "$DNS_CNAME" ]]; then
   echo -e "${GREEN}✅ CNAME e DomainMapping estão consistentes${NC}"
 else
   echo -e "${RED}⚠️ CNAME e DomainMapping estão inconsistentes${NC}"
@@ -60,4 +72,3 @@ echo -e "${GREEN}🚦 Tráfego alocado: ${TRAFFIC_PERCENT}%${NC}"
 
 echo -e "${YELLOW}🔍 Testando resposta HTTP do domínio...${NC}"
 curl -I --silent --location "https://$DOMAIN" | head -n 1
-
