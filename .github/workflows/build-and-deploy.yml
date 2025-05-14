@@ -1,0 +1,43 @@
+name: Build and Deploy para Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: observatudo-infra
+  SERVICE_NAME: www-observatudo
+  REGION: us-east1
+  IMAGE_NAME: gcr.io/observatudo-infra/observatudo-bq
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Autenticar no GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar Docker com credenciais GCP
+        run: gcloud auth configure-docker
+
+      - name: Build da imagem Docker
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Push da imagem para Container Registry
+        run: docker push $IMAGE_NAME
+
+      - name: Deploy da imagem no Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image $IMAGE_NAME \
+            --region $REGION \
+            --platform managed \
+            --project $PROJECT_ID \
+            --allow-unauthenticated
