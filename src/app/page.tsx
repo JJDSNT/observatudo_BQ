@@ -1,3 +1,5 @@
+import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
+
 export default function Home() {
   return (
     <section className="space-y-6">
@@ -9,6 +11,8 @@ export default function Home() {
         Este projeto demonstra a integração entre Next.js e Google BigQuery para
         construir visualizações baseadas em dados públicos.
       </p>
+      
+      <ComboBoxLocalidades />
 
       <p className="text-sm opacity-70">
         Em breve, você poderá navegar por indicadores por estado, cidade e tema.
