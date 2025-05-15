@@ -29,7 +29,7 @@ result = client.query(query).result()
 
 # === ORGANIZAÇÃO DOS DADOS ===
 estados = {}
-cidades_por_estado = defaultdict(list)
+cidades_por_estado = defaultdict(dict)  # dict interno para deduplicar por ID
 
 for row in result:
     if row.tipo == "estado":
@@ -41,16 +41,22 @@ for row in result:
         }
     elif row.tipo == "cidade":
         estado_uf = row.localidade_pai_id.replace("BR-", "")
-        cidades_por_estado[estado_uf].append({
+        cidades_por_estado[estado_uf][row.localidade_id] = {
             "id": row.localidade_id,
             "nome": row.nome,
             "é_capital": row["é_capital"] or False
-        })
+        }
 
 # === AGRUPAR ===
-for uf, cidades in cidades_por_estado.items():
+for uf, cidades_dict in cidades_por_estado.items():
     if uf in estados:
-        estados[uf]["cidades"] = sorted(cidades, key=lambda c: c["nome"])
+        cidades_unicas = list(cidades_dict.values())
+        cidades_ordenadas = sorted(
+            cidades_unicas,
+            key=lambda c: c["nome"]
+        )
+        estados[uf]["cidades"] = cidades_ordenadas
+
 
 # === CRIAR DIRETÓRIO SE NECESSÁRIO ===
 os.makedirs(os.path.dirname(DESTINO_JSON), exist_ok=True)
