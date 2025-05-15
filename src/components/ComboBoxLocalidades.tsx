@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react'
 import localidades from '@/data/localidades_dropdown.json'
 
@@ -21,30 +22,33 @@ export default function ComboBoxLocalidades() {
   const cidades = ufSelecionado ? localidades[ufSelecionado].cidades : []
 
   return (
-    <div className="flex flex-col gap-4 max-w-md mx-auto">
-      <label className="text-sm font-medium">Estado (UF)</label>
-      <select
-        value={ufSelecionado}
-        onChange={(e) => {
-          setUfSelecionado(e.target.value)
-          setCidadeSelecionada('')
-        }}
-        className="border p-2 rounded"
-      >
-        <option value="">Selecione um estado</option>
-        {estados.map(([uf, estado]) => (
-          <option key={uf} value={uf}>
-            {estado.nome} ({uf})
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-4 max-w-4xl mx-auto">
+      <div className="flex flex-wrap gap-4">
+        <div className="flex flex-col w-full sm:w-1/2">
+          <label className="text-sm font-medium mb-1">Estado (UF)</label>
+          <select
+            value={ufSelecionado}
+            onChange={(e) => {
+              setUfSelecionado(e.target.value)
+              setCidadeSelecionada('')
+            }}
+            className="border p-2 rounded"
+          >
+            <option value="">Selecione um estado</option>
+            {estados.map(([uf, estado]) => (
+              <option key={uf} value={uf}>
+                {estado.nome} ({uf})
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {ufSelecionado && (
-        <>
-          <label className="text-sm font-medium">Cidade</label>
+        <div className="flex flex-col w-full sm:w-1/2">
+          <label className="text-sm font-medium mb-1">Cidade</label>
           <select
             value={cidadeSelecionada}
             onChange={(e) => setCidadeSelecionada(e.target.value)}
+            disabled={!ufSelecionado}
             className="border p-2 rounded"
           >
             <option value="">Selecione uma cidade</option>
@@ -54,11 +58,11 @@ export default function ComboBoxLocalidades() {
               </option>
             ))}
           </select>
-        </>
-      )}
+        </div>
+      </div>
 
       {cidadeSelecionada && (
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="text-sm text-gray-600">
           Selecionado: <strong>{cidadeSelecionada}</strong>
         </div>
       )}
