@@ -52,8 +52,8 @@ export default function ComboBoxLocalidades() {
             className="border p-2 rounded w-full"
           >
             <option value="">Selecione uma cidade</option>
-            {cidades.map((cidade, index) => (
-              <option key={`${cidade.id}-${index}`} value={cidade.id}>
+            {cidades.map((cidade) => (
+              <option key={cidade.id} value={cidade.id}>
                 {cidade.nome} {cidade.é_capital ? '(Capital)' : ''}
               </option>
             ))}
