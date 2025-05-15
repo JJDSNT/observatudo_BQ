@@ -23,8 +23,8 @@ export default function ComboBoxLocalidades() {
 
   return (
     <div className="flex flex-col gap-4 max-w-4xl mx-auto">
-      <div className="flex flex-wrap gap-4">
-        <div className="flex flex-col w-full sm:w-1/2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
           <label className="text-sm font-medium mb-1">Estado (UF)</label>
           <select
             value={ufSelecionado}
@@ -32,7 +32,7 @@ export default function ComboBoxLocalidades() {
               setUfSelecionado(e.target.value)
               setCidadeSelecionada('')
             }}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           >
             <option value="">Selecione um estado</option>
             {estados.map(([uf, estado]) => (
@@ -43,17 +43,17 @@ export default function ComboBoxLocalidades() {
           </select>
         </div>
 
-        <div className="flex flex-col w-full sm:w-1/2">
+        <div>
           <label className="text-sm font-medium mb-1">Cidade</label>
           <select
             value={cidadeSelecionada}
             onChange={(e) => setCidadeSelecionada(e.target.value)}
             disabled={!ufSelecionado}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           >
             <option value="">Selecione uma cidade</option>
-            {cidades.map((cidade) => (
-              <option key={cidade.id} value={cidade.id}>
+            {cidades.map((cidade, index) => (
+              <option key={`${cidade.id}-${index}`} value={cidade.id}>
                 {cidade.nome} {cidade.é_capital ? '(Capital)' : ''}
               </option>
             ))}
