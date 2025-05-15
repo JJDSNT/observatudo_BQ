@@ -7,7 +7,7 @@ import os
 PROJETO = "observatudo-infra"
 DATASET = "dados"
 TABELA = "dim_localidades"
-CAMINHO_DADOS = "../dados/ibge/localidades/"
+CAMINHO_DADOS = "dados/ibge/localidades/"
 CAMPO_CAPITAL = "é_capital"
 
 # === LEITURA DOS CSVs ===
