@@ -1,36 +1,31 @@
-"use client"
-import { useState } from 'react'
-import localidades from '@/data/localidades_dropdown.json'
+"use client";
+import { useState } from "react"
+import localidadesJson from "@/data/localidades_dropdown.json"
+import type {
+  CidadeDropdown,
+  EstadoDropdown,
+  LocalidadesMap
+} from '@/types/localidadesDropdown.types'
 
-interface Cidade {
-  id: string
-  nome: string
-  é_capital: boolean
-}
-
-interface Estado {
-  nome: string
-  capital_id: string
-  cidades: Cidade[]
-}
+const localidades = localidadesJson as LocalidadesMap
 
 export default function ComboBoxLocalidades() {
-  const [ufSelecionado, setUfSelecionado] = useState<string>('')
-  const [cidadeSelecionada, setCidadeSelecionada] = useState<string>('')
+  const [ufSelecionado, setUfSelecionado] = useState<string>("");
+  const [cidadeSelecionada, setCidadeSelecionada] = useState<string>("");
 
-  const estados = Object.entries(localidades) as [string, Estado][]
-  const cidades = ufSelecionado ? localidades[ufSelecionado].cidades : []
+  const estados = Object.entries(localidades) as [string, EstadoDropdown][];
+  const cidades = ufSelecionado ? localidades[ufSelecionado].cidades : [];
 
   return (
     <div className="flex flex-col gap-4 max-w-4xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium mb-1">Estado (UF)</label>
+          <label htmlFor="select-uf" className="text-sm font-medium mb-1">Estado (UF)</label>
           <select
             value={ufSelecionado}
             onChange={(e) => {
-              setUfSelecionado(e.target.value)
-              setCidadeSelecionada('')
+              setUfSelecionado(e.target.value);
+              setCidadeSelecionada("");
             }}
             className="border p-2 rounded w-full"
           >
@@ -44,7 +39,7 @@ export default function ComboBoxLocalidades() {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1">Cidade</label>
+          <label htmlFor="select-cidade" className="text-sm font-medium mb-1">Cidade</label>
           <select
             value={cidadeSelecionada}
             onChange={(e) => setCidadeSelecionada(e.target.value)}
@@ -52,9 +47,9 @@ export default function ComboBoxLocalidades() {
             className="border p-2 rounded w-full"
           >
             <option value="">Selecione uma cidade</option>
-            {cidades.map((cidade) => (
+            {cidades.map((cidade: CidadeDropdown) => (
               <option key={cidade.id} value={cidade.id}>
-                {cidade.nome} {cidade.é_capital ? '(Capital)' : ''}
+                {cidade.nome} {cidade.é_capital ? "(Capital)" : ""}
               </option>
             ))}
           </select>
@@ -67,5 +62,5 @@ export default function ComboBoxLocalidades() {
         </div>
       )}
     </div>
-  )
+  );
 }
