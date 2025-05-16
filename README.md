@@ -1,6 +1,7 @@
 # 📊 Observatudo – Indicadores Cívicos
 
-Projeto de ingestão, organização e exploração de indicadores cívicos (como saúde, educação, governança) com dados abertos provenientes de múltiplas fontes. Utiliza BigQuery como base analítica, Python para pré-processamento e dbt para modelagem e governança de dados.
+Plataforma fullstack para ingestão, organização e visualização de indicadores cívicos como saúde, educação e governança.  
+Combina frontend em **Next.js**, backend analítico com **BigQuery** e pipelines com **Python + dbt**.
 
 ---
 
@@ -16,8 +17,14 @@ observatudo-bq/
 │   ├── preprocess_cidades_sustentaveis.py  # ETL leve e upload para GCS
 │   └── carregar_localidades_ibge.py        # Geração da tabela de localidades
 ├── src/
+│   ├── app/                                 # Next.js App Router
+│   │   └── page.tsx                         # Página principal
+│   ├── components/
+│   │   └── ComboBoxLocalidades.tsx         # Componente dinâmico
+│   ├── types/
+│   │   └── localidadesDropdown.types.ts    # Tipagens compartilhadas
 │   └── data/
-│       └── localidades_dropdown.json       # Dados para uso no frontend
+│       └── localidades_dropdown.json       # Dados carregados via import no frontend
 ├── terraform/
 │   └── bigquery.tf                         # Infraestrutura no GCP (buckets, tabelas)
 ├── .gcloudignore
@@ -29,116 +36,93 @@ observatudo-bq/
 
 ## ✅ Pipeline Atual
 
-### 1. Pré-processamento (`scripts/preprocess_cidades_sustentaveis.py`)
-- Lê a fonte bruta `indicadores.csv`
-- Padroniza colunas, sanitiza valores, converte `valor` para `FLOAT`
-- Gera CSV limpo `indicadores_padronizados.csv`
-- Realiza upload dos arquivos para o bucket GCS
+### Frontend (Next.js 15+)
+- Carregamento de `localidades_dropdown.json` via `import`
+- Componente `ComboBoxLocalidades` com seleção UF + cidade
+- Interface tipada com TypeScript (`EstadoDropdown`, `CidadeDropdown`)
 
-### 2. Upload para GCS
-- `indicadores/brutos/cidades-sustentaveis/indicadores.csv`
-- `indicadores/processados/cidades-sustentaveis/indicadores.csv`
+### Pré-processamento (`scripts/preprocess_cidades_sustentaveis.py`)
+- Leitura da fonte original
+- Limpeza e padronização
+- Conversão do campo `valor` para float
+- Estatísticas de cobertura
+- Upload para GCS (bruto + processado)
 
-### 3. Tabelas BigQuery (via Terraform)
-- `dim_localidades`: localidades IBGE hierarquizadas
-- `dim_indicadores`: metadados dos indicadores (em construção)
-- `fact_indicadores`: valores associados a local/data/indicador (em construção)
+### Tabelas no BigQuery (via Terraform)
+- `dim_localidades` ✔️
+- `dim_indicadores` ⚙️
+- `fact_indicadores` ⚙️
 
 ---
 
 ## 🔁 Próximos Passos
 
 - [ ] Criar modelo `stg_indicadores__cidades_sustentaveis` no dbt  
-- [ ] Implementar testes de qualidade de dados (dbt)  
-- [ ] Normalizar categorias com IA ou mapeamento manual  
-- [ ] Popular `dim_indicadores` e `fact_indicadores`  
-- [ ] Habilitar views e dashboards exploratórios  
+- [ ] Popular `dim_indicadores` com metadados enriquecidos  
+- [ ] Popular `fact_indicadores` com valores por município  
+- [ ] Criar página de indicadores com filtros por local/categoria  
+- [ ] Recategorizar eixos com IA supervisionada  
 
 ---
 
-## 💡 Estratégia de Modelagem
+## 💡 Estratégia de Modelagem (Dados)
 
 - Star Schema (dimensões + fatos)  
-- Particionamento por data  
-- Clustering por `indicador_id` e `localidade_id`  
-- Recategorização por IA (eixo temático → enum `Eixos`)  
+- Tabelas `dim_` e `fact_` com particionamento/clustering  
+- Qualidade de dados via dbt (`tests`, `docs`, `sources`)  
+- JSONs para metadados flexíveis (`metadados`, `flags`, `formula_calculo`)  
 
 ---
 
 ## 🛠️ Requisitos
 
-- Python 3.10+
-- Ambiente virtual:
+- **Node.js 18+**
+- **Python 3.10+**
+- **Terraform 1.6+**
+- Conta Google Cloud com permissão no projeto
+
+---
+
+## ⚙️ Setup
 
 ```bash
+# 1. Instalar dependências do frontend
+npm install
+
+# 2. Criar ambiente virtual Python
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-```
 
-- Acesso ao GCP via:
-
-```bash
+# 3. Autenticar na GCP (dev)
 gcloud auth application-default login
 ```
 
 ---
 
-## 🚀 Execução local
+## 🚀 Comandos Úteis
 
 ```bash
-# Ativar o ambiente
-source .venv/bin/activate
-
-# Executar o pré-processamento
+# Executar pré-processamento de dados
 python scripts/preprocess_cidades_sustentaveis.py
+
+# Rodar frontend localmente (Next.js)
+npm run dev
+
+# Aplicar infraestrutura no GCP
+terraform init && terraform apply
 ```
 
 ---
 
 ## 🧠 Visão futura
 
-Este projeto visa evoluir para uma plataforma analítica cívica interoperável, com:
-- Dados versionados e auditáveis  
-- Modelo semântico flexível (recategorização por IA)  
-- Visualização integrada (Next.js + API)  
-- Pipeline unificado com GitOps + Terraform + dbt
+Este projeto visa evoluir para uma **plataforma analítica cívica interoperável**, com:
 
+- Dados versionados e auditáveis
+- Normalização assistida por IA
+- Visualização Next.js com filtros e gráficos
+- Backend analítico via BigQuery + dbt
+- CI/CD via GitHub Actions + Terraform + dbt Cloud
 
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
