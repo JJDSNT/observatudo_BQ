@@ -44,7 +44,8 @@ import os
 from datetime import datetime, timezone
 import json
 from pathlib import Path
-from scripts.meu_llm import classificar_eixo, check_server
+from meu_llm import classificar_eixo, check_server
+from tqdm import tqdm
 
 
 # === CONFIGURAÇÕES ===
@@ -55,6 +56,22 @@ DESTINO_BRUTO = "indicadores/brutos/cidades-sustentaveis/indicadores.csv"
 DESTINO_PROCESSADO = (
     "indicadores/processados/cidades-sustentaveis/indicadores.csv"
 )
+
+# === CATEGORIAS VÁLIDAS ===
+CATEGORIAS_VALIDAS = {
+    "Saude",
+    "Educacao",
+    "Assistencia Social",
+    "Seguranca",
+    "Meio Ambiente",
+    "Urbanismo",
+    "Mobilidade Urbana",
+    "Economia",
+    "Financas Publicas",
+    "Governanca",
+    "Administracao Publica"
+}
+
 
 # === ETAPA 1: Leitura do CSV bruto ===
 df = pd.read_csv(CAMINHO_BRUTO)
@@ -81,58 +98,101 @@ colunas_renomeadas = {
 df = df.rename(columns=colunas_renomeadas)
 df = df[list(colunas_renomeadas.values())]
 
-"""
-=== ETAPA 2.5: Recategorização com LLM local ===
-
-Esta etapa utiliza um modelo LLM
-(ex: rodando localmente via Ollama, LM Studio, etc.)
-para classificar automaticamente cada `indicador_id` em um eixo temático.
-
-Fluxo:
-1. Um cache incremental é salvo em: dados/cidades-sustentaveis/eixos_llm.json
-2. Se o indicador já foi classificado, reutiliza o valor salvo
-3. Apenas novos indicadores são enviados ao modelo via HTTP (Ollama)
-4. O resultado é salvo na coluna `eixo_ia` e persistido no cache
-
-🛑 Se o servidor Ollama não estiver acessível ou o modelo não carregado,
-    a etapa de categorização é automaticamente ignorada
-    (o script segue normalmente).
-"""
+# === ETAPA 2.5: Recategorização com LLM local ===
 
 CAMINHO_MAPA_EIXOS = "dados/cidades-sustentaveis/eixos_llm.json"
+CAMINHO_ERROS_EIXOS = "dados/cidades-sustentaveis/erros_classificacao_llm.csv"
 
 if check_server():
-    # Carregar mapeamento salvo anteriormente
     if Path(CAMINHO_MAPA_EIXOS).exists():
         with open(CAMINHO_MAPA_EIXOS, encoding="utf-8") as f:
             mapeamento_eixos = json.load(f)
     else:
         mapeamento_eixos = {}
 
-    # Agrupar por indicador_id e classificar apenas os novos
     agrupado = df.groupby("indicador_id").first()
+    novos = {
+        cod: row
+        for cod, row in agrupado.iterrows()
+        if cod not in mapeamento_eixos
+    }
 
-    for cod, row in agrupado.iterrows():
-        if cod not in mapeamento_eixos:
-            texto = f"{row['nome']} - {row.get('descricao', '')}"
-            eixo = classificar_eixo(texto)
+    erros_classificacao = []
+
+    print(f"🧠 Classificando {len(novos)} indicadores com LLM...")
+
+    for i, (cod, row) in enumerate(
+        tqdm(
+            novos.items(),
+            desc="LLM classificando"
+        )
+    ):
+
+        texto = f"{row['nome']} - {row.get('descricao', '')}"
+
+        try:
+            eixo = classificar_eixo(texto).strip()
+
+            if eixo not in CATEGORIAS_VALIDAS:
+                print(
+                    f"🚫 [{i+1}/{len(novos)}] {cod} - {row['nome']}\n"
+                    f"→ Classificação inválida: '{eixo}'"
+                )
+
+                erros_classificacao.append(
+                    {
+                        "indicador_id": cod,
+                        "nome": row["nome"],
+                        "descricao": row.get("descricao", ""),
+                        "eixo_invalido": eixo,
+                    }
+                )
+                continue
+
             mapeamento_eixos[cod] = eixo
+            print(f"✅ [{i+1}/{len(novos)}] {cod} - {row['nome']} → {eixo}")
 
-    # Aplicar ao DataFrame principal
+        except Exception as e:
+            print(
+                f"⚠️ [{i+1}/{len(novos)}] Erro ao classificar\n"
+                f"→ {cod} - {row['nome']}\n"
+                f"→ {e}"
+            )
+            erros_classificacao.append(
+                {
+                    "indicador_id": cod,
+                    "nome": row["nome"],
+                    "descricao": row.get("descricao", ""),
+                    "erro": str(e),
+                }
+            )
+
     df["eixo_ia"] = df["indicador_id"].map(mapeamento_eixos)
 
-    # Salvar o mapeamento atualizado
     os.makedirs(os.path.dirname(CAMINHO_MAPA_EIXOS), exist_ok=True)
     with open(CAMINHO_MAPA_EIXOS, "w", encoding="utf-8") as f:
         json.dump(mapeamento_eixos, f, ensure_ascii=False, indent=2)
+
+    if erros_classificacao:
+        df_erros = pd.DataFrame(erros_classificacao)
+        os.makedirs(os.path.dirname(CAMINHO_ERROS_EIXOS), exist_ok=True)
+        df_erros.to_csv(CAMINHO_ERROS_EIXOS, index=False)
+
+        msg = (
+            f"🚫 Foram encontrados "
+            f"{len(erros_classificacao)} erros na classificação."
+        )
+        print(msg)
+
+        print(f"📄 Detalhes salvos em: {CAMINHO_ERROS_EIXOS}")
+    else:
+        print("✅ Nenhum erro de classificação encontrado.")
 
 else:
     print("⚠️ Recategorização ignorada: servidor Ollama não acessível.")
 
 # === ETAPA 3: Conversões seguras ===
-
-# → valor: texto com vírgula → float (ou NaN se não for número)
-df["valor_original"] = df["valor"]  # backup
+df["valor_original"] = df["valor"]
 df["valor"] = pd.to_numeric(
     df["valor"]
     .astype(str)
@@ -141,13 +201,8 @@ df["valor"] = pd.to_numeric(
     errors="coerce"
 )
 
-# → justificativa: remover quebras de linha
 df["justificativa"] = df["justificativa"].fillna("").str.replace("\n", " ")
-
-# → ano: transformar em inteiro seguro
 df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
-
-# → data de processamento
 df["data_processamento"] = datetime.now(timezone.utc)
 
 # === ETAPA 4: Estatísticas de qualidade ===
@@ -168,11 +223,9 @@ df.to_csv(CAMINHO_LIMPO, index=False)
 client = storage.Client()
 bucket = client.bucket(BUCKET_NAME)
 
-# Upload do bruto
 blob_bruto = bucket.blob(DESTINO_BRUTO)
 blob_bruto.upload_from_filename(CAMINHO_BRUTO)
 
-# Upload do processado
 blob_proc = bucket.blob(DESTINO_PROCESSADO)
 blob_proc.upload_from_filename(CAMINHO_LIMPO)
 
