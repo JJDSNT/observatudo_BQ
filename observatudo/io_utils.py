@@ -2,7 +2,7 @@ import os
 import json
 import pandas as pd
 from google.cloud import storage
-from observatudo.constants import BUCKET_NAME
+from observatudo.config import BUCKET_NAME
 
 
 # === Manipulação de CSV ===

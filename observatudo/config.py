@@ -18,3 +18,6 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:0.5b")
 
 # === Timeout padrão para chamadas LLM ===
 LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "30"))
+
+# === Logging ===
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
