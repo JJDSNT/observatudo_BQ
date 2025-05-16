@@ -1,7 +1,7 @@
 # 📊 Observatudo – Indicadores Cívicos
 
-Plataforma fullstack para ingestão, organização e visualização de indicadores cívicos como saúde, educação e governança.  
-Combina frontend em **Next.js**, backend analítico com **BigQuery** e pipelines com **Python + dbt**.
+Plataforma fullstack para ingestão, organização e visualização de indicadores cívicos (como saúde, educação, governança).  
+Combina frontend em **Next.js**, backend analítico com **BigQuery** e pipelines com **Python + dbt + Terraform**.
 
 ---
 
@@ -10,25 +10,29 @@ Combina frontend em **Next.js**, backend analítico com **BigQuery** e pipelines
 ```
 observatudo-bq/
 ├── dados/
-│   └── cidades-sustentaveis/
-│       ├── indicadores.csv                 # Fonte bruta
-│       └── indicadores_padronizados.csv    # Após pré-processamento
+│   ├── cidades-sustentaveis/
+│   │   ├── indicadores.csv                 # Fonte bruta
+│   │   ├── indicadores_padronizados.csv    # Após pré-processamento
+│   │   └── indicadores_utf16.csv           # Original
+│   └── ibge/localidades/                   # Base de localidades (IBGE)
+├── dbt/                                     # Modelos de transformação
+├── infra/                                   # Infraestrutura Terraform (GCP)
+│   ├── bigquery.tf                          # Tabelas
+│   ├── storage.tf                           # Buckets
+│   ├── iam.tf                               # Permissões
+│   └── ...
 ├── scripts/
-│   ├── preprocess_cidades_sustentaveis.py  # ETL leve e upload para GCS
-│   └── carregar_localidades_ibge.py        # Geração da tabela de localidades
+│   ├── carregar_localidades_ibge.py         # Tabela + JSON
+│   ├── gerar_dropdown_json.py               # Dropdown de estados/cidades
+│   └── preprocess_cidades_sustentaveis.py   # Pré-processamento + upload
 ├── src/
-│   ├── app/                                 # Next.js App Router
-│   │   └── page.tsx                         # Página principal
-│   ├── components/
-│   │   └── ComboBoxLocalidades.tsx         # Componente dinâmico
-│   ├── types/
-│   │   └── localidadesDropdown.types.ts    # Tipagens compartilhadas
-│   └── data/
-│       └── localidades_dropdown.json       # Dados carregados via import no frontend
-├── terraform/
-│   └── bigquery.tf                         # Infraestrutura no GCP (buckets, tabelas)
-├── .gcloudignore
-├── .gitignore
+│   ├── app/                                  # App Router (Next.js)
+│   ├── components/                           # Componentes reutilizáveis
+│   ├── data/                                 # Dados locais (ex: dropdown)
+│   ├── features/                             # Domínios do frontend
+│   ├── lib/                                  # Integrações (ex: BigQuery)
+│   ├── types/                                # Tipagens TS
+│   └── utils/                                # Funções auxiliares
 └── README.md
 ```
 
@@ -36,22 +40,38 @@ observatudo-bq/
 
 ## ✅ Pipeline Atual
 
-### Frontend (Next.js 15+)
-- Carregamento de `localidades_dropdown.json` via `import`
-- Componente `ComboBoxLocalidades` com seleção UF + cidade
-- Interface tipada com TypeScript (`EstadoDropdown`, `CidadeDropdown`)
+### 🔧 Pré-processamento (`scripts/preprocess_cidades_sustentaveis.py`)
+- Lê CSV bruto da fonte "Cidades Sustentáveis"
+- Remove colunas irrelevantes
+- Converte `valor` para float com sanitização de dados
+- Gera CSV padronizado + envia ambos os arquivos para o GCS
 
-### Pré-processamento (`scripts/preprocess_cidades_sustentaveis.py`)
-- Leitura da fonte original
-- Limpeza e padronização
-- Conversão do campo `valor` para float
-- Estatísticas de cobertura
-- Upload para GCS (bruto + processado)
+### 🌎 Dados de Localidade (`scripts/carregar_localidades_ibge.py`)
+- Lê dados do IBGE
+- Popula tabela `dim_localidades` no BigQuery
+- Gera arquivo `localidades_dropdown.json` usado no frontend
 
-### Tabelas no BigQuery (via Terraform)
-- `dim_localidades` ✔️
-- `dim_indicadores` ⚙️
-- `fact_indicadores` ⚙️
+### 📦 Infraestrutura
+- Buckets e tabelas criadas via Terraform
+- Dataset particionado e clusterizado para performance
+
+### 🧑‍💻 Frontend (Next.js)
+- `ComboBoxLocalidades.tsx` com seleção UF → cidade
+- Carregamento via `import` local (`localidades_dropdown.json`)
+- UI baseada em Tailwind CSS
+
+---
+
+## 🧠 Visão futura
+
+O Observatudo evoluirá para uma **plataforma analítica cívica** com:
+
+- 🎯 Dados versionados, auditáveis e recategorizados por IA
+- 📦 Modelo semântico padronizado com dbt
+- 📈 Visualizações com Next.js + filtros e painéis
+- 🔄 **Camada de acesso analítico inspirada na API do [Cube.js](https://cube.dev)**  
+  Um "ORM para BigQuery", permitindo explorar medidas, dimensões e filtros com facilidade e reutilização via código
+- ⚙️ GitOps com Terraform, dbt, GitHub Actions e CI/CD
 
 ---
 
@@ -60,69 +80,46 @@ observatudo-bq/
 - [ ] Criar modelo `stg_indicadores__cidades_sustentaveis` no dbt  
 - [ ] Popular `dim_indicadores` com metadados enriquecidos  
 - [ ] Popular `fact_indicadores` com valores por município  
-- [ ] Criar página de indicadores com filtros por local/categoria  
-- [ ] Recategorizar eixos com IA supervisionada  
-
----
-
-## 💡 Estratégia de Modelagem (Dados)
-
-- Star Schema (dimensões + fatos)  
-- Tabelas `dim_` e `fact_` com particionamento/clustering  
-- Qualidade de dados via dbt (`tests`, `docs`, `sources`)  
-- JSONs para metadados flexíveis (`metadados`, `flags`, `formula_calculo`)  
+- [ ] Estruturar camada de consulta analítica estilo Cube.js  
+- [ ] Criar visualizações dinâmicas no frontend
 
 ---
 
 ## 🛠️ Requisitos
 
-- **Node.js 18+**
-- **Python 3.10+**
-- **Terraform 1.6+**
-- Conta Google Cloud com permissão no projeto
-
----
-
-## ⚙️ Setup
-
-```bash
-# 1. Instalar dependências do frontend
-npm install
-
-# 2. Criar ambiente virtual Python
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# 3. Autenticar na GCP (dev)
-gcloud auth application-default login
-```
+- Node.js 18+
+- Python 3.10+
+- Terraform 1.6+
+- Conta Google Cloud autenticada via:
+  ```
+  gcloud auth application-default login
+  ```
 
 ---
 
 ## 🚀 Comandos Úteis
 
 ```bash
-# Executar pré-processamento de dados
+# Ativar ambiente virtual Python
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Rodar pré-processamento
 python scripts/preprocess_cidades_sustentaveis.py
 
-# Rodar frontend localmente (Next.js)
+# Rodar app Next.js localmente
+npm install
 npm run dev
 
-# Aplicar infraestrutura no GCP
-terraform init && terraform apply
+# Aplicar Terraform
+cd infra
+terraform init
+terraform apply
 ```
 
 ---
 
-## 🧠 Visão futura
+## 📄 Licença
 
-Este projeto visa evoluir para uma **plataforma analítica cívica interoperável**, com:
-
-- Dados versionados e auditáveis
-- Normalização assistida por IA
-- Visualização Next.js com filtros e gráficos
-- Backend analítico via BigQuery + dbt
-- CI/CD via GitHub Actions + Terraform + dbt Cloud
-
----
+Este projeto está sob licença MIT.
