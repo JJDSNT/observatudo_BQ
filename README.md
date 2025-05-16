@@ -123,3 +123,19 @@ terraform apply
 ## 📄 Licença
 
 Este projeto está sob licença MIT.
+
+---
+
+## 👨‍💻 Sobre mim
+
+Este repositório faz parte do meu portfólio pessoal.  
+Sou Engenheiro de Software especialista em transformação digital, com foco em sistemas distribuídos e ênfase em plataformas e ecossistemas para a construção de organizações biônicas.
+
+🌐 Acesse: [https://observatudo.com.br](https://observatudo.com.br)
+
+---
+
+## 📬 Contato
+
+- GitHub: [@JJDSNT](https://github.com/JJDSNT)  
+- LinkedIn: [https://www.linkedin.com/in/jdiasneto/](https://www.linkedin.com/in/jdiasneto/)
