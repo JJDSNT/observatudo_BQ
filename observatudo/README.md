@@ -1,4 +1,4 @@
-# Observatudo Data Pipeline – Documento Técnico Consolidado
+# Observatudo Data Pipeline – Pipeline Modular, LLM, Logs, Versionamento
 
 ## 1. Ajustes Lógicos de Convergência no Resultado do LLM
 
@@ -82,7 +82,6 @@ A qualidade da classificação automática feita pelo LLM depende da clareza e d
 
 ## 3. Política de Prioridade para Categoria/Eixo
 
-### Regra
 - Se existir campo explícito de categoria (`eixo`, `categoria`, etc.), **sempre usar esse valor**. Registrar como "categoria da fonte".
 - Se o campo está ausente/nulo, acionar classificador automático (LLM, regra etc.), registrar como "categoria por LLM".
 - No pipeline modularizado, essa lógica é universal: recebe parâmetro/config apontando para o campo prioritário de categoria.
@@ -94,9 +93,6 @@ A qualidade da classificação automática feita pelo LLM depende da clareza e d
 ---
 
 ## 4. Modularização para Múltiplas Fontes/Datasets
-
-### Problema
-O pipeline precisa processar várias fontes, cada uma podendo fornecer múltiplos datasets (ex: por ano, região etc.). Evitar código duplicado, facilitar manutenção e onboarding.
 
 ### Abordagem Técnica
 
@@ -135,11 +131,6 @@ O pipeline precisa processar várias fontes, cada uma podendo fornecer múltiplo
 ---
 
 ## 5. Abordagem de Manutenção para Update (Atualização de Dados)
-
-### Problema
-Nem sempre o processamento será full. Controlar atualizações incrementais (novos registros ou alterações) mantendo consistência e custos baixos.
-
-### Abordagem Técnica
 
 - **Configuração de Modo de Update por Dataset**
   - Campo `update_mode` em cada config: `full` ou `incremental`
@@ -186,6 +177,23 @@ Nem sempre o processamento será full. Controlar atualizações incrementais (no
 
 ---
 
+## 8. Monitoramento Operacional, Observabilidade e Auditoria/Versionamento
+
+### 8.1. Monitoramento e Observabilidade Operacional
+
+- **Métricas Automáticas:** tempo de execução, uso de CPU/RAM, volumetria de dados, taxa de sucesso/falha
+- **Logs Estruturados:** status por etapa, detalhes de falhas, divergências
+- **Alertas:** (opcional) trigger para erros críticos ou taxa de falha alta
+
+### 8.2. Versionamento e Auditoria
+
+- **Versionamento de Configs:** git/snapshots, registrar versão usada por run
+- **Versionamento de Dados:** output versionado, metadados por execução (data, batch_id, parâmetros)
+- **Histórico de Execuções:** log CSV/JSON consolidado com dataset, horário, config, volume, erros/sucesso
+- **Comparação de Versões:** notebook/script para comparação entre runs
+
+---
+
 ## Resumo Visual
 
 ```
@@ -195,17 +203,4 @@ Nem sempre o processamento será full. Controlar atualizações incrementais (no
 4. Modularização: configs por fonte/dataset, pipeline genérico, máxima reutilização/extensão
 5. Update: modo full/incremental configurável, controle de histórico, logs detalhados
 6. Logs/estatísticas padronizados, rastreabilidade completa
-```
-
----
-
-## Conclusão e Próximos Passos
-
-- **Foco técnico:** Consistência, modularidade real (multi-fonte/dataset) e update seguro/eficiente.
-- **Próximos passos:**
-    1. Refatorar pipeline para receber configs modulares (multi-fonte/dataset)
-    2. Implementar cache de convergência/divergência do LLM
-    3. Estruturar modo de update (full/incremental)
-    4. Implementar prompts exemplificados/configuráveis
-    5. Garantir logging, stats e rastreabilidade em todos os pontos críticos
-
+7. Monitoramento e versionamento: rastreabilidade, rollback, comparação de runs
