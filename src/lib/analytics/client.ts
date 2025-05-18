@@ -9,14 +9,14 @@ export interface BigQueryConfig {
 
 export class BigQueryClient {
   private client: BigQuery;
-  private projectId: string;
-  private datasetId: string;
+  private _projectId: string;
+  private _datasetId: string;
 
   constructor(config: BigQueryConfig) {
-    this.projectId = config.projectId;
-    this.datasetId = config.datasetId;
+    this._projectId = config.projectId;
+    this._datasetId = config.datasetId;
     this.client = new BigQuery({
-      projectId: this.projectId,
+      projectId: this._projectId,
       ...(config.keyFilename ? { keyFilename: config.keyFilename } : {}),
     });
   }
@@ -30,8 +30,15 @@ export class BigQueryClient {
     return rows;
   }
 
+  // CORREÇÃO: O getter dataset deve retornar apenas o datasetId
+  // O projectId já está sendo usado separadamente no QueryBuilder
   get dataset() {
-    return `${this.projectId}.${this.datasetId}`;
+    return this._datasetId; // ✅ Correto: retorna apenas 'dados'
+  }
+
+  // Getter para acessar o projectId publicamente
+  get projectId() {
+    return this._projectId;
   }
 }
 

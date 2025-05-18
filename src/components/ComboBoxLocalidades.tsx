@@ -1,20 +1,31 @@
 "use client";
-import { useState } from "react"
-import localidadesJson from "@/data/localidades_dropdown.json"
+import { useState, useEffect } from "react";
+import localidadesJson from "@/data/localidades_dropdown.json";
 import type {
   CidadeDropdown,
   EstadoDropdown,
-  LocalidadesMap
-} from '@/types/localidadesDropdown.types'
+  LocalidadesMap,
+} from '@/types/localidadesDropdown.types';
 
-const localidades = localidadesJson as LocalidadesMap
+const localidades = localidadesJson as LocalidadesMap;
 
-export default function ComboBoxLocalidades() {
+interface ComboBoxLocalidadesProps {
+  onChange: (municipioId: string) => void;
+}
+
+export default function ComboBoxLocalidades({ onChange }: Readonly<ComboBoxLocalidadesProps>) {
   const [ufSelecionado, setUfSelecionado] = useState<string>("");
   const [cidadeSelecionada, setCidadeSelecionada] = useState<string>("");
 
   const estados = Object.entries(localidades) as [string, EstadoDropdown][];
   const cidades = ufSelecionado ? localidades[ufSelecionado].cidades : [];
+
+  useEffect(() => {
+    console.log("🏙️ Cidade selecionada:", cidadeSelecionada);
+    if (cidadeSelecionada) {
+      onChange(cidadeSelecionada);
+    }
+  }, [cidadeSelecionada, onChange]);
 
   return (
     <div className="flex flex-col gap-4 max-w-4xl mx-auto">
@@ -22,6 +33,7 @@ export default function ComboBoxLocalidades() {
         <div>
           <label htmlFor="select-uf" className="text-sm font-medium mb-1">Estado (UF)</label>
           <select
+            id="select-uf"
             value={ufSelecionado}
             onChange={(e) => {
               setUfSelecionado(e.target.value);
@@ -41,6 +53,7 @@ export default function ComboBoxLocalidades() {
         <div>
           <label htmlFor="select-cidade" className="text-sm font-medium mb-1">Cidade</label>
           <select
+            id="select-cidade"
             value={cidadeSelecionada}
             onChange={(e) => setCidadeSelecionada(e.target.value)}
             disabled={!ufSelecionado}

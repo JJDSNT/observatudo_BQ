@@ -1,84 +1,77 @@
 // lib/analytics/models/indicadorCivico.ts
+
 import { QueryBuilder } from '../query';
 
 export class IndicadorCivico {
-  // Dimensões comuns
-  static dimensoes = {
-    data: {
-      name: 'data',
-      sql: 'f.data_referencia',
-      type: 'date'
-    },
-    ano: {
-      name: 'ano',
-      sql: 'EXTRACT(YEAR FROM f.data_referencia)',
-      type: 'number'
-    },
-    mes: {
-      name: 'mes',
-      sql: 'EXTRACT(MONTH FROM f.data_referencia)',
-      type: 'number'
-    },
-    localNome: {
-      name: 'localNome',
-      sql: 'l.nome',
-      type: 'string'
-    },
-    localTipo: {
-      name: 'localTipo',
-      sql: 'l.tipo',
-      type: 'string'
-    },
-    indicadorNome: {
-      name: 'indicadorNome',
-      sql: 'i.nome',
-      type: 'string'
-    },
-    categoria: {
-      name: 'categoria',
-      sql: 'i.categoria',
-      type: 'string'
-    }
-  };
+  static serieHistorica(indicadorId: string, localIds: string[], anos: number = 5) {
+    const currentYear = new Date().getFullYear();
+    //const startYear = currentYear - anos + 1;
+    const startYear = 2000;
 
-  // Métricas comuns
-  static metricas = {
-    valor: {
-      name: 'valor',
-      sql: 'f.valor',
-      type: 'avg' as const
-    },
-    totalRegistros: {
-      name: 'totalRegistros',
-      sql: '1',
-      type: 'count' as const
-    },
-    valorMaximo: {
-      name: 'valorMaximo',
-      sql: 'f.valor',
-      type: 'max' as const
-    },
-    valorMinimo: {
-      name: 'valorMinimo',
-      sql: 'f.valor',
-      type: 'min' as const
-    }
-  };
+    const query = new QueryBuilder('fact_indicadores', 'f')
+      .addDimension({
+        name: 'data',
+        sql: 'f.data_referencia',
+        type: 'date'
+      })
+      .addDimension({
+        name: 'localNome', 
+        sql: 'l.nome',
+        type: 'string'
+      })
+      .addMeasure({
+        name: 'valor',
+        sql: 'f.valor',
+        type: 'avg'
+      })
+      .join('dim_localidades', 'l', 'f.localidade_id = l.localidade_id') // AJUSTE FEITO AQUI
+      .filter({
+        dimension: 'f.indicador_id',
+        operator: '=',
+        values: [indicadorId]
+      })
+      .filter({
+        dimension: 'f.localidade_id',
+        operator: 'IN',
+        values: localIds
+      })
+      .filter({
+        dimension: 'EXTRACT(YEAR FROM f.data_referencia)',
+        operator: '>=',
+        values: [startYear]
+      })
+      .orderBy('f.data_referencia', 'ASC')
+      .orderBy('l.nome', 'ASC');
 
-  // Consultas pré-construídas
-  static consultarPorRegiao(categoria: string, regiao: string, periodo: {inicio: string, fim: string}) {
-    const query = new QueryBuilder('fact_indicadores f')
-      .addDimension(this.dimensoes.data)
-      .addDimension(this.dimensoes.localNome)
-      .addDimension(this.dimensoes.indicadorNome)
-      .addMeasure(this.metricas.valor)
+    return query;
+  }
+
+  static consultarPorRegiao(categoria: string, regiao: string, periodo: { inicio: string, fim: string }) {
+    const query = new QueryBuilder('fact_indicadores', 'f')
+      .addDimension({
+        name: 'indicador_nome',
+        sql: 'i.nome',
+        type: 'string'
+      })
+      .addDimension({
+        name: 'localidade_nome',
+        sql: 'l.nome', 
+        type: 'string'
+      })
+      .addMeasure({
+        name: 'valor_medio',
+        sql: 'f.valor',
+        type: 'avg'
+      })
+      .join('dim_indicadores', 'i', 'f.indicador_id = i.id')
+      .join('dim_localidades', 'l', 'f.localidade_id = l.localidade_id')
       .filter({
         dimension: 'i.categoria',
         operator: '=',
         values: [categoria]
       })
       .filter({
-        dimension: 'l.nome',
+        dimension: 'l.regiao',
         operator: '=',
         values: [regiao]
       })
@@ -91,35 +84,8 @@ export class IndicadorCivico {
         dimension: 'f.data_referencia',
         operator: '<=',
         values: [periodo.fim]
-      })
-      .orderBy('f.data_referencia', 'DESC');
-      
-    return query;
-  }
+      });
 
-  static serieHistorica(indicadorId: string, localIds: string[], anos: number) {
-    const query = new QueryBuilder('fact_indicadores f')
-      .addDimension(this.dimensoes.data)
-      .addDimension(this.dimensoes.localNome)
-      .addMeasure(this.metricas.valor)
-      .filter({
-        dimension: 'f.indicador_id',
-        operator: '=',
-        values: [indicadorId]
-      })
-      .filter({
-        dimension: 'f.local_id',
-        operator: 'IN',
-        values: localIds
-      })
-      .filter({
-        dimension: `EXTRACT(YEAR FROM f.data_referencia)`,
-        operator: '>=',
-        values: [new Date().getFullYear() - anos]
-      })
-      .orderBy('f.data_referencia', 'ASC')
-      .orderBy('l.nome', 'ASC');
-      
     return query;
   }
 }
