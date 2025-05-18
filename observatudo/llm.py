@@ -24,7 +24,9 @@ from time import perf_counter
 
 from observatudo.config import OLLAMA_URL, OLLAMA_MODEL, LLM_TIMEOUT
 from observatudo.constants import CATEGORIAS_VALIDAS
-from observatudo.logger import logger
+from observatudo.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def check_server() -> bool:

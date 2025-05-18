@@ -1,8 +1,7 @@
 import pandas as pd
 from datetime import datetime, timezone
 import os
-import json
-import logging
+from observatudo.io_utils import upload_csv_to_bigquery
 
 from observatudo import config
 from observatudo.io_utils import (
@@ -18,7 +17,6 @@ from observatudo.logger import setup_logger
 from tqdm import tqdm
 
 logger = setup_logger(__name__)
-
 
 def classificar_indicadores_com_llm(df, mapeamento_eixos, categorias_validas):
     agrupado = df.groupby("indicador_id").first()
@@ -41,30 +39,53 @@ def classificar_indicadores_com_llm(df, mapeamento_eixos, categorias_validas):
                     "descricao": row.get("descricao", ""),
                     "eixo_invalido": eixo
                 })
-                logger.warning(
+                tqdm.write(
                     f"🚫 [{i+1}/{len(novos)}] {cod} - {row['nome']} → Classificação inválida: '{eixo}'"
                 )
             else:
                 mapeamento_eixos[cod] = eixo
-                logger.info(f"✅ [{i+1}/{len(novos)}] {cod} - {row['nome']} → {eixo}")
+                tqdm.write(
+                    f"✅ [{i+1}/{len(novos)}] {cod} - {row['nome']} → {eixo}"
+                )
         except Exception as e:
-            logger.error(
+            tqdm.write(
                 f"⚠️ [{i+1}/{len(novos)}] Erro ao classificar {cod} - {row['nome']}: {e}"
             )
 
     return mapeamento_eixos, erros
 
-def exibe_estatisticas(df):
+def exibe_estatisticas(df, erros=None, path_invalidos=None):
     total = len(df)
     com_valor = df["valor"].notna().sum()
     sem_valor = df["valor"].isna().sum()
+    n_indicadores = df["indicador_id"].nunique()
+
+    # Cache de válidos
+    try:
+        mapeamento_eixos = carregar_cache_json(config.MAPA_EIXOS_PATH)
+        n_validos = len(mapeamento_eixos)
+    except Exception as e:
+        n_validos = 0
+        logger.warning(f"Não foi possível carregar o cache de válidos: {e}")
+
+    # Cache de inválidos (última run)
+    n_invalidos = 0
+    if path_invalidos and os.path.exists(path_invalidos):
+        try:
+            df_erros = pd.read_csv(path_invalidos)
+            n_invalidos = df_erros["indicador_id"].nunique()
+        except Exception as e:
+            logger.warning(f"Não foi possível ler o CSV de inválidos: {e}")
+
     logger.info("📊 Estatísticas do pré-processamento:")
     logger.info(f" - Total de registros: {total}")
+    logger.info(f" - Total de indicadores únicos: {n_indicadores}")
+    logger.info(f" - Indicadores no cache de válidos: {n_validos}")
+    logger.info(f" - Indicadores no cache de inválidos (última run): {n_invalidos}")
     logger.info(f" - Com valor numérico: {com_valor}")
     logger.info(f" - Ignorados por valor inválido: {sem_valor}")
     if erros and path_invalidos:
         logger.warning(f"🚫 Foram encontrados {len(erros)} erros na classificação (detalhes salvos em {path_invalidos}).")
-
 
 def main():
     logger.info(f"📁 Lendo arquivo bruto de indicadores: {os.path.join(config.DADOS_DIR, 'indicadores.csv')}")
@@ -92,21 +113,34 @@ def main():
     df = df[list(colunas_renomeadas.values())]
     logger.info("✅ Colunas renomeadas e padronizadas.")
 
-    # Classificação com LLM
+    # Inicializa as variáveis para garantir existência
+    erros = []
+    path_invalidos = None
+    
+    # === Classificação e preenchimento da coluna eixo_ia ===
+
+    # Carrega o cache de eixos já classificados
+    mapeamento_eixos = carregar_cache_json(config.MAPA_EIXOS_PATH)
+
+    # Sempre preenche a coluna eixo_ia com o cache existente
+    df["eixo_ia"] = df["indicador_id"].map(mapeamento_eixos)
+
+    # Tenta rodar a IA para classificar apenas os que faltam ou estão pendentes
     if check_server():
         logger.info("🔗 Servidor LLM disponível, carregando cache e iniciando classificação de eixos.")
-        mapeamento_eixos = carregar_cache_json(config.MAPA_EIXOS_PATH)
         mapeamento_eixos, erros = classificar_indicadores_com_llm(
             df, mapeamento_eixos, CATEGORIAS_VALIDAS
         )
         salvar_cache_json(mapeamento_eixos, config.MAPA_EIXOS_PATH)
         if erros:
             df_erros = pd.DataFrame(erros)
-            salvar_csv(df_erros, config.INVALIDOS_PATH)
-            logger.warning(f"🚫 Foram encontrados {len(erros)} erros na classificação (detalhes salvos em {config.INVALIDOS_PATH}).")
+            path_invalidos = config.INVALIDOS_PATH
+            salvar_csv(df_erros, path_invalidos)
+        # Atualiza a coluna eixo_ia após classificação
         df["eixo_ia"] = df["indicador_id"].map(mapeamento_eixos)
     else:
-        logger.warning("⚠️ Recategorização ignorada: servidor Ollama não acessível.")
+        logger.warning("⚠️ Servidor Ollama não acessível. Usando apenas o cache existente para eixo_ia.")
+
 
     # Conversões
     logger.info("🔄 Convertendo campos para tipos adequados...")
@@ -122,8 +156,8 @@ def main():
     df["ano"] = pd.to_numeric(df["ano"], errors="coerce").astype("Int64")
     df["data_processamento"] = datetime.now(timezone.utc)
 
-    # Estatísticas
-    exibe_estatisticas(df)
+    # Estatísticas + erros (tudo agrupado!)
+    exibe_estatisticas(df, erros=erros, path_invalidos=path_invalidos)
 
     # Salvar arquivo padronizado localmente
     caminho_limpo = os.path.join(config.DADOS_DIR, "indicadores_padronizados.csv")
@@ -142,6 +176,11 @@ def main():
     )
     logger.info("✅ Upload concluído com sucesso para o bucket GCS.")
 
+    # Upload para o BigQuery (raw)
+    upload_csv_to_bigquery(
+        csv_path=os.path.join(config.DADOS_DIR, "indicadores_padronizados.csv"),
+        table_id="observatudo-infra.dados.raw_cidades_sustentaveis"
+    )
 
 if __name__ == "__main__":
     main()
