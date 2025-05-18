@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: dim_indicadores
+    description: >
+      Tabela dimensão que contém o cadastro dos indicadores,
+      suas características, categorias, fontes e metadados,
+      para suportar análises e enriquecimentos futuros.
+
+    columns:
+      - name: indicador_id
+        description: Identificador único do indicador.
+        tests:
+          - unique
+          - not_null
+
+      - name: nome
+        description: Nome do indicador.
+        tests:
+          - not_null
+
+      - name: descricao
+        description: Descrição detalhada do indicador.
+
+      - name: eixo
+        description: Eixo original do dataset, para referência histórica.
+
+      - name: eixo_ia
+        description: Eixo atribuído pela inteligência artificial (classificação automática).
+
+      - name: categoria
+        description: Categoria principal do indicador, derivada do eixo_ia para uso downstream.
+
+      - name: categoria_origem
+        description: "Origem da categoria (exemplo: 'ia' para inteligência artificial)."
+
+      - name: subcategoria
+        description: Categoria secundária ou detalhada do indicador.
+
+      - name: unidade_medida
+        description: "Unidade de medida do indicador (ex: %, número)."
+
+      - name: formula_calculo
+        description: Fórmula utilizada para calcular o indicador.
+
+      - name: fonte
+        description: Fonte original dos dados do indicador.
+
+      - name: frequencia_atualizacao
+        description: Periodicidade com que o indicador é atualizado.
+
+      - name: origem_dados
+        description: Sistema ou fonte de onde o indicador foi obtido.
+
+      - name: status
+        description: "Status do indicador (ex: ativo, obsoleto, em revisão)."
+
+      - name: tags
+        description: Lista de etiquetas para classificação e filtros avançados.
+
+      - name: metadados
+        description: Campo JSON para metadados adicionais e customizados.
+
+      - name: data_criacao
+        description: Data de criação do registro do indicador.
+
+      - name: ultima_atualizacao
+        description: Data da última atualização do registro do indicador.

@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: dados
+    database: observatudo-infra        # ou deixe em branco se não usar múltiplos projetos
+    schema: dados
+    tables:
+      - name: raw_cidades_sustentaveis

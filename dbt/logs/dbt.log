@@ -1,0 +1,196 @@
+[0m05:04:29.038550 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f26c1dfb220>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f26c0d97550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f26c0d974f0>]}
+
+
+============================== 05:04:29.043448 | fac8bb43-2d5c-4d8e-9c99-5f86d7147e46 ==============================
+[0m05:04:29.043448 [info ] [MainThread]: Running with dbt=1.9.4
+[0m05:04:29.044265 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/home/jaime/.dbt', 'version_check': 'True', 'debug': 'False', 'log_path': 'logs', 'warn_error': 'None', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'None', 'quiet': 'False', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'introspect': 'True', 'invocation_command': 'dbt init .', 'log_format': 'default', 'target_path': 'None', 'static_parser': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m05:04:29.054740 [warn ] [MainThread]: [ConfigFolderDirectory]: Unable to parse logging event dictionary. Failed to parse dir field: expected string or bytes-like object.. Dictionary: {'dir': PosixPath('/home/jaime/.dbt')}
+[0m05:04:29.055359 [info ] [MainThread]: Creating dbt configuration folder at 
+[0m05:05:33.985447 [error] [MainThread]: Encountered an error:
+
+[0m05:05:33.987115 [error] [MainThread]: Traceback (most recent call last):
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/dbt/cli/requires.py", line 153, in wrapper
+    result, success = func(*args, **kwargs)
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/dbt/cli/requires.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/dbt/cli/main.py", line 477, in init
+    results = task.run()
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/dbt/task/init.py", line 324, in run
+    project_name = self.get_valid_project_name()
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/dbt/task/init.py", line 278, in get_valid_project_name
+    name = click.prompt("Enter a name for your project (letters, digits, underscore)")
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/click/termui.py", line 168, in prompt
+    value = prompt_func(prompt)
+  File "/home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/click/termui.py", line 151, in prompt_func
+    raise Abort() from None
+click.exceptions.Abort
+
+[0m05:05:33.991106 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": false, "command_wall_clock_time": 65.0153, "process_in_blocks": "7664", "process_kernel_time": 0.100908, "process_mem_max_rss": "92268", "process_out_blocks": "16", "process_user_time": 1.415708}
+[0m05:05:33.991862 [debug] [MainThread]: Command `dbt init` failed at 05:05:33.991631 after 65.02 seconds
+[0m05:05:33.992557 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f26c1dfb220>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f26c0d97d00>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f26c0d96ec0>]}
+[0m05:05:33.993509 [debug] [MainThread]: Flushing usage events
+[0m05:05:35.539014 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m05:07:33.196209 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fa3c93a7280>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fa3c8343580>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fa3c8343520>]}
+
+
+============================== 05:07:33.198760 | 010b1b53-8ef8-4a52-91c6-9b53a3bccbf4 ==============================
+[0m05:07:33.198760 [info ] [MainThread]: Running with dbt=1.9.4
+[0m05:07:33.199352 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'version_check': 'True', 'fail_fast': 'False', 'log_path': 'logs', 'debug': 'False', 'profiles_dir': '/home/jaime/.dbt', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'None', 'log_format': 'default', 'introspect': 'True', 'invocation_command': 'dbt init .', 'static_parser': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m05:10:54.063584 [debug] [MainThread]: Starter project path: /home/jaime/observatudo-bq/.venv/lib/python3.10/site-packages/dbt/include/starter_project
+[0m05:10:54.069955 [info ] [MainThread]: 
+Your new dbt project "observatudo" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m05:10:54.071101 [info ] [MainThread]: Setting up your profile.
+[0m05:23:30.081512 [info ] [MainThread]: Profile observatudo written to /home/jaime/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m05:23:30.085742 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 956.9486, "process_in_blocks": "162736", "process_kernel_time": 0.364083, "process_mem_max_rss": "204212", "process_out_blocks": "96", "process_user_time": 3.004568}
+[0m05:23:30.086700 [debug] [MainThread]: Command `dbt init` succeeded at 05:23:30.086573 after 956.95 seconds
+[0m05:23:30.087219 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fa3c93a7280>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fa3a8546110>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fa3c8343df0>]}
+[0m05:23:30.087688 [debug] [MainThread]: Flushing usage events
+[0m05:23:31.240801 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m05:24:57.712234 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f62cab9b1f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f62c9b37550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f62c9b374c0>]}
+
+
+============================== 05:24:57.717418 | 2a26a77c-231b-486b-80ea-97601e82558c ==============================
+[0m05:24:57.717418 [info ] [MainThread]: Running with dbt=1.9.4
+[0m05:24:57.718161 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/home/jaime/.dbt', 'fail_fast': 'False', 'version_check': 'True', 'log_path': 'logs', 'debug': 'False', 'warn_error': 'None', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'None', 'quiet': 'False', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'introspect': 'True', 'log_format': 'default', 'static_parser': 'True', 'target_path': 'None', 'invocation_command': 'dbt debug', 'send_anonymous_usage_stats': 'True'}
+[0m05:24:57.748929 [info ] [MainThread]: dbt version: 1.9.4
+[0m05:24:57.749448 [info ] [MainThread]: python version: 3.10.12
+[0m05:24:57.749957 [info ] [MainThread]: python path: /home/jaime/observatudo-bq/.venv/bin/python3
+[0m05:24:57.750538 [info ] [MainThread]: os info: Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35
+[0m05:24:59.173886 [info ] [MainThread]: Using profiles dir at /home/jaime/.dbt
+[0m05:24:59.174544 [info ] [MainThread]: Using profiles.yml file at /home/jaime/.dbt/profiles.yml
+[0m05:24:59.175224 [info ] [MainThread]: Using dbt_project.yml file at /home/jaime/observatudo-bq/dbt/dbt_project.yml
+[0m05:24:59.176008 [info ] [MainThread]: adapter type: bigquery
+[0m05:24:59.176577 [info ] [MainThread]: adapter version: 1.9.1
+[0m05:24:59.177300 [info ] [MainThread]: Configuration:
+[0m05:24:59.177946 [info ] [MainThread]:   profiles.yml file [[32mOK found and valid[0m]
+[0m05:24:59.178433 [info ] [MainThread]:   dbt_project.yml file [[31mERROR not found[0m]
+[0m05:24:59.178979 [info ] [MainThread]: Required dependencies:
+[0m05:24:59.179466 [debug] [MainThread]: Executing "git --help"
+[0m05:24:59.184812 [debug] [MainThread]: STDOUT: "b"usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n           [--super-prefix=<path>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n   mv        Move or rename a file, a directory, or a symlink\n   restore   Restore working tree files\n   rm        Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect    Use binary search to find the commit that introduced a bug\n   diff      Show changes between commits, commit and working tree, etc\n   grep      Print lines matching a pattern\n   log       Show commit logs\n   show      Show various types of objects\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   merge     Join two or more development histories together\n   rebase    Reapply commits on top of another base tip\n   reset     Reset current HEAD to the specified state\n   switch    Switch branches\n   tag       Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch     Download objects and refs from another repository\n   pull      Fetch from and integrate with another repository or a local branch\n   push      Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m05:24:59.185826 [debug] [MainThread]: STDERR: "b''"
+[0m05:24:59.186627 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m05:24:59.187478 [info ] [MainThread]: Connection:
+[0m05:24:59.188407 [info ] [MainThread]:   method: service-account
+[0m05:24:59.189331 [info ] [MainThread]:   database: observatudo-infra
+[0m05:24:59.190346 [info ] [MainThread]:   execution_project: observatudo-infra
+[0m05:24:59.191367 [info ] [MainThread]:   schema: dados
+[0m05:24:59.192440 [info ] [MainThread]:   location: US
+[0m05:24:59.193378 [info ] [MainThread]:   priority: interactive
+[0m05:24:59.194213 [info ] [MainThread]:   maximum_bytes_billed: None
+[0m05:24:59.195238 [info ] [MainThread]:   impersonate_service_account: None
+[0m05:24:59.196335 [info ] [MainThread]:   job_retry_deadline_seconds: None
+[0m05:24:59.197251 [info ] [MainThread]:   job_retries: 1
+[0m05:24:59.197877 [info ] [MainThread]:   job_creation_timeout_seconds: None
+[0m05:24:59.198383 [info ] [MainThread]:   job_execution_timeout_seconds: 300
+[0m05:24:59.198869 [info ] [MainThread]:   timeout_seconds: 300
+[0m05:24:59.199349 [info ] [MainThread]:   client_id: None
+[0m05:24:59.199845 [info ] [MainThread]:   token_uri: None
+[0m05:24:59.200356 [info ] [MainThread]:   dataproc_region: None
+[0m05:24:59.200844 [info ] [MainThread]:   dataproc_cluster_name: None
+[0m05:24:59.201390 [info ] [MainThread]:   gcs_bucket: None
+[0m05:24:59.201796 [info ] [MainThread]:   dataproc_batch: None
+[0m05:24:59.202407 [info ] [MainThread]: Registered adapter: bigquery=1.9.1
+[0m05:24:59.330526 [debug] [MainThread]: Acquiring new bigquery connection 'debug'
+[0m05:24:59.331221 [debug] [MainThread]: On debug: select 1 as id
+[0m05:24:59.331764 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m05:24:59.332414 [debug] [MainThread]: BigQuery adapter: Got an error when attempting to create a bigquery " "client: '[Errno 2] No such file or directory: '/home/jaime/.gcp/observatudo-dbt-sa.json''
+[0m05:24:59.333377 [debug] [MainThread]: BigQuery adapter: Unhandled error while running:
+select 1 as id
+[0m05:24:59.333845 [debug] [MainThread]: BigQuery adapter: Database Error
+  [Errno 2] No such file or directory: '/home/jaime/.gcp/observatudo-dbt-sa.json'
+[0m05:24:59.334232 [info ] [MainThread]:   Connection test: [[31mERROR[0m]
+
+[0m05:24:59.334735 [info ] [MainThread]: [31m2 checks failed:[0m
+[0m05:24:59.335243 [info ] [MainThread]: Project loading failed for the following reason:
+ project path </home/jaime/observatudo-bq/dbt/dbt_project.yml> not found
+
+[0m05:24:59.335902 [info ] [MainThread]: dbt was unable to connect to the specified database.
+The database returned the following error:
+
+  >'NoneType' object has no attribute 'close'
+
+Check your database credentials and try again. For more information, visit:
+https://docs.getdbt.com/docs/configure-your-profile
+
+
+[0m05:24:59.339076 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 1.6814306, "process_in_blocks": "82704", "process_kernel_time": 0.267157, "process_mem_max_rss": "204420", "process_out_blocks": "32", "process_user_time": 3.186096}
+[0m05:24:59.339905 [debug] [MainThread]: Command `dbt debug` failed at 05:24:59.339783 after 1.68 seconds
+[0m05:24:59.340371 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f62cab9b1f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f62a5dd1120>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f62a5dd04f0>]}
+[0m05:24:59.340841 [debug] [MainThread]: Flushing usage events
+[0m05:25:00.024308 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m05:28:55.633741 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7c1786f160>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7c167df460>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7c167df400>]}
+
+
+============================== 05:28:55.636310 | db815f99-5866-4c55-8f9e-9dd3954a3900 ==============================
+[0m05:28:55.636310 [info ] [MainThread]: Running with dbt=1.9.4
+[0m05:28:55.637021 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'fail_fast': 'False', 'version_check': 'True', 'log_path': 'logs', 'profiles_dir': '/home/jaime/.dbt', 'debug': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'None', 'quiet': 'False', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'invocation_command': 'dbt debug', 'log_format': 'default', 'static_parser': 'True', 'target_path': 'None', 'introspect': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m05:28:55.646011 [info ] [MainThread]: dbt version: 1.9.4
+[0m05:28:55.646638 [info ] [MainThread]: python version: 3.10.12
+[0m05:28:55.647060 [info ] [MainThread]: python path: /home/jaime/observatudo-bq/.venv/bin/python3
+[0m05:28:55.648109 [info ] [MainThread]: os info: Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35
+[0m05:28:56.392995 [info ] [MainThread]: Using profiles dir at /home/jaime/.dbt
+[0m05:28:56.393608 [info ] [MainThread]: Using profiles.yml file at /home/jaime/.dbt/profiles.yml
+[0m05:28:56.394107 [info ] [MainThread]: Using dbt_project.yml file at /home/jaime/observatudo-bq/dbt/dbt_project.yml
+[0m05:28:56.394595 [info ] [MainThread]: adapter type: bigquery
+[0m05:28:56.395213 [info ] [MainThread]: adapter version: 1.9.1
+[0m05:28:56.395867 [info ] [MainThread]: Configuration:
+[0m05:28:56.396413 [info ] [MainThread]:   profiles.yml file [[32mOK found and valid[0m]
+[0m05:28:56.397096 [info ] [MainThread]:   dbt_project.yml file [[31mERROR not found[0m]
+[0m05:28:56.397549 [info ] [MainThread]: Required dependencies:
+[0m05:28:56.398084 [debug] [MainThread]: Executing "git --help"
+[0m05:28:56.400865 [debug] [MainThread]: STDOUT: "b"usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n           [--super-prefix=<path>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n   mv        Move or rename a file, a directory, or a symlink\n   restore   Restore working tree files\n   rm        Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect    Use binary search to find the commit that introduced a bug\n   diff      Show changes between commits, commit and working tree, etc\n   grep      Print lines matching a pattern\n   log       Show commit logs\n   show      Show various types of objects\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   merge     Join two or more development histories together\n   rebase    Reapply commits on top of another base tip\n   reset     Reset current HEAD to the specified state\n   switch    Switch branches\n   tag       Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch     Download objects and refs from another repository\n   pull      Fetch from and integrate with another repository or a local branch\n   push      Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m05:28:56.401322 [debug] [MainThread]: STDERR: "b''"
+[0m05:28:56.401682 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m05:28:56.402262 [info ] [MainThread]: Connection:
+[0m05:28:56.402832 [info ] [MainThread]:   method: service-account
+[0m05:28:56.403336 [info ] [MainThread]:   database: observatudo-infra
+[0m05:28:56.403863 [info ] [MainThread]:   execution_project: observatudo-infra
+[0m05:28:56.404291 [info ] [MainThread]:   schema: dados
+[0m05:28:56.404809 [info ] [MainThread]:   location: US
+[0m05:28:56.405307 [info ] [MainThread]:   priority: interactive
+[0m05:28:56.405866 [info ] [MainThread]:   maximum_bytes_billed: None
+[0m05:28:56.406264 [info ] [MainThread]:   impersonate_service_account: None
+[0m05:28:56.406667 [info ] [MainThread]:   job_retry_deadline_seconds: None
+[0m05:28:56.407111 [info ] [MainThread]:   job_retries: 1
+[0m05:28:56.407528 [info ] [MainThread]:   job_creation_timeout_seconds: None
+[0m05:28:56.407967 [info ] [MainThread]:   job_execution_timeout_seconds: 300
+[0m05:28:56.408359 [info ] [MainThread]:   timeout_seconds: 300
+[0m05:28:56.408770 [info ] [MainThread]:   client_id: None
+[0m05:28:56.409155 [info ] [MainThread]:   token_uri: None
+[0m05:28:56.409558 [info ] [MainThread]:   dataproc_region: None
+[0m05:28:56.409949 [info ] [MainThread]:   dataproc_cluster_name: None
+[0m05:28:56.410375 [info ] [MainThread]:   gcs_bucket: None
+[0m05:28:56.411008 [info ] [MainThread]:   dataproc_batch: None
+[0m05:28:56.411709 [info ] [MainThread]: Registered adapter: bigquery=1.9.1
+[0m05:28:56.523362 [debug] [MainThread]: Acquiring new bigquery connection 'debug'
+[0m05:28:56.523908 [debug] [MainThread]: On debug: select 1 as id
+[0m05:28:56.524307 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m05:28:58.104072 [debug] [MainThread]: BigQuery adapter: https://console.cloud.google.com/bigquery?project=observatudo-infra&j=bq:US:4d90a9c3-4f4e-486b-9fae-df0db7c86909&page=queryresults
+[0m05:28:58.749165 [info ] [MainThread]:   Connection test: [[32mOK connection ok[0m]
+
+[0m05:28:58.752123 [info ] [MainThread]: [31m1 check failed:[0m
+[0m05:28:58.754920 [info ] [MainThread]: Project loading failed for the following reason:
+ project path </home/jaime/observatudo-bq/dbt/dbt_project.yml> not found
+
+[0m05:28:58.760800 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 3.1822207, "process_in_blocks": "3000", "process_kernel_time": 0.26774, "process_mem_max_rss": "209184", "process_out_blocks": "24", "process_user_time": 3.034392}
+[0m05:28:58.766574 [debug] [MainThread]: Command `dbt debug` failed at 05:28:58.765262 after 3.19 seconds
+[0m05:28:58.770684 [debug] [MainThread]: Connection 'debug' was properly closed.
+[0m05:28:58.773994 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7c1786f160>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7bf28f5480>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7bf28f6560>]}
+[0m05:28:58.775137 [debug] [MainThread]: Flushing usage events
+[0m05:28:59.461954 [debug] [MainThread]: An error was encountered while trying to flush usage events
