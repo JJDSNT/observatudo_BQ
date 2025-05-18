@@ -1,0 +1,175 @@
+indicador_id,nome,descricao,eixo_invalido
+15,Acesso permanente e sustentável à água potável,Porcentagem de domicílios atendidos pelo abastecimento público de água potável sobre o total de domicílios do município.,Agricultura
+117,Desnutrição infantil,"Percentual de crianças menores de 5 anos desnutridas, em relação ao total de crianças nesta faixa etária.",Financeiras
+126,Inclusão de catadores no sistema de coleta seletiva,"Percentual de catadores incluídos no sistema de coleta seletiva, em relação ao número total de catadores do município.",Administração
+131,"Centros culturais, casas e espaços de cultura","Número de centros culturais, espaços e casas
+de cultura, públicos e privados, por 10 mil habitantes.",Cultura
+152,Agressão a idosos,"Número de internações na rede pública, de pessoas de 60 anos ou mais, por causas relacionadas a possíveis agressões, por 10 mil habitantes nessa faixa etária.",Agressão a idosos - Economia
+155,Crimes violentos fatais,"Número de crimes violentos fatais ocorridos no município, por 10 mil habitantes.",Crimeiro Fatais
+161,Compras Públicas Sustentáveis,Percentual de Compras Públicas Sustentáveis sobre o total das compras efetuadas pelo Município (uso de seu poder de compra para a promoção do desenvolvimento sustentável),Financeiras
+172,Corredores exclusivos de ônibus,"Percentual de quilômetros (km) da rede de corredores exclusivos de ônibus, em relação à extensão total de vias da cidade.","Agora, vamos analisar o indicador e classificar-o em um dos eixos:
+
+1. **Economia**: O indicador não se relaciona diretamente com economia.
+
+2. **Governança**: O indicador não se relaciona diretamente com governança.
+
+3. **Mediante Ambiente**: O indicador não se relaciona diretamente com meio ambiente.
+
+4. **Moradia**: O indicador não se relaciona diretamente com moradia.
+
+5. **Saude**: É um indicador médico específico e não se relaciona a saúde.
+
+6. **Seguranca**: Não tem um significado específico na área de saúde.
+
+7. **Urbanismo**: O indicador não se relaciona diretamente com urbanismo.
+
+8. **Assistência Social**: O indicador não se relaciona diretamente com assistência social.
+
+9. **Educacao**: Não tem um significado específico na educação.
+
+10. **Financas**: É um indicador financeiro específico e não se relaciona à financas.
+
+Portanto, o indicador ""Corredores exclusivos de ônibus - Percentual de quilômetros (km) da rede de corredores exclusivos de ônibus, em relação à extensão total de vias da cidade"" se relaciona com a economia e o meio ambiente, mas não diretamente com o funcionamento do transporte público.
+
+Portanto, a resposta é: Economia."
+185,Orçamento executado decidido de forma participativa,"Percentual do orçamento executado decidido de forma participativa, em relação ao total do orçamento.",Organização
+187,Conselhos Municipais,Percentual de secretarias do governo que possuem Conselhos Municipais com participação da sociedade sobre o total de secretarias.,Governança
+188,Espaços de participação deliberativos e audiências públicas na cidade,Listar os espaços de participação deliberativos que existem na cidade. Qual é a periodicidade dos encontros? Qual o número de participantes? Com quanto tempo de antecedência são convocadas as reuniões? Quais veículos de comunicação são utilizados para fazer a convocatória?,"Economia, Educacao"
+3865,Mortes no trânsito,"Número de mortes em acidentes de trânsito, por tipo de transporte, por 10 mil habitantes.",Governança
+3867,Área verde na zona urbana,Total de metros quadrados de área verde pública por habitante e percentual da população que vive em um raio de até 300m de áreas verdes.,Goverança
+3868,Calçadas acessíveis,"Percentual de quilômetros de calçadas acessíveis sobre a extensão total em quilômetros de calçadas da cidade.
+O que considerar para a calçada acessível: rampa, corrimão, sinal sonoro, iluminação, faixa, piso tátil e em bom estado de conservação.",Economico
+3874,Mulheres em cargos gerencias no governo do município,Percentual de mulheres em cargos gerenciais no governo do município sobre o total de pessoas em cargos gerenciais no governo do município.,Governança
+3875,Negros em cargos gerencias no governo do município,Percentual de negros em cargos gerenciais sobre o total de pessoas em cargos gerenciais no governo do município.,Governança
+3877,Acessibilidade nos espaços públicos,Percentual de espaços e equipamentos públicos com acessibilidade sobre o total de espaços públicos e equipamentos públicos no município.,Acessibilidade nos espaços públicos
+3880,Acesso ao crédito para pequenos empresários,Existência de acesso a serviços de financiamento e crédito para pequenos empresários.,Financeiras
+3889,Alunos com acesso à quadra esportiva (coberta e descoberta),Percentual de alunos da rede pública com acesso à quadra esportiva (coberta ou descoberta) sobre o total de alunos da rede pública.,Financeiras
+3896,Áreas de mananciais protegidas,Percentual de áreas de mananciais protegidas sobre a área total do município.,Aeroportos
+3901,Capacitação profissional e incentivo ao primeiro emprego,Políticas municipais de capacitação profissional e de incentivo ao primeiro emprego.,Governança
+3903,Centro municipal de monitoramento e alertas de desastres naturais,Existência no município de um centro municipal de monitoramento e alertas de desastres naturais.,Goveranca
+3908,Notificações de estupros sofridos por mulheres,Notificações de estupros sofridos por mulheres registrados no município.,Finação
+3914,Ocupação das pessoas com 16 anos de idade ou mais,Taxa de ocupação das pessoas com 16 anos ou mais.,Administração
+3917,Orçamento municipal investido em Ciência e Tecnologia,Percentual do orçamento municipal investido em ciência e tecnologia sobre o total do orçamento municipal.,Financeiras
+3919,Controladoria Geral do Município,Existência no município de Controladoria Geral do Município.,Administração
+3921,Custo anual dos acidentes de trânsito,"Custo anual, em reais, dos acidentes de trânsito no município",Goverança
+3923,Déficit habitacional,"Valor do déficit habitacional no município. Ver referência da Fundação João Pinheiro:
+http://www.fjp.mg.gov.br/index.php/produtos-e-servicos1/2742-deficit-habitacional-no-brasil-3",Financeiras
+3928,Órgãos de controle e combate à corrupção,"Existência de órgãos de controle externo e combate à corrupção, quais são os órgãos e se os órgãos têm eleições diretas.",Governança
+3929,Domicílios com acesso a telefone celular,Percentual de domicílios com acesso a telefone celular sobre o total de domicílios do município.,Governança
+3936,Educação em tempo integral na pré-escola,Percentual de alunos de pré-escolas da rede municipal com educação em tempo integral sobre o total de alunos de pré-escolas da rede municipal (urbana + rural).,Educação
+3937,Participação da agricultura  familiar nas culturas e na pecuária,Percentual de agricultores familiares sobre o total de agricultores (culturas e pecuária).,Administração
+3939,Participação de adolescentes e jovens em instâncias deliberativas,Existência de marco legal que regulamente os mecanismos de participação social nas instâncias de deliberação das políticas públicas que assegure a participação de adolescentes e jovens.,Governança
+3941,Participação do município no Comitê de Bacias,Participação do município no Comitê de Bacias.,Social
+3942,Educação em tempo integral no Ensino Fundamental – anos finais,Percentual de alunos do ensino fundamental (anos finais) da rede municipal com educação em tempo integral sobre o total de alunos do ensino fundamental da rede municipal (urbana + rural).,Educação
+3945,Pedidos respondidos no sistema de informação ao cidadão,"Percentual de pedidos respondidos no sistema de informação ao cidadão, de acordo com a Lei de Acesso à Informação, sobre o total de pedidos registrados.",Informação
+3948,Empresas que realizam logística reversa de resíduos,Percentual de empresas que realizam logística reserva de resíduos.,Financeiras
+3951,Escolas com dependências adequadas a pessoas com deficiência,"Percentual de escolas que possuem banheiros, dependências e vias adequadas a pessoas com deficiência e
+mobilidade reduzida sobre o total de escolas no município.",Agricultura
+3952,PIB do município,Produto Interno Bruto do município.,Financeiras
+3957,Planejamento integrado entre todas as secretarias,Existência de planejamento integrado entre todas as secretarias municipais.,Goverança
+3962,"Esgoto tratado antes de chegar ao mar, rios e córregos","Percentual do esgoto tratado antes de chegar ao mar, rios e córregos sobre o total de esgoto que chega ao mar.",Economico
+3971,Funcionários públicos investigados por corrupção,Percentual de funcionários públicos investigados por corrupção sobre o total de funcionários públicos.,Governança
+3972,Políticas de cooperação no município,Existência de políticas de cooperação no município.,Politicas de cooperação no município
+3975,Gasto municipal em saúde em proporção ao gasto total em saúde,"Gasto municipal em saúde como proporção do gasto total em saúde (municipal, estadual e federal).",Gastão Municipal em Saúde
+3981,Políticas públicas regionalizadas,"Listar as experiências de debate sobre políticas públicas municipais que tenham sido feitas em bairros, subprefeituras e distritos, de maneira regionalizada.",Politicas Públicas Regionalizadas
+3983,Indicadores atualizados produzidos pela gestão,"Descrever se a gestão monitora indicadores de desempenho, qual a periodicidade das atualizações e a disponibilidade desses indicadores no site da prefeitura.",Gestão
+3984,População idosa,Existência no município de Conselho Municipal do Idoso. Listar as políticas e espaços voltados para a população idosa na cidade e percentual da população idosa no município (mais de 60 anos).,Education
+3986,Indivíduos que utilizaram o governo eletrônico,Percentual de indivíduos que utilizaram o governo eletrônico sobre o total de usuários da Internet com 16 anos ou mais.,Financeiras
+3991,Investimento em saúde preventiva,Percentual do orçamento do município destinado à saúde aplicado em programas de saúde preventiva.,Saúde
+3993,Prevalência de diabetes melito,Percentual de adultos (35 anos ou mais de idade) que apresentam diagnóstico médico prévio de diabetes sobre o total das pessoas da mesma faixa etária.,Goverança
+3997,Lei de Acesso à Informação regulamentada,"Registrar a regulamentação municipal da Lei de Acesso à Informação (Lei nº 12.527, de 18 de novembro de 2011).",Administração
+3998,Produção e consumo de orgânicos,Existência no município de políticas de incentivo à produção e consumo de produtos orgânicos.,Organização e Consumo de Orgânicos
+3999,Lista suja do trabalho análogo à escravidão,Número de Infratores do cadastro de empregadores flagrados utilizando trabalho em condição análoga à escravidão – “Lista suja”.,Infraturores na Escravidão
+4004,Mecanismos de Democracia Direta,"Apontar a regulamentação na Lei Orgânica do Município (LOM), as regulamentações feitas no tocante à Democracia Direta (Plebiscito, Referendo e Lei de Iniciativa Popular); Listar, se houve, os temas colocados para consulta à população via plebiscito e/ou referendo.",Governança
+4009,Mortalidade neonatal (crianças de 0 a 27 dias),Taxa de mortalidade neonatal (número de óbitos infantis – de 0 a 27 dias – por mil nascidos vivos).,Medicina
+4010,Propriedade de imóveis,Percentual de imóveis locados no município sobre o total de imóveis do município.,Estudistica econômica
+4017,Proximidade de transporte público,Percentual da população que vive em um raio de até 300 metros de uma estação de transporte de público sobre a população total do município.,Indefinido
+4035,Tempo médio gasto da moradia ao local de trabalho,"Tempo médio gasto no deslocamento entre a moradia e o local de trabalho, em minutos.",Financeiras
+4037,Títulos expedidos às comunidades quilombolas,Percentual de títulos expedidos às comunidades quilombolas sobre o total de títulos solicitados.,Financeiras
+4038,Total de receitas arrecadadas,Valor de receitas arrecadadas sobre o total de receitas no município.,Financeiras
+4041,Tratamento de esgoto e resíduos da atividade econômica local,Existência de programas de tratamento de esgoto e resíduos da atividade econômica local no município.,Financeiras
+4053,Frota de ônibus com acessibilidade para pessoas com deficiência,"Percentual da frota de ônibus com acessibilidade, piso rebaixado e elevador para pessoas com deficiência, sobre a frota de ônibus.",Financeas
+4067,Investimento em saúde preventiva,Percentual do orçamento do município destinado à saúde aplicado em programas de saúde preventiva.,Medicina
+4073,teste,testando a parada toda,Administração
+4075,Índice do Reciclômetro de Assis Chateaubriand,Valor médio do quilo do material reciclado de Assis Chateaubriand,"Aqui estão os indicadores relacionados ao Reciclômetro de Assis Chateaubriand:
+
+1. **Economia**
+2. **Saude**
+3. **Goverança**
+4. **Mobilidade**
+5. **Financeas**
+6. **Segurança**
+7. **Urbanismo**
+
+O indicador que relaciona ao Reciclômetro de Assis Chateaubriand é:
+
+**Economia**"
+4076,Mortalidade por COVID-19,Percentual de Óbitos por COVID-19 por 100.000 Habitantes,Governança
+4085,Iluminação Pública,Ações para garantir eficiência em iluminação pública.,Governança
+4086,Revitalização dos espaços públicos,Ações de revitalização dos espaços públicos,Organização
+4092,Políticas Habitacionais,Condições de moradia ,"Aqui está a classificação correta do indicador de Políticas Habitacionais:
+
+Políticas Habitacionais - Condições de Moradia"
+4097,Iniciativas de fomento à Cultura,Ações para incentivo à cultura e tradição locais.,Cultura
+4098,"Sistemas de Fiscalização, Cadastro e Licenciamento","Existência no município de sistemas e mecanismos de fiscalização, cadastro e licenciamento ambiental.",Fiscalização
+4099,Tecnologias na fiscalização e no licenciamento ambiental,Quais as tecnologias adquiridas para uso  nas atividades de fiscalização e licenciamento ambiental?,Financeiras
+4105,"Divulgação de indicadores de balneabilidade de praias, rios e igarapés voltados ao turismo","Quantos e Quais são os  rios, praias e igarapés voltados ao turismo que possuem registros de indicadores de balneabilidade",Governança
+4108,Emissões de gases de efeito estufa,Ações realizadas no município com o intuito de mitigar e inibir a prática de emissão de gases de efeito estufa.,Aeronatura
+4114,Fomento de Produtos agropecuários e de pesca,Percentual de produtores rurais e pescadores artesanais beneficiados ,Gestão
+4122,Conselho Municipal de Defesa do Consumidor,Conselho de defesa do consumidor criado,Goverança
+4124,Regularização fundiária realizada,Número de regularização fundiária realizada,Financeiras
+4125,"PLANO DE CONTINGÊNCIA, TAMBÉM CHAMADO DE PLANEJAMENTO DE RISCO","A CRIAÇÃO DESSE PLANO DE CONTINGÊNCIA TEM POR OBJETIVO DESCREVER AS MEDIDAS 
+A SEREM TOMADAS PELO ÓRGÃO, INCLUINDO A ATIVAÇÃO DE PROCESSOS MANUAIS, PARA FAZER 
+COM QUE SEUS PROCESSOS VITAIS VOLTEM A FUNCIONAR PLENAMENTE, OU NUM ESTADO 
+MINIMAMENTE ACEITÁVEL, O MAIS RÁPIDO POSSÍVEL, EVITANDO ASSIM UMA PARALISAÇÃO 
+PROLONGADA QUE POSSA GERAR MAIORES PREJUÍZOS AO PODER PÚBLICO.",Goverança
+4129,"ESTRUTURAÇÃO ADMINISTRATIVA, FÍSICA E MATERIAL DA COORDENADORIA  DA DEFESA CIVIL MUNICIPAL",ESTRUTURAÇÃO DO PRÉDIO COM EQUIPAMENTOS NOVOS E DE QUALIDADE.,Financeiras
+4163,Prevenir o aumento do número de crianças e adolescentes em uso de álcool e outras drogas,"A prevenção do número de crianças e adolescentes em uso de álcool e outras drogas se dará por meio da implantação de projetos: esportivos, com o objetivo de criar novas academias ao ar livre e parquinhos infantis; de cultura, por meio da realização de eventos e criação de espaços culturais; de educação, por meio do fomento à atividades extracurriculares; de saúde, por meio do fortalecimento do CAPS AD; e a realização de parceiras com a Polícia Militar de Minas Gerais para a execução do PROERD.
+",Goverança
+4165,Ampliar para 100% o percentual de vias pavimentadas no município de Bom Despacho.,"Nos últimos anos a frota de veículos em Bom Despacho cresceu cerca de 200%. Do ponto de vista urbanístico, essa trajetória é insustentável, uma vez que os investimentosna manutenção e construção de vias urbanas não acompanharam no mesmo ritmo a elevação da frota de veículos. Ademais, a política de acessibilidade às vias urbanas, em especial para deficientes, vem se tornando pauta necessária na Prefeitura. Entende-se por vias urbanas superfícies por onde transitam veículos, pessoas e animais; como ruas, avenidas, calçadas e outros.
+",Urbano
+4172,"Aumentar a arrecadação do ISS no município de Bom Despacho em pelo menos 40% acima da inflação,","O Imposto sobre Serviço de Qualquer Natureza é pago por empresas e profissionais liberais que têm base no município, em função do que recebem de seus clientes por serviços prestados. Espera-se que o município de Bom Despacho consiga aumentar sua arrecadação de ISS até 2030, a partir de medidas como: Aumentar a transparência das ações do governo e criar canais de participação popular; Presença de um quadro fiscal atuante que intensifique a fiscalização como em bancos, cartórios e empresas entre outros.
+",Financeiras
+4176,"Fortalecer o ambiente de negócios, de forma a aumentar as propostas no modelo startup geradas", no Município de Bom Despacho para 40 até 2030.,Financeiras
+4182,"Universalizar a coleta domiciliar de resíduos sólidos, alcançando 100% os bairros de Bom Despacho","A universalização da coleta e do transporte dos diversos tipos de resíduos é bastante importante, principalmente para se obter a confirmação das quantidades de lixo geradas. Além disso, a coletas seletiva e o reaproveitamento dos resíduos, são importante para viabilizar seu retorno ao ciclo produtivo. A partir da coleta domiciliar é possível ver quais resíduos necessitam se reduzir, reutilizar, reciclar e tratar. Para isso, é preciso que 100% dos domicílios do município de Bom Despacho participe da coleta.
+",Goverança
+4201,Conselho Municipal de Desenvolvimento Econômico,Existência e Regulamentação do Conselho Municipal de Desenvolvimento Econômico,Governança
+4202,DISTRITO IMPLANTADO E COM CERTIFICAÇÃO DE SUSTENTABILIDADE AMBIENTAL,Desenvolver estudo de viabilidade junto a CODEC (Companhia de Desenvolvimento Econômico do Pará) para implantação do Distrito Industrial de Abaetetuba.,Sustentabilidade Ambiente
+4204,MERCADO DA PEQUENA E MÉDIA EMPRESA,"Ações de fomento e intensificação do Programa de Incentivo as Pequenas e Médias Empresas, incentivando a geração de emprego e renda.",Financeiras
+4208,Plano Plurianual - PPA,Instrumento de planejamento da Gestão Municipal,Gestão Municipal
+4220,REDES DE DRENAGEM ,Realizar análises e projetos para a implementação e recuperação das redes de drenagem.,Goverança
+4234,"ESTRUTURAÇÃO ADMINISTRATIVA, FÍSICA E MATERIAL DA SECRETARIA DE OBRAS E VIAÇÃO","Estruturar e organizar o prédio administrativo da Secretaria Municipal de Obras e Viação, para que a mesma atenda as suas demandas de maneira eficaz.",Estruturação Administrativa
+4255,MESAS OU ESPAÇOS FORMAIS DE NEGOCIAÇÃO PERMANENTE DO SUS IMPLANTADOS E OU MANTIDOS EM FUNCIONAMENTO,"Mesas ou espaços formais municipais de negociação do SUS, implantados e em funcionamento",Financeiras
+4284,NÚMERO DE PONTOS DE TELESSAÚDE BRASIL REDES IMPLANTADOS,Pontos de Telessaúde Brasil Redes implantados,Goverança
+4322,CICLOS QUE ATINGIRAM MÍNIMO DE 80% D COBERTURA DE IMÓVEIS VISITADOS PELO CONTROLE VETORIAL DE DENGUE,Realizar visitas domiciliares para controle da dengue.,Administração
+4328,"MORTALIDADE POR DENGUE, ZIKA E CHIKUNGUNYA","Número de pessoas mortas por Dengue, Chikungunya ou Zika por 10 mil habitantes.",Gestão
+4334,ACESSO HOSPITALAR DOS ÓBITOS POR ACIDENTE,Ampliar o nº de pessoas assistidas em hospitais quando acidentadas. ,Healthcare
+4343,AÇÕES DE MATRICIAMENTO REALIZADAS POR CAPS COM EQUIPES DE ATENÇÃO BÁSICA,Ampliar as ações realizadas pelas equipes dos Centros de Atenção Psicossocial (CAPS) com equipes de Atenção Básica.,Governança
+4354,Plano Municipal de políticas para Mulheres,Existência de Plano Municipal de políticas para Mulheres,"Aqui está a resposta à pergunta:
+
+Plano Municipal de políticas para Mulheres - Existência de Plano Municipal de políticas para Mulheres"
+4357,ÓRGÃO DE COORDENAÇÃO DE POLÍTICAS DE GARANTIAS DE DIREITOS,Criação e Estruturação da coordenadoria de políticas de garantias de direitos.,Governança
+4358,Equipe técnica completa e sistema informatizado de vigilância socioassistencial,A secretaria não possui uma equipe completa e um sistema informatizado na vigilância socioassistêncial.,Organização
+4399,DIVERSIDADE GEOGRÁFICA E TERRITORIAL ,Temos uma diversidade geográfica territorial bem complexa e dificulta a locomoção da equipe até as comunidades e assim atrapalhando os serviços socioassistenciais. ,Geografia
+4400,EQUIPES VOLANTES,"Compor equipes volantes, para atender nas comunidades.",Economicos
+4406,COFINANCIAMENTO FEDERAL PARA COBATE AO COVID-19,"Incremento temporário para ações de combate ao covid-19 Proteção Social Especial- PSE, pactuação enquanto durar a pandemia.",Financeas
+4459,POPULAÇÃO BENEFICIÁRIA DO PBF ,"O município ainda possui 12,54 % famílias que estão dentro do perfil de renda e ainda não recebem o beneficio do Programa Bolsa Família.",Social
+4686,BENEFICIÁRIOS DO BPC NO CADASTRO ÚNICO,Inscrever todos os beneficiários do BPC no Cadastro Único.,Financeiras
+4709,RELAÇÃO DE BENEFICIÁRIOS DO BPC ESCOLA INDICADOS PARA O PERÍODO.,Monitoramento das crianças indicadas ao Beneficio de Prestação Continuada- BPC,Financeiras
+4731,POLÍTICA MUNICIPAL DE PROMOÇÃO DA CIDADANIA LGBTQIA+,Criação de uma política Municipal LGBTQIA+ para o desenvolvimento de ações de fortalecimento da cidadania LGBTQIA+.,Politica Municipal de Promoção da Cidadania LGBTQIA+
+4775,COFINANCIAMENTO NAS TRÊS ESFERAS DE GOVERNO INEXISTÊNCIA DO PMDPI,A falta de Cofinanciamento das três esferas de governo para Pessoa Idosa,Goverança
+4822,MOVIMENTAÇÃO DO FUNDO DA INFÂNCIA E ADOLESCÊNCIA,Apoio ao Conselho Municipal da Criança e Adolescente-CMDCA para habilitação em projetos e captação em recursos.,Financeas
+4855,"Conselho Municipal De Trânsito, Transporte E Mobilidade Urbana ","Existência de conselho municipal específico de Trânsito, Transporte E Mobilidade Urbana",Transporte E Mobilidade Urbana
+5042,Ciclovias e ciclofaixas,"Promover o amplo acesso a prédio seguro, eficiente, sustentável, resiliente e democrático a cidade e a zona rural no que se refere ao trânsito e transporte público.","Aqui está a classificação correta:
+
+Educacao"
+5043,Transporte público coletivo,"Promover o amplo acesso a prédio seguro, eficiente, sustentável, resiliente e democrático a cidade e a zona rural no que se refere ao trânsito e transporte público.",Transporte Público Coletivo
+5047,Calendário Turístico Municipal,: Produzir o calendário turístico do Município,Calendário Turístico Municipal
+5048,Banco de Dados do Turismo ,Banco de Dados do Cadastur ,Banco de Dados do Turismo
+5050,Plano de Qualificação para os Operadores de Atividades Turísticas,Capacitações Para Trabalhadores e Operadores de Atividades Turísticas,A Economia
+5055,LEI DA MICRO E PEQUENA EMPRESA ,Implantação comitê gestor da lei geral do micro e pequena empresa.,Financeira
+5058,COMPRAS PÚBLICAS,Compras governamentais/PNAE,Financeiras
+5059,FOMENTO AO COMÉRCIO LOCAL, Apoiar o setor comercial na implementação do “Projeto Shopping a Céu Aberto”.,Financeiras
+5139,Bicicletas públicas na cidade,Número total de bicicletas públicas disponíveis para aluguel,Agricultura
+5141,Energia fotovoltaica em residências,"Número de residências com painéis fotovoltáicos, ao ano, no municipio",Financeiras
+5142,Energia fotovoltaica em prédios comerciais,"Número de prédios comercias com painéis fotovoltaicos, ao ano, no município",Energia Fotovoltaica
