@@ -1,19 +1,9 @@
 // types/indicadores.ts
 import { Categoria } from "./categorias";
 
-export type CategoriaComIndicadores = Categoria & {
-  indicadores: {
-    id: string;
-    nome: string;
-    unidade: string;
-    fonte: string;
-    serie: { data: string; valor: number | null }[];
-  }[];
-};
-
 export interface ValorSerie {
   data: string;   // "2022-01-01" ou ano simples, se preferir
-  valor: number;
+  valor: number | null;
 }
 
 export interface Indicador {
@@ -23,6 +13,11 @@ export interface Indicador {
   fonte: string;
   serie: ValorSerie[];
 }
+
+export type CategoriaComIndicadores = Categoria & {
+  indicadores: Indicador[];
+};
+
 
 export interface LocalidadePayload {
   id: string;
