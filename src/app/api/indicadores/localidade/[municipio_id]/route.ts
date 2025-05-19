@@ -4,9 +4,9 @@ import { getLocalidadeFullPorCategorias } from '@/services/indicadores';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { municipio_id: string } }
+  { params }: { params: Promise<{ municipio_id: string }> }
 ) {
-  const municipio_id = params.municipio_id;
+  const { municipio_id } = await params;
 
   try {
     const body = await req.json();
