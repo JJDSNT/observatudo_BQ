@@ -1,22 +1,31 @@
-// lib/analytics/client.ts
 import { BigQuery } from '@google-cloud/bigquery';
 
 export interface BigQueryConfig {
   projectId: string;
   datasetId: string;
-  keyFilename?: string; // para rodar localmente ou CI/CD, se necessário
+  keyFilename?: string; // usado localmente
+  keyFileJsonBase64?: string; // usado em produção
 }
 
 export class BigQueryClient {
-  private client: BigQuery;
-  private _projectId: string;
-  private _datasetId: string;
+  private readonly client: BigQuery;
+  private readonly _projectId: string;
+  private readonly _datasetId: string;
 
   constructor(config: BigQueryConfig) {
     this._projectId = config.projectId;
     this._datasetId = config.datasetId;
+
+    let credentials;
+
+    if (config.keyFileJsonBase64) {
+      const decoded = Buffer.from(config.keyFileJsonBase64, 'base64').toString();
+      credentials = JSON.parse(decoded);
+    }
+
     this.client = new BigQuery({
       projectId: this._projectId,
+      ...(credentials ? { credentials } : {}),
       ...(config.keyFilename ? { keyFilename: config.keyFilename } : {}),
     });
   }
@@ -30,13 +39,10 @@ export class BigQueryClient {
     return rows;
   }
 
-  // CORREÇÃO: O getter dataset deve retornar apenas o datasetId
-  // O projectId já está sendo usado separadamente no QueryBuilder
   get dataset() {
-    return this._datasetId; // ✅ Correto: retorna apenas 'dados'
+    return this._datasetId;
   }
 
-  // Getter para acessar o projectId publicamente
   get projectId() {
     return this._projectId;
   }
@@ -46,4 +52,6 @@ export class BigQueryClient {
 export const bigQueryClient = new BigQueryClient({
   projectId: process.env.BIGQUERY_PROJECT_ID || '',
   datasetId: process.env.BIGQUERY_DATASET_ID || '',
+  keyFilename: process.env.BIGQUERY_KEYFILE,
+  keyFileJsonBase64: process.env.BIGQUERY_KEYFILE_JSON,
 });
