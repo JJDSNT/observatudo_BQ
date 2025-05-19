@@ -1,13 +1,19 @@
 import React from "react";
-import { LocalidadeFullResponse, CategoriaComIndicadores } from "@/types/indicadores";
+import { CategoriaComIndicadores, Indicador, LocalidadePayload } from "@/types/indicadores";
 import { MetricCard } from "./MetricCard/MetricCard";
 
+type DashboardPayload = {
+  pais: LocalidadePayload;
+  municipio: LocalidadePayload;
+  estado: LocalidadePayload;
+};
+
 type DashboardProps = {
-  payload: LocalidadeFullResponse;
+  payload: DashboardPayload;
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ payload }) => {
-  const renderCards = (label: string, localidade: typeof payload.municipio) => (
+  const renderCards = (label: string, localidade: LocalidadePayload) => (
     <>
       <h2 className="text-lg font-semibold mb-4">
         {label}: {localidade.nome}
@@ -18,7 +24,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ payload }) => {
           <h3 className="text-md font-medium mb-2">{categoria.nome}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {categoria.indicadores.length > 0 ? (
-              categoria.indicadores.map((indicador) => (
+              categoria.indicadores.map((indicador: Indicador) => (
                 <MetricCard
                   key={`${indicador.id}-${localidade.id}`}
                   indicador={indicador}
