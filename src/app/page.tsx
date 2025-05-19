@@ -4,50 +4,58 @@ import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
 import CategoryNav from "@/components/CategoryNav";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { IndicadorSearch } from "@/components/IndicadorSearch";
-import { Indicador } from '@/types/indicadores';
+import categoriasJson from "@/data/categoriasIndicadores.json";
+import { Categoria } from "@/types/categorias";
 
-const CATEGORIAS_INDICADORES = [
-  { id: "educacao", nome: "Educação", indicadores: ["24", "55", "73"] },
-  { id: "saude", nome: "Saúde", indicadores: ["14", "88"] },
-  { id: "seguranca", nome: "Segurança", indicadores: ["100", "101"] },
-];
+const CATEGORIAS_INDICADORES: Categoria[] = categoriasJson;
 
 export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState(
-    CATEGORIAS_INDICADORES[0].id
-  );
-    const [indicadorSelecionado, setIndicadorSelecionado] = useState<Indicador | null>(null);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<number | null>(null);
 
-  const idsIndicadores =
-    CATEGORIAS_INDICADORES.find((c) => c.id === categoriaSelecionada)
-      ?.indicadores || [];
+  // Categorização personalizada para o backend
+  const categoriasSelecionadas = useMemo(() => {
+    if (categoriaSelecionada === null) return [];
+    const encontrada = CATEGORIAS_INDICADORES.find((c) => c.id === categoriaSelecionada);
+    return encontrada ? [encontrada] : [];
+  }, [categoriaSelecionada]);
 
   const {
     data: payload,
     loading,
     error,
-  } = useIndicadoresDashboard(municipioId, idsIndicadores);
+  } = useIndicadoresDashboard(municipioId, categoriasSelecionadas);
+
+  useEffect(() => {
+    if (payload) {
+      console.log("📊 Dados prontos para renderização no Dashboard:", {
+        municipio: payload?.municipio?.nome,
+        totalCategorias: payload?.municipio?.categorias?.length ?? 0,
+        raw: payload,
+      });
+    }
+  }, [payload]);
 
   const handleMunicipioChange = (novoMunicipioId: string) => {
-    console.log("🔍 município selecionado:", novoMunicipioId);
+    console.log("🌍 Município selecionado:", novoMunicipioId);
     setMunicipioId(novoMunicipioId);
   };
 
-  const handleCategoriaChange = (novaCategoriaId: string) => {
-    console.log("📂 categoria selecionada:", categoriaSelecionada);
+  const handleCategoriaChange = (novaCategoriaId: number) => {
+    console.log("📂 Nova categoria clicada:", novaCategoriaId);
     setCategoriaSelecionada(novaCategoriaId);
   };
 
-    const handleIndicadorSelect = (indicador: Indicador) => {
-    console.log("🔍 Indicador selecionado:", indicador);
-    setIndicadorSelecionado(indicador);
-    // Aqui você pode:
-    // - disparar uma nova consulta para esse indicador
-    // - substituir a categoria atual
-    // - alterar uma URL de filtro etc
+  type IndicadorBusca = {
+    id: string;
+    nome: string;
+  };
+
+  const handleIndicadorSelect = (indicador: IndicadorBusca) => {
+    console.log("🔍 Indicador selecionado via busca:", indicador);
+    // Se quiser acionar consulta por indicador isolado, pode adaptar aqui
   };
 
   return (
@@ -63,13 +71,13 @@ export default function Home() {
       <IndicadorSearch onSelect={handleIndicadorSelect} />
       <CategoryNav
         categorias={CATEGORIAS_INDICADORES}
-        categoriaSelecionada={categoriaSelecionada}
+        categoriaSelecionada={categoriaSelecionada ?? -1}
         onCategoriaChange={handleCategoriaChange}
       />
 
-      {loading && <p>Carregando indicadores...</p>}
-      {error && <p className="text-red-500">Erro: {error.message}</p>}
-      {payload && <Dashboard payload={payload} />}
+      {loading && <p>⏳ Carregando indicadores...</p>}
+      {error && <p className="text-red-500">❌ Erro: {error.message}</p>}
+      {!loading && !error && payload && <Dashboard payload={payload} />}
     </section>
   );
 }

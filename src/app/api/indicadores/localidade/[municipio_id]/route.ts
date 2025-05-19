@@ -1,27 +1,30 @@
-
 // app/api/indicadores/localidade/[municipio_id]/route.ts
-import { NextResponse } from 'next/server';
-import { getLocalidadeFull } from '@/services/indicadores';
+import { NextRequest, NextResponse } from 'next/server';
+import { getLocalidadeFullPorCategorias } from '@/services/indicadores';
 
-export async function GET(
-  req: Request,
-  { params }: { params: { municipio_id: string } }
+export async function POST(
+  req: NextRequest,
+  context: { params: { municipio_id: string } }
 ) {
-  // Aguarda o params antes de acessar suas propriedades
-  const resolvedParams = await params;
-  const municipio_id = resolvedParams.municipio_id;
-  
-  const { searchParams } = new URL(req.url);
-  const categoria = searchParams.get('categoria') || '';
+  const { municipio_id } = await context.params;
 
   try {
-    const data = await getLocalidadeFull(municipio_id, categoria);
+    const body = await req.json();
+    const categorias = body.categorias;
+
+    if (!Array.isArray(categorias)) {
+      return NextResponse.json(
+        { error: 'Formato de categorias inválido' },
+        { status: 400 }
+      );
+    }
+
+    console.log(`📩 POST recebido com ${categorias.length} categorias para ${municipio_id}`);
+
+    const data = await getLocalidadeFullPorCategorias(municipio_id, categorias);
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Erro ao buscar dados da localidade:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    console.error('❌ Erro ao processar POST /localidade:', error);
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }

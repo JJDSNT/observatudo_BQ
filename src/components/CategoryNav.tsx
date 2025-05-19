@@ -2,14 +2,14 @@
 import React from "react";
 
 type Categoria = {
-  id: string;
+  id: number;
   nome: string;
 };
 
 type CategoryNavProps = {
   categorias: Categoria[];
-  categoriaSelecionada: string;
-  onCategoriaChange: (id: string) => void;
+  categoriaSelecionada: number;
+  onCategoriaChange: (id: number) => void;
 };
 
 export default function CategoryNav({ categorias, categoriaSelecionada, onCategoriaChange }: Readonly<CategoryNavProps>) {

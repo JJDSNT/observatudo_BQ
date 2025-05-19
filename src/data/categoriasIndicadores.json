@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "nome": "Educação",
+    "indicadores": ["24", "55", "73", "4016", "4148", "5155"]
+  },
+  {
+    "id": 2,
+    "nome": "Saúde",
+    "indicadores": ["14", "88", "4009", "3982", "4008", "3905"]
+  },
+  {
+    "id": 3,
+    "nome": "Assistência social",
+    "indicadores": ["3965", "3985", "4686", "4043", "4065", "4384"]
+  },
+  {
+    "id": 4,
+    "nome": "Segurança",
+    "indicadores": ["3900", "3897", "155", "159", "3891", "3864"]
+  },
+  {
+    "id": 5,
+    "nome": "Meio ambiente, urbanização e mobilidade",
+    "indicadores": ["125", "127", "5140", "4032", "3959", "5159"]
+  },
+  {
+    "id": 6,
+    "nome": "Economia & Finanças",
+    "indicadores": ["23", "137", "3952", "144", "4030", "3946"]
+  }
+]
