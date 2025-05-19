@@ -19,9 +19,9 @@ export async function getIndicadoresPorRegiao(
 export async function getSerieHistorica(
   indicadorId: string,
   localIds: string[],
-  anos: number = 5
+  //anos: number = 5
 ) {
-  const query = IndicadorCivico.serieHistorica(indicadorId, localIds, anos);
+  const query = IndicadorCivico.serieHistorica(indicadorId, localIds);
   return await query.execute();
 }
 
@@ -88,7 +88,6 @@ export async function getLocalidadeFullPorCategorias(
               const data = await IndicadorCivico.serieHistorica(
                 indicadorId,
                 [localidadeId],
-                5
               ).execute();
 
               console.groupCollapsed(
