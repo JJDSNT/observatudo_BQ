@@ -16,8 +16,8 @@ export async function GET(request: Request) {
 
     const data = await getIndicadoresPorRegiao(categoria, regiao, { inicio, fim });
     return NextResponse.json({ data, error: null });
-  } catch (error: any) {
-    // Logar o erro se desejar
-    return NextResponse.json({ data: null, error: error?.message || 'Erro interno.' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Erro interno.';
+    return NextResponse.json({ data: null, error: message }, { status: 500 });
   }
 }

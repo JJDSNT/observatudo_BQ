@@ -16,7 +16,7 @@ type Measure = {
 type Filter = {
   dimension: string;
   operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'IN' | 'NOT IN' | 'CONTAINS';
-  values: any[];
+  values: unknown[];
 };
 
 export class QueryBuilder {

@@ -21,7 +21,7 @@ export class BigQueryClient {
     });
   }
 
-  async executeQuery(query: string, params: any[] = []) {
+  async executeQuery(query: string, params: unknown[] = []) : Promise<Record<string, unknown>[]> {
     const [rows] = await this.client.query({
       query,
       params,

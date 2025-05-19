@@ -6,9 +6,9 @@ export class IndicadorCivico {
   static serieHistorica(
     indicadorId: string,
     localIds: string[],
-    anos: number = 5
+    //anos: number = 5
   ) {
-    const currentYear = new Date().getFullYear();
+    //const currentYear = new Date().getFullYear();
     //const startYear = currentYear - anos + 1;
     const startYear = 2000;
 

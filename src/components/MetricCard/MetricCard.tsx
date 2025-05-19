@@ -7,14 +7,24 @@ type MetricCardProps = {
   localidadeNome?: string;
 };
 
-export const MetricCard: React.FC<MetricCardProps> = ({ indicador, localidadeNome }) => {
+export const MetricCard: React.FC<MetricCardProps> = ({
+  indicador,
+  localidadeNome,
+}) => {
   const ultimaMedida = indicador.serie.at(-1);
   const serieRecentes = indicador.serie.slice(-5);
 
-  const formatarData = (data: any): string => {
+  const formatarData = (data: unknown): string => {
     if (!data) return "--";
-    if (typeof data === "object" && "value" in data) return data.value;
-    return data.toString();
+
+    if (typeof data === "object" && data !== null && "value" in data) {
+      const value = (data as { value?: string }).value;
+      return typeof value === "string" ? value : "--";
+    }
+
+    if (typeof data === "string") return data;
+
+    return "--";
   };
 
   return (
