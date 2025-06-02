@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
           <p className="text-sm opacity-75">
             Infraestrutura de dados públicos
           </p>
+          <Navbar />
         </header>
         <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
       </body>

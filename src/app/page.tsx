@@ -5,7 +5,6 @@ import Dashboard from "@/components/Dashboard";
 import CategoryNav from "@/components/CategoryNav";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
 import { useState, useMemo, useEffect } from "react";
-import { IndicadorSearch } from "@/components/IndicadorSearch";
 import categoriasJson from "@/data/categoriasIndicadores.json";
 import { Categoria } from "@/types/categorias";
 
@@ -48,15 +47,6 @@ export default function Home() {
     setCategoriaSelecionada(novaCategoriaId);
   };
 
-  type IndicadorBusca = {
-    id: string;
-    nome: string;
-  };
-
-  const handleIndicadorSelect = (indicador: IndicadorBusca) => {
-    console.log("🔍 Indicador selecionado via busca:", indicador);
-    // Se quiser acionar consulta por indicador isolado, pode adaptar aqui
-  };
 
   return (
     <section className="space-y-6">
@@ -68,7 +58,7 @@ export default function Home() {
       </p>
 
       <ComboBoxLocalidades onChange={handleMunicipioChange} />
-      <IndicadorSearch onSelect={handleIndicadorSelect} />
+ 
       <CategoryNav
         categorias={CATEGORIAS_INDICADORES}
         categoriaSelecionada={categoriaSelecionada ?? -1}
