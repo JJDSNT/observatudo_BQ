@@ -62,4 +62,5 @@ jobs:
             --region $REGION \
             --platform managed \
             --project $PROJECT_ID \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --service-account sa-observatudo-www-app@observatudo-infra.iam.gserviceaccount.com

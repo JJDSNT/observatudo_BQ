@@ -10,6 +10,13 @@ resource "google_bigquery_dataset_iam_member" "www_app_viewer" {
   member     = "serviceAccount:${google_service_account.www_app.email}"
 }
 
+resource "google_project_iam_member" "www_app_job_user" {
+  project = var.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.www_app.email}"
+}
+
+
 # === SA do dbt ===
 resource "google_service_account" "dbt" {
   account_id   = "sa-observatudo-dbt"
