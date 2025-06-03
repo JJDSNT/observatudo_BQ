@@ -162,7 +162,9 @@ export class QueryBuilder {
             .map((v) => (typeof v === "string" ? `'${v}'` : v))
             .join(", ")})`;
         case "CONTAINS":
-          return `CONTAINS(${dimensionSql}, '${values[0]}')`;
+          return `LOWER(${dimensionSql}) LIKE '%${(
+            values[0] as string
+          ).toLowerCase()}%'`;
         default:
           return `${dimensionSql} ${operator} ${
             typeof values[0] === "string" ? `'${values[0]}'` : values[0]
