@@ -1,18 +1,8 @@
-export default function Head() {
+// app/components/AppleSplashScreens.tsx
+
+export default function AppleSplashScreens() {
   return (
     <>
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="196x196"
-        href="/assets/favicon-196.png"
-      />
-      <link rel="apple-touch-icon" href="/assets/apple-icon-180.png" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="theme-color" content="#00d6d6" />
-      <link rel="manifest" href="/manifest.json" />
-
-      {/* 👇 Splash Screens */}
       <link
         rel="apple-touch-startup-image"
         href="/assets/apple-splash-2048-2732.png"
