@@ -1,9 +1,11 @@
 {
   "name": "ObservaTudo",
   "short_name": "ObservaTudo",
+  "description": "Sua descrição aqui",
   "theme_color": "#000000",
   "background_color": "#00d6d6",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "start_url": "/",
   "icons": [
     {
