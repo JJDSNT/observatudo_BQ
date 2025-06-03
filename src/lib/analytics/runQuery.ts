@@ -1,3 +1,4 @@
+// lib/analytics/runQuery.ts
 import { bigQueryClient } from './client';
 
 export interface QueryParams {
