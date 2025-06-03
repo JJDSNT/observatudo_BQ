@@ -1,5 +1,3 @@
-// src/components/IndicadorSearch.tsx
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -19,25 +17,29 @@ export const IndicadorSearch: React.FC<IndicadorSearchProps> = ({ onSelect }) =>
   const [resultados, setResultados] = useState<Indicador[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const buscarIndicadores = async (texto: string) => {
-    if (!texto) {
-      setResultados([]);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/indicadores/search?query=${encodeURIComponent(texto)}`);
-      const data = await res.json();
-      setResultados(data);
-    } catch (e) {
-      console.error('Erro na busca de indicadores:', e);
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
-    buscarIndicadores(query);
+    const handler = setTimeout(() => {
+      if (!query || query.length < 2) {
+        setResultados([]);
+        return;
+      }
+
+      const buscarIndicadores = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`/api/indicadores/search?query=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          setResultados(data);
+        } catch (e) {
+          console.error('Erro na busca de indicadores:', e);
+        }
+        setLoading(false);
+      };
+
+      buscarIndicadores();
+    }, 300); // debounce de 300ms
+
+    return () => clearTimeout(handler); // limpa timeout anterior ao digitar novamente
   }, [query]);
 
   return (
