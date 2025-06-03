@@ -27,5 +27,11 @@
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "next": "15.3.2"
+  },
+  "resolutions": {
+    "next": "15.3.2"
   }
 }
