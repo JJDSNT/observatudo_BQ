@@ -1,4 +1,4 @@
-import { BigQuery } from '@google-cloud/bigquery';
+import { BigQuery } from "@google-cloud/bigquery";
 
 export interface BigQueryConfig {
   projectId: string;
@@ -19,7 +19,10 @@ export class BigQueryClient {
     let credentials;
 
     if (config.keyFileJsonBase64) {
-      const decoded = Buffer.from(config.keyFileJsonBase64, 'base64').toString();
+      const decoded = Buffer.from(
+        config.keyFileJsonBase64,
+        "base64"
+      ).toString();
       credentials = JSON.parse(decoded);
     }
 
@@ -30,13 +33,16 @@ export class BigQueryClient {
     });
   }
 
-  async executeQuery(query: string, params: unknown[] = []) : Promise<Record<string, unknown>[]> {
+  async executeQuery<T = Record<string, unknown>>(
+    query: string,
+    params: unknown[] = []
+  ): Promise<T[]> {
     const [rows] = await this.client.query({
       query,
       params,
-      parameterMode: 'positional',
+      parameterMode: "positional",
     });
-    return rows;
+    return rows as T[];
   }
 
   get dataset() {
@@ -50,8 +56,8 @@ export class BigQueryClient {
 
 // Singleton instance
 export const bigQueryClient = new BigQueryClient({
-  projectId: process.env.BIGQUERY_PROJECT_ID || '',
-  datasetId: process.env.BIGQUERY_DATASET_ID || '',
+  projectId: process.env.BIGQUERY_PROJECT_ID || "",
+  datasetId: process.env.BIGQUERY_DATASET_ID || "",
   keyFilename: process.env.BIGQUERY_KEYFILE,
   keyFileJsonBase64: process.env.BIGQUERY_KEYFILE_JSON,
 });

@@ -1,5 +1,5 @@
 // lib/analytics/runQuery.ts
-import { bigQueryClient } from './client';
+import { bigQueryClient } from "./client";
 
 export interface QueryParams {
   table: string;
@@ -11,18 +11,22 @@ export interface QueryParams {
   groupBy?: string[];
 }
 
-export async function runQuery(params: QueryParams): Promise<Record<string, unknown>[]> {
-  let sql = `SELECT ${params.fields?.join(', ') || '*'} FROM \`${params.table}\``;
+export async function runQuery<T = Record<string, unknown>>(
+  params: QueryParams
+): Promise<T[]> {
+  let sql = `SELECT ${params.fields?.join(", ") || "*"} FROM \`${
+    params.table
+  }\``;
 
   if (params.filters && Object.keys(params.filters).length > 0) {
     const whereClauses = Object.keys(params.filters)
       .map((field) => `${field} = @${field}`)
-      .join(' AND ');
+      .join(" AND ");
     sql += ` WHERE ${whereClauses}`;
   }
 
   if (params.groupBy) {
-    sql += ` GROUP BY ${params.groupBy.join(', ')}`;
+    sql += ` GROUP BY ${params.groupBy.join(", ")}`;
   }
 
   if (params.orderBy) {
@@ -41,10 +45,12 @@ export async function runQuery(params: QueryParams): Promise<Record<string, unkn
     params.filters && Object.keys(params.filters).length > 0
       ? Object.entries(params.filters).map(([name, value]) => ({
           name,
-          parameterType: { type: typeof value === 'number' ? 'INT64' : 'STRING' },
+          parameterType: {
+            type: typeof value === "number" ? "INT64" : "STRING",
+          },
           parameterValue: { value },
         }))
       : [];
 
-  return bigQueryClient.executeQuery(sql, queryParams);
+  return bigQueryClient.executeQuery<T>(sql, queryParams);
 }
