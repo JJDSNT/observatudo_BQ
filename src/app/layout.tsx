@@ -15,7 +15,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ObservaTudo",
-  description: "Visualização de dados públicos com BigQuery e Next.js",
+  description: "Plataforma digital que transforma dados abertos em indicadores cívicos, promovendo transparência e engajamento cidadão.",
+  manifest: '/manifest.json',
+  themeColor: '#00d6d6',
 };
 
 export default function RootLayout({
