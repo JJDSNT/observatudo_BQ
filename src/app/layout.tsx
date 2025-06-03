@@ -14,11 +14,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ObservaTudo",
-  description: "Plataforma digital que transforma dados abertos em indicadores cívicos, promovendo transparência e engajamento cidadão.",
+  title: 'ObservaTudo',
+  description: 'Plataforma digital que transforma dados abertos em indicadores cívicos, promovendo transparência e engajamento cidadão.',
   manifest: '/manifest.json',
   themeColor: '#00d6d6',
-};
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ObservaTudo',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'ObservaTudo',
+    title: 'ObservaTudo',
+    description: 'Plataforma digital que transforma dados abertos em indicadores cívicos, promovendo transparência e engajamento cidadão.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'ObservaTudo',
+    description: 'Plataforma digital que transforma dados abertos em indicadores cívicos, promovendo transparência e engajamento cidadão.',
+  },
+}
+
 
 export default function RootLayout({
   children,
