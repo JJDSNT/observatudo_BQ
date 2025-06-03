@@ -44,7 +44,7 @@ export default function Sobre() {
           responsabilizado por suas ações.
         </p>
         <p>
-          <strong>Dados Abertos</strong> são a infraestrutura mínima para tornar
+          Os <strong>Dados Abertos</strong> são a infraestrutura mínima para tornar
           tudo isso viável. Sem acesso público a dados estruturados e
           confiáveis, não há como avaliar políticas, construir soluções ou
           exercer controle social.
@@ -55,7 +55,7 @@ export default function Sobre() {
             A Relevância dos Dados Abertos
           </h2>
           <p className="mt-2">
-            Os dados abertos conectam a análise da{" "}
+            Os <strong>dados abertos</strong> conectam a análise da{" "}
             <strong>economia urbana</strong> com a aplicação dos princípios da{" "}
             <strong>Sociedade 5.0</strong>. Eles viabilizam práticas de{" "}
             <strong>governo aberto</strong> e dão suporte técnico à
