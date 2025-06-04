@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
 import Navbar from "@/components/Navbar";
+import GlobalHealthNotifier from "@/components/GlobalHealthNotifier";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,6 +72,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[--color-background] text-[--color-foreground]`}
       >
+        <GlobalHealthNotifier />
         <header className="px-6 py-4 border-b border-gray-300/40 dark:border-gray-700/50">
           <h1 className="text-2xl font-bold">ObservaTudo</h1>
           <Navbar />
