@@ -77,10 +77,10 @@ O Observatudo evoluirá para uma **plataforma analítica cívica** com:
 
 ## 🔁 Próximos Passos
 
-- [ ] Criar modelo `stg_indicadores__cidades_sustentaveis` no dbt  
-- [ ] Popular `dim_indicadores` com metadados enriquecidos  
-- [ ] Popular `fact_indicadores` com valores por município  
-- [ ] Estruturar camada de consulta analítica estilo Cube.js  
+- [x] Criar modelo `stg_indicadores__cidades_sustentaveis` no dbt  
+- [x] Popular `dim_indicadores` com metadados enriquecidos  
+- [x] Popular `fact_indicadores` com valores por município  
+- [x] Estruturar camada de consulta analítica estilo Cube.js  
 - [ ] Criar visualizações dinâmicas no frontend
 
 ---
