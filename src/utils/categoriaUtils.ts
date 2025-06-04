@@ -14,7 +14,7 @@ export function criarCategoriaPadrao(): CategoriaIndicador {
   return {
     id: timestamp,
     cor: '#000000',
-    icone: 'Circle' as LucideIconName,
+    icone: 'Circle',
     subeixos: [criarSubeixoPadrao(timestamp)],
   };
 }
@@ -26,6 +26,10 @@ export function normalizarCategoriasJson(
     id: cat.id ?? index + 1,
     cor: cat.cor ?? '#000000',
     icone: (cat.icone ?? 'Circle') as LucideIconName,
-    subeixos: cat.subeixos ?? [],
+    subeixos: (cat.subeixos ?? []).map((s) => ({
+      id: s.id,
+      nome: s.nome,
+      indicadores: s.indicadores ?? [],
+    })),
   }));
 }
