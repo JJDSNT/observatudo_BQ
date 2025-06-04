@@ -25,7 +25,6 @@
  * - Adicionar suporte a persistência otimista ou undo/redo
  */
 
-
 'use client';
 
 import { CategoriaCard } from '@/components/categorias/CategoriaCard';
@@ -63,7 +62,8 @@ export default function CategoriasEditor() {
     categoria.subeixos.flatMap((s) => s.indicadores)
   );
 
-  const nomesMap = useIndicadorNomes(todosIndicadores);
+  // Usa a nova API do hook
+  const { mapa: nomesMap, loading: loadingNomes, getNome } = useIndicadorNomes(todosIndicadores);
 
   if (loading) return <p>Carregando categorias...</p>;
   if (error) return <p>Erro: {error}</p>;
@@ -71,6 +71,12 @@ export default function CategoriasEditor() {
   return (
     <section className="space-y-6">
       <h2 className="text-2xl font-bold">Editor de Categorias</h2>
+
+      {loadingNomes && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-blue-700">🔄 Carregando nomes dos indicadores...</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {edicaoLocal.map((categoria) => (
@@ -85,6 +91,8 @@ export default function CategoriasEditor() {
             onAddSubeixo={adicionarSubeixo}
             onRemoveSubeixo={removerSubeixo}
             mapaNomes={nomesMap}
+            getNome={getNome}
+            loading={loadingNomes}
           />
         ))}
       </div>

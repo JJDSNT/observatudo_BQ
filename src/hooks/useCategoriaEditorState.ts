@@ -1,6 +1,7 @@
+//src/hooks/useCategoriaEditorState.ts
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCategoriasIndicadores } from './useCategoriasIndicadores';
 import categoriasPadrao from '@/data/categoriasIndicadores.json' assert { type: 'json' };
 import { CategoriaIndicador } from '@/types/categorias';
@@ -20,44 +21,46 @@ export function useCategoriaEditorState() {
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
-  const categoriasMemo = useMemo(() => categoriasIndicadores, [categoriasIndicadores]);
-
+  // Removido o useMemo desnecessário e usando useEffect com dependências corretas
   useEffect(() => {
     const categoriasValidas =
-      Array.isArray(categoriasMemo) && categoriasMemo.length > 0;
+      Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0;
 
     if (categoriasValidas) {
       console.log('✅ Carregando categorias do banco de dados');
-      setEdicaoLocal(categoriasMemo);
-    } else {
+      setEdicaoLocal(categoriasIndicadores);
+    } else if (!loading) {
+      // Só carrega o padrão se não estiver carregando
       console.warn('⚠️ Nenhuma categoria encontrada. Usando padrão do JSON...');
       const padraoConvertido = normalizarCategoriasJson(categoriasPadrao);
       setEdicaoLocal(padraoConvertido);
     }
-  }, [categoriasMemo]);
+  }, [categoriasIndicadores, loading]);
 
-  // Ações
-  const salvarAlteracoes = () => setCategoriasIndicadores(edicaoLocal);
+  // Ações com useCallback para otimização
+  const salvarAlteracoes = useCallback(() => {
+    setCategoriasIndicadores(edicaoLocal);
+  }, [edicaoLocal, setCategoriasIndicadores]);
 
-  const deletarCategoria = (id: number) => {
+  const deletarCategoria = useCallback((id: number) => {
     setEdicaoLocal((prev) => prev.filter((cat) => cat.id !== id));
-  };
+  }, []);
 
-  const adicionarCategoria = () => {
+  const adicionarCategoria = useCallback(() => {
     const novaCategoria = criarCategoriaPadrao();
     setEdicaoLocal((prev) => [...prev, novaCategoria]);
-  };
+  }, []);
 
-  const atualizarCategoria = (
+  const atualizarCategoria = useCallback((
     id: number,
     atualizacao: Partial<CategoriaIndicador>
   ) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) => (cat.id === id ? { ...cat, ...atualizacao } : cat))
     );
-  };
+  }, []);
 
-  const atualizarNomeSubeixo = (
+  const atualizarNomeSubeixo = useCallback((
     categoriaId: number,
     subeixoId: string,
     novoNome: string
@@ -74,9 +77,9 @@ export function useCategoriaEditorState() {
           : cat
       )
     );
-  };
+  }, []);
 
-  const adicionarSubeixo = (categoriaId: number) => {
+  const adicionarSubeixo = useCallback((categoriaId: number) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
         cat.id === categoriaId
@@ -87,9 +90,9 @@ export function useCategoriaEditorState() {
           : cat
       )
     );
-  };
+  }, []);
 
-  const removerSubeixo = (categoriaId: number, subeixoId: string) => {
+  const removerSubeixo = useCallback((categoriaId: number, subeixoId: string) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
         cat.id === categoriaId
@@ -100,9 +103,9 @@ export function useCategoriaEditorState() {
           : cat
       )
     );
-  };
+  }, []);
 
-  const removerIndicadorSubeixo = (
+  const removerIndicadorSubeixo = useCallback((
     categoriaId: number,
     subeixoId: string,
     indicadorId: string
@@ -124,7 +127,7 @@ export function useCategoriaEditorState() {
           : cat
       )
     );
-  };
+  }, []);
 
   return {
     edicaoLocal,
