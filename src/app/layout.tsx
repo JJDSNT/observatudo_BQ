@@ -74,7 +74,6 @@ export default function RootLayout({
       >
         <GlobalHealthNotifier />
         <header className="px-6 py-4 border-b border-gray-300/40 dark:border-gray-700/50">
-          <h1 className="text-2xl font-bold">ObservaTudo</h1>
           <Navbar />
         </header>
         <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
