@@ -2,30 +2,22 @@
 
 import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
-import CategoryNav from "@/components/CategoryNav";
+import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
-import { useState, useMemo, useEffect } from "react";
-import categoriasJson from "@/data/categoriasIndicadores.json";
-import { Categoria } from "@/types/categorias";
+import { useState, useEffect } from "react";
+import eixosTematicosJson from "@/data/categoriasIndicadores.json"; // renomeado para refletir a nova estrutura
+import { EixoTematico } from "@/types/categorias";
 
-const CATEGORIAS_INDICADORES: Categoria[] = categoriasJson;
+const EIXOS_TEMATICOS: EixoTematico[] = eixosTematicosJson;
 
 export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<number | null>(null);
+  const [indicadoresSelecionados, setIndicadoresSelecionados] = useState<string[]>([]);
 
-  // Categorização personalizada para o backend
-  const categoriasSelecionadas = useMemo(() => {
-    if (categoriaSelecionada === null) return [];
-    const encontrada = CATEGORIAS_INDICADORES.find((c) => c.id === categoriaSelecionada);
-    return encontrada ? [encontrada] : [];
-  }, [categoriaSelecionada]);
-
-  const {
-    data: payload,
-    loading,
-    error,
-  } = useIndicadoresDashboard(municipioId, categoriasSelecionadas);
+  const { data: payload, loading, error } = useIndicadoresDashboard(
+    municipioId,
+    indicadoresSelecionados
+  );
 
   useEffect(() => {
     if (payload) {
@@ -37,17 +29,6 @@ export default function Home() {
     }
   }, [payload]);
 
-  const handleMunicipioChange = (novoMunicipioId: string) => {
-    console.log("🌍 Município selecionado:", novoMunicipioId);
-    setMunicipioId(novoMunicipioId);
-  };
-
-  const handleCategoriaChange = (novaCategoriaId: number) => {
-    console.log("📂 Nova categoria clicada:", novaCategoriaId);
-    setCategoriaSelecionada(novaCategoriaId);
-  };
-
-
   return (
     <section className="space-y-6">
       <h2 className="text-2xl font-semibold tracking-tight">
@@ -57,12 +38,11 @@ export default function Home() {
         Em breve, você poderá navegar por indicadores por estado, cidade e tema.
       </p>
 
-      <ComboBoxLocalidades onChange={handleMunicipioChange} />
- 
-      <CategoryNav
-        categorias={CATEGORIAS_INDICADORES}
-        categoriaSelecionada={categoriaSelecionada ?? -1}
-        onCategoriaChange={handleCategoriaChange}
+      <ComboBoxLocalidades onChange={setMunicipioId} />
+
+      <CategoriaSelector
+        eixos={EIXOS_TEMATICOS}
+        onCategoriaChange={setIndicadoresSelecionados}
       />
 
       {loading && <p>⏳ Carregando indicadores...</p>}
