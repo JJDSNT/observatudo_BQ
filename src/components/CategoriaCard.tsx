@@ -1,7 +1,6 @@
 // src/components/CategoriaCard.tsx
 "use client";
 
-import { cn } from "@/lib/utils";
 import { IconSelector, LucideIconName } from "./IconSelector";
 import { SubeixoCard } from "./SubeixoCard";
 import { CategoriaIndicador } from "@/types/categorias-indicadores";
@@ -12,6 +11,7 @@ interface CategoriaCardProps {
   onUpdate: (id: number, atualizacao: Partial<CategoriaIndicador>) => void;
   onUpdateSubeixo: (categoriaId: number, subeixoId: string, novoNome: string) => void;
   onRemoveIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export function CategoriaCard({
@@ -20,9 +20,19 @@ export function CategoriaCard({
   onUpdate,
   onUpdateSubeixo,
   onRemoveIndicador,
+  onDelete,
 }: Readonly<CategoriaCardProps>) {
   return (
-    <div className="border rounded-xl p-4 shadow space-y-4 bg-white dark:bg-zinc-900">
+    <div className="relative border rounded-xl p-4 shadow space-y-4 bg-white dark:bg-zinc-900">
+      <button
+        onClick={() => onDelete(categoria.id)}
+        className="absolute top-2 right-2 text-sm text-red-600 hover:text-red-800 cursor-pointer"
+        title="Remover categoria"
+        aria-label="Remover categoria"
+      >
+        ×
+      </button>
+
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <IconSelector
@@ -41,7 +51,7 @@ export function CategoriaCard({
             type="color"
             value={categoria.cor}
             onChange={(e) => onUpdate(categoria.id, { cor: e.target.value })}
-            className="w-8 h-6 border border-gray-300 rounded"
+            className="cursor-pointer w-8 h-6 border border-gray-300 rounded"
           />
           <span>{categoria.cor}</span>
         </div>

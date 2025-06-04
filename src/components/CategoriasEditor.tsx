@@ -23,7 +23,10 @@ export default function CategoriasEditor() {
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
-  const categoriasMemo = useMemo(() => categoriasIndicadores, [categoriasIndicadores]);
+  const categoriasMemo = useMemo(
+    () => categoriasIndicadores,
+    [categoriasIndicadores]
+  );
 
   useEffect(() => {
     if (categoriasMemo.length > 0) {
@@ -50,13 +53,20 @@ export default function CategoriasEditor() {
     setEdicaoLocal((prev) => [...prev, novaCategoria]);
   };
 
-  const atualizarCategoria = (id: number, atualizacao: Partial<CategoriaIndicador>) => {
+  const atualizarCategoria = (
+    id: number,
+    atualizacao: Partial<CategoriaIndicador>
+  ) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) => (cat.id === id ? { ...cat, ...atualizacao } : cat))
     );
   };
 
-  const atualizarNomeSubeixo = (categoriaId: number, subeixoId: string, novoNome: string) => {
+  const atualizarNomeSubeixo = (
+    categoriaId: number,
+    subeixoId: string,
+    novoNome: string
+  ) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
         cat.id === categoriaId
@@ -85,7 +95,9 @@ export default function CategoriasEditor() {
                 s.id === subeixoId
                   ? {
                       ...s,
-                      indicadores: s.indicadores.filter((id) => id !== indicadorId),
+                      indicadores: s.indicadores.filter(
+                        (id) => id !== indicadorId
+                      ),
                     }
                   : s
               ),
@@ -118,14 +130,14 @@ export default function CategoriasEditor() {
       <div className="flex gap-4">
         <button
           onClick={adicionarCategoria}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
         >
           + Nova Categoria
         </button>
 
         <button
           onClick={salvarAlteracoes}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
         >
           Salvar Alterações
         </button>

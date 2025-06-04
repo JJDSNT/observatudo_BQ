@@ -37,7 +37,7 @@ export function IconSelector({
     <div className="relative inline-block" ref={ref}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="w-10 h-10 flex items-center justify-center rounded border bg-white dark:bg-zinc-800"
+        className="w-10 h-10 flex items-center justify-center rounded border bg-white dark:bg-zinc-800 cursor-pointer"
         title={`Ícone selecionado: ${value}`}
       >
         <SelectedIcon size={18} />
@@ -58,7 +58,7 @@ export function IconSelector({
                     setOpen(false);
                   }}
                   className={cn(
-                    "w-10 h-10 flex items-center justify-center rounded border transition-colors",
+                    "w-10 h-10 flex items-center justify-center rounded border transition-colors cursor-pointer",
                     isSelected
                       ? "bg-blue-600 text-white border-blue-600"
                       : "hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-zinc-800"
