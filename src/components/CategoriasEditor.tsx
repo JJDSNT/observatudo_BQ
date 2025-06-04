@@ -1,11 +1,36 @@
 // src/components/CategoriasEditor.tsx
+
+/**
+ * 📘 CATEGORIAS EDITOR
+ *
+ * Esta página permite editar as categorias e seus respectivos subeixos e indicadores.
+ *
+ * ✅ FUNCIONALIDADES IMPLEMENTADAS:
+ * - Carregamento dos dados salvos no banco (hook `useCategoriasIndicadores`)
+ * - Fallback automático para `categoriasIndicadores.json` caso o banco esteja vazio
+ * - Edição de cor e ícone da categoria
+ * - Adição e remoção de categorias
+ * - Adição e remoção de subeixos
+ * - Edição de nome do subeixo
+ * - Remoção de indicadores de um subeixo
+ *
+ * 💡 SUGESTÕES FUTURAS:
+ * - Adicionar botão de reset para restaurar categorias padrão do JSON manualmente
+ * - Implementar "drag and drop" para reordenar categorias e subeixos
+ * - Adicionar indicadores a subeixos usando um seletor baseado em busca
+ * - Implementar validações (ex: evitar nomes em branco ou duplicados)
+ * - Mostrar um toast de confirmação ao salvar ou resetar
+ * - Refatorar os subcomponentes em arquivos separados para melhor organização
+ */
+
 "use client";
 
 import { useCategoriasIndicadores } from "@/hooks/useCategoriasIndicadores";
-import { CategoriaIndicador, Subeixo } from "@/types/categorias-indicadores";
+import { CategoriaIndicador, Subeixo } from "@/types/categorias";
 import { useEffect, useMemo, useState } from "react";
 import { LucideIconName } from "@/components/IconSelector";
 import { CategoriaCard } from "./CategoriaCard";
+import categoriasPadrao from "@/data/categoriasIndicadores.json" assert { type: "json" };
 
 const iconesDisponiveis: LucideIconName[] = [
   "Circle",
@@ -17,7 +42,6 @@ const iconesDisponiveis: LucideIconName[] = [
   "BarChart2",
 ];
 
-// 🔧 Função utilitária para criar subeixos
 function criarSubeixoPadrao(categoriaId: number): Subeixo {
   return {
     id: `sub-${categoriaId}-${Date.now()}`,
@@ -32,11 +56,30 @@ export default function CategoriasEditor() {
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
-  const categoriasMemo = useMemo(() => categoriasIndicadores, [categoriasIndicadores]);
+  const categoriasMemo = useMemo(
+    () => categoriasIndicadores,
+    [categoriasIndicadores]
+  );
 
   useEffect(() => {
-    if (categoriasMemo.length > 0) {
+    const categoriasValidas =
+      Array.isArray(categoriasMemo) && categoriasMemo.length > 0;
+
+    if (categoriasValidas) {
+      console.log("✅ Carregando categorias do banco de dados");
       setEdicaoLocal(categoriasMemo);
+    } else {
+      console.warn(
+        "⚠️ Nenhuma categoria encontrada no banco. Usando padrão do JSON..."
+      );
+      const padraoConvertido: CategoriaIndicador[] = categoriasPadrao.map(
+        (cat) => ({
+          ...cat,
+          icone: cat.icone as LucideIconName,
+        })
+      );
+      console.log("📦 Categorias padrão carregadas:", padraoConvertido);
+      setEdicaoLocal(padraoConvertido);
     }
   }, [categoriasMemo]);
 
@@ -125,7 +168,9 @@ export default function CategoriasEditor() {
                 s.id === subeixoId
                   ? {
                       ...s,
-                      indicadores: s.indicadores.filter((id) => id !== indicadorId),
+                      indicadores: s.indicadores.filter(
+                        (id) => id !== indicadorId
+                      ),
                     }
                   : s
               ),

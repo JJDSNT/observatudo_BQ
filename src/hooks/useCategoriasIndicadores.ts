@@ -2,13 +2,15 @@
 'use client';
 
 import { useUserPreferences } from './useUserPreferences';
-import { CategoriaIndicador } from '@/types/categorias-indicadores';
+import { CategoriaIndicador } from '@/types/categorias';
 
 export function useCategoriasIndicadores() {
   const { preferencias, updatePreferencias, loading, error } = useUserPreferences();
 
-  const categoriasIndicadores: CategoriaIndicador[] =
-    preferencias?.categoriasIndicadores ?? [];
+  const categoriasIndicadores: CategoriaIndicador[] | undefined =
+    preferencias?.categoriasIndicadores?.length > 0
+      ? preferencias.categoriasIndicadores
+      : undefined;
 
   const setCategoriasIndicadores = (categorias: CategoriaIndicador[]) => {
     updatePreferencias({ categoriasIndicadores: categorias });

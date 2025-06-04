@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -8,13 +6,13 @@ import { UserPreferences } from '@/types/user-preferences';
 
 export function useUserPreferences() {
   const { user } = useAuth();
-  const [preferencias, setPreferencias] = useState<UserPreferences>({});
+  const [preferencias, setPreferencias] = useState<UserPreferences | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
-      setPreferencias({});
+      setPreferencias(undefined);
       setLoading(false);
       return;
     }
@@ -25,16 +23,13 @@ export function useUserPreferences() {
         const ref = doc(db, 'users', user.uid);
         const snap = await getDoc(ref);
         if (snap.exists()) {
-          setPreferencias(snap.data().preferencias ?? {});
+          const data = snap.data().preferencias ?? undefined;
+          setPreferencias(data);
         } else {
-          setPreferencias({});
+          setPreferencias(undefined);
         }
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('Erro desconhecido');
-        }
+        setError(err instanceof Error ? err.message : 'Erro desconhecido');
       } finally {
         setLoading(false);
       }
@@ -46,7 +41,7 @@ export function useUserPreferences() {
   const updatePreferencias = async (newPrefs: Partial<UserPreferences>) => {
     if (!user) return;
     const ref = doc(db, 'users', user.uid);
-    const mergedPrefs: UserPreferences = { ...preferencias, ...newPrefs };
+    const mergedPrefs: UserPreferences = { ...preferencias, ...newPrefs } as UserPreferences;
     await setDoc(ref, { preferencias: mergedPrefs }, { merge: true });
     setPreferencias(mergedPrefs);
   };
