@@ -10,3 +10,7 @@ output "www_app_sa_email" {
 output "dbt_sa_email" {
   value = google_service_account.dbt.email
 }
+
+output "firestore_database_name" {
+  value = google_firestore_database.default.name
+}
