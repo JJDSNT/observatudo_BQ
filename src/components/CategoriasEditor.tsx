@@ -25,21 +25,21 @@
  * - Adicionar suporte a persistência otimista ou undo/redo
  */
 
-'use client';
+"use client";
 
-import { CategoriaCard } from '@/components/categorias/CategoriaCard';
-import { LucideIconName } from '@/components/IconSelector';
-import { useCategoriaEditorState } from '@/hooks/useCategoriaEditorState';
-import { useIndicadorNomes } from '@/hooks/useIndicadorNomes';
+import { CategoriaCard } from "@/components/categorias/CategoriaCard";
+import { LucideIconName } from "@/components/IconSelector";
+import { useCategoriaEditorState } from "@/hooks/useCategoriaEditorState";
+import { useIndicadorNomes } from "@/hooks/useIndicadorNomes";
 
 const iconesDisponiveis: LucideIconName[] = [
-  'Circle',
-  'GraduationCap',
-  'HeartPulse',
-  'HandHeart',
-  'ShieldCheck',
-  'Globe',
-  'BarChart2',
+  "Circle",
+  "GraduationCap",
+  "HeartPulse",
+  "HandHeart",
+  "ShieldCheck",
+  "Globe",
+  "BarChart2",
 ];
 
 export default function CategoriasEditor() {
@@ -63,7 +63,8 @@ export default function CategoriasEditor() {
   );
 
   // Usa a nova API do hook
-  const { mapa: nomesMap, loading: loadingNomes, getNome } = useIndicadorNomes(todosIndicadores);
+  const { getNome, loading: loadingNomes } =
+    useIndicadorNomes(todosIndicadores);
 
   if (loading) return <p>Carregando categorias...</p>;
   if (error) return <p>Erro: {error}</p>;
@@ -74,7 +75,9 @@ export default function CategoriasEditor() {
 
       {loadingNomes && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-blue-700">🔄 Carregando nomes dos indicadores...</p>
+          <p className="text-blue-700">
+            🔄 Carregando nomes dos indicadores...
+          </p>
         </div>
       )}
 
@@ -90,7 +93,6 @@ export default function CategoriasEditor() {
             onDelete={deletarCategoria}
             onAddSubeixo={adicionarSubeixo}
             onRemoveSubeixo={removerSubeixo}
-            mapaNomes={nomesMap}
             getNome={getNome}
             loading={loadingNomes}
           />
