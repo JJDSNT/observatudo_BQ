@@ -1,14 +1,13 @@
-//src/hooks/useCategoriaEditorState.ts
+// src/hooks/useCategoriaEditorState.ts
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCategoriasIndicadores } from './useCategoriasIndicadores';
-import categoriasPadrao from '@/data/categoriasIndicadores.json' assert { type: 'json' };
+import { CATEGORIAS_INDICADORES } from '@/data/categoriasIndicadores';
 import { CategoriaIndicador } from '@/types/categorias';
 import {
   criarCategoriaPadrao,
   criarSubeixoPadrao,
-  normalizarCategoriasJson,
 } from '@/utils/categoriaUtils';
 
 export function useCategoriaEditorState() {
@@ -21,7 +20,6 @@ export function useCategoriaEditorState() {
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
-  // Removido o useMemo desnecessário e usando useEffect com dependências corretas
   useEffect(() => {
     const categoriasValidas =
       Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0;
@@ -30,14 +28,11 @@ export function useCategoriaEditorState() {
       console.log('✅ Carregando categorias do banco de dados');
       setEdicaoLocal(categoriasIndicadores);
     } else if (!loading) {
-      // Só carrega o padrão se não estiver carregando
-      console.warn('⚠️ Nenhuma categoria encontrada. Usando padrão do JSON...');
-      const padraoConvertido = normalizarCategoriasJson(categoriasPadrao);
-      setEdicaoLocal(padraoConvertido);
+      console.warn('⚠️ Nenhuma categoria encontrada. Usando padrão do arquivo TS...');
+      setEdicaoLocal(CATEGORIAS_INDICADORES);
     }
   }, [categoriasIndicadores, loading]);
 
-  // Ações com useCallback para otimização
   const salvarAlteracoes = useCallback(() => {
     setCategoriasIndicadores(edicaoLocal);
   }, [edicaoLocal, setCategoriasIndicadores]);
