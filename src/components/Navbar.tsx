@@ -29,12 +29,12 @@ export default function Navbar() {
             alt="Logo ObservaTudo"
             width={32}
             height={32}
-            className="rounded-full object-cover w-8 h-8"
+            className="w-8 h-8 rounded-full object-cover align-middle block"
           />
           ObservaTudo
         </Link>
 
-        <div>
+        <div className="flex items-center">
           {user ? (
             <button onClick={logout} title={user.displayName ?? ''}>
               <Image
@@ -42,7 +42,7 @@ export default function Navbar() {
                 alt="Avatar"
                 width={32}
                 height={32}
-                className="rounded-full object-cover w-8 h-8 hover:opacity-80 transition"
+                className="w-8 h-8 rounded-full object-cover align-middle block hover:opacity-80 transition"
               />
             </button>
           ) : (
