@@ -52,6 +52,7 @@ export function useIndicadorNomes(indicadorIds: string[]) {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Cancela requisição anterior se existir
     if (abortControllerRef.current) {
@@ -76,7 +77,7 @@ export function useIndicadorNomes(indicadorIds: string[]) {
         abortControllerRef.current.abort();
       }
     };
-  }, [idsOrdenados, idsString, fetchNomes]); // Usa idsString em vez de idsOrdenados
+  }, [idsString, fetchNomes]); // Usa idsString em vez de idsOrdenados
 
   // Limpa o AbortController quando o componente é desmontado
   useEffect(() => {
