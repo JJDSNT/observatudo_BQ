@@ -36,6 +36,10 @@ export default function CategoriasEditor() {
 
   const salvarAlteracoes = () => setCategoriasIndicadores(edicaoLocal);
 
+  const deletarCategoria = (id: number) => {
+    setEdicaoLocal((prev) => prev.filter((cat) => cat.id !== id));
+  };
+
   const adicionarCategoria = () => {
     const timestamp = Date.now();
     const novaCategoria: CategoriaIndicador = {
@@ -123,6 +127,7 @@ export default function CategoriasEditor() {
             onUpdateSubeixo={atualizarNomeSubeixo}
             onRemoveIndicador={removerIndicadorSubeixo}
             iconesDisponiveis={iconesDisponiveis}
+            onDelete={deletarCategoria}
           />
         ))}
       </div>
