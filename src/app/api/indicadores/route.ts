@@ -1,3 +1,4 @@
+//src/app/api/indicadores/route.ts
 import { getIndicadoresPorRegiao } from '@/services/indicadores';
 import { NextResponse } from 'next/server';
 

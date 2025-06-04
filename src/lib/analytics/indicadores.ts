@@ -1,3 +1,4 @@
+//src/lib/analytics/indicadores.ts
 import { QueryBuilder } from "./query";
 
 export interface Indicador {
@@ -25,3 +26,17 @@ export async function buscarIndicadores(query: string): Promise<Indicador[]> {
 
   return qb.execute<Indicador>();
 }
+
+export async function nomesIndicadores(ids: string[]): Promise<Indicador[]> {
+  const qb = new QueryBuilder("dim_indicadores", "i")
+    .addDimension({ name: "id", sql: "i.indicador_id", type: "string" })
+    .addDimension({ name: "nome", sql: "i.nome", type: "string" })
+    .filter({
+      dimension: "i.indicador_id",
+      operator: "IN",
+      values: ids,
+    });
+
+  return qb.execute<Indicador>();
+}
+

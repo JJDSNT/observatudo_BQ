@@ -1,8 +1,9 @@
-"use client";
+//src/components/categorias/CategoriasCard.tsx
+'use client';
 
-import { IconSelector, LucideIconName } from "./IconSelector";
-import { SubeixoCard } from "./SubeixoCard";
-import { CategoriaIndicador } from "@/types/categorias-indicadores";
+import { IconSelector, LucideIconName } from '@/components/IconSelector';
+import { SubeixoCard } from '@/components/categorias/SubeixoCard';
+import { CategoriaIndicador } from '@/types/categorias';
 
 interface CategoriaCardProps {
   categoria: CategoriaIndicador;
@@ -21,6 +22,7 @@ interface CategoriaCardProps {
     indicadorId: string
   ) => void;
   onDelete: (id: number) => void;
+  mapaNomes: Map<string, string>;
 }
 
 export function CategoriaCard({
@@ -32,11 +34,12 @@ export function CategoriaCard({
   onRemoveSubeixo,
   onRemoveIndicador,
   onDelete,
+  mapaNomes,
 }: Readonly<CategoriaCardProps>) {
-  const nomeCategoria = new Intl.ListFormat("pt-BR", {
-    style: "long",
-    type: "conjunction",
-  }).format(categoria.subeixos.map((s) => s.nome || "Subeixo"));
+  const nomeCategoria = new Intl.ListFormat('pt-BR', {
+    style: 'long',
+    type: 'conjunction',
+  }).format(categoria.subeixos.map((s) => s.nome || 'Subeixo'));
 
   return (
     <div className="relative border rounded-xl p-4 shadow space-y-4 bg-white dark:bg-zinc-900">
@@ -79,9 +82,9 @@ export function CategoriaCard({
                   onUpdateSubeixo(categoria.id, subeixo.id, e.target.value)
                 }
                 onFocus={(e) => {
-                  if (e.target.value === "Novo subeixo") {
+                  if (e.target.value === 'Novo subeixo') {
                     e.target.select();
-                    onUpdateSubeixo(categoria.id, subeixo.id, "");
+                    onUpdateSubeixo(categoria.id, subeixo.id, '');
                   }
                 }}
                 className="w-full mb-1 px-2 py-1 border rounded text-sm bg-white dark:bg-zinc-800"
@@ -97,6 +100,7 @@ export function CategoriaCard({
               <SubeixoCard
                 nome={subeixo.nome}
                 indicadores={subeixo.indicadores}
+                mapaNomes={mapaNomes}
                 onRemoveIndicador={(indicadorId) =>
                   onRemoveIndicador(categoria.id, subeixo.id, indicadorId)
                 }

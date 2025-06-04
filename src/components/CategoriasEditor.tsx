@@ -25,9 +25,10 @@
 
 'use client';
 
-import { CategoriaCard } from './CategoriaCard';
+import { CategoriaCard } from '@/components/categorias/CategoriaCard';
 import { LucideIconName } from '@/components/IconSelector';
 import { useCategoriaEditorState } from '@/hooks/useCategoriaEditorState';
+import { useIndicadorNomes } from '@/hooks/useIndicadorNomes';
 
 const iconesDisponiveis: LucideIconName[] = [
   'Circle',
@@ -54,6 +55,13 @@ export default function CategoriasEditor() {
     salvarAlteracoes,
   } = useCategoriaEditorState();
 
+  // 🔍 Reúne todos os IDs de indicadores usados
+  const todosIndicadores = edicaoLocal.flatMap((categoria) =>
+    categoria.subeixos.flatMap((s) => s.indicadores)
+  );
+
+  const nomesMap = useIndicadorNomes(todosIndicadores);
+
   if (loading) return <p>Carregando categorias...</p>;
   if (error) return <p>Erro: {error}</p>;
 
@@ -73,6 +81,7 @@ export default function CategoriasEditor() {
             onDelete={deletarCategoria}
             onAddSubeixo={adicionarSubeixo}
             onRemoveSubeixo={removerSubeixo}
+            mapaNomes={nomesMap}
           />
         ))}
       </div>

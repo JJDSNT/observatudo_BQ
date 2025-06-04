@@ -1,4 +1,4 @@
-// src/components/SubeixoCard.tsx
+// src/components/categorias/SubeixoCard.tsx
 'use client';
 
 import { X } from 'lucide-react';
@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 interface SubeixoCardProps {
   readonly nome: string;
   readonly indicadores: string[];
+  readonly mapaNomes?: Map<string, string>;
   readonly onRemoveIndicador?: (indicadorId: string) => void;
   readonly className?: string;
 }
@@ -13,6 +14,7 @@ interface SubeixoCardProps {
 export function SubeixoCard({
   nome,
   indicadores,
+  mapaNomes,
   onRemoveIndicador,
   className,
 }: SubeixoCardProps) {
@@ -28,7 +30,9 @@ export function SubeixoCard({
         <ul className="space-y-1 text-sm">
           {indicadores.map((indicador) => (
             <li key={indicador} className="flex items-center justify-between">
-              <span className="truncate">{indicador}</span>
+              <span className="truncate">
+                {mapaNomes?.get(indicador) ?? `ID: ${indicador}`}
+              </span>
               {onRemoveIndicador && (
                 <button
                   onClick={() => onRemoveIndicador(indicador)}
