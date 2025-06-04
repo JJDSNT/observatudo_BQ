@@ -1,4 +1,8 @@
 //transformar isso em um componente embutido na própria navbar, com modal ou dropdown
+//Se quiser que o login continue o mais fluido possível e compatível com mobile, 
+//podemos encapsular esse componente dentro de um LoginButton e depois renderizá-lo
+//em qualquer lugar (navbar, modal etc).
+
 'use client';
 import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth, provider } from '@/lib/firebase';
