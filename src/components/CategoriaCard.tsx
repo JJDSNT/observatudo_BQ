@@ -9,8 +9,18 @@ interface CategoriaCardProps {
   categoria: CategoriaIndicador;
   iconesDisponiveis: LucideIconName[];
   onUpdate: (id: number, atualizacao: Partial<CategoriaIndicador>) => void;
-  onUpdateSubeixo: (categoriaId: number, subeixoId: string, novoNome: string) => void;
-  onRemoveIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
+  onUpdateSubeixo: (
+    categoriaId: number,
+    subeixoId: string,
+    novoNome: string
+  ) => void;
+  onAddSubeixo: (categoriaId: number) => void;
+  onRemoveSubeixo: (categoriaId: number, subeixoId: string) => void;
+  onRemoveIndicador: (
+    categoriaId: number,
+    subeixoId: string,
+    indicadorId: string
+  ) => void;
   onDelete: (id: number) => void;
 }
 
@@ -19,6 +29,8 @@ export function CategoriaCard({
   iconesDisponiveis,
   onUpdate,
   onUpdateSubeixo,
+  onAddSubeixo,
+  onRemoveSubeixo,
   onRemoveIndicador,
   onDelete,
 }: Readonly<CategoriaCardProps>) {
@@ -51,22 +63,35 @@ export function CategoriaCard({
             type="color"
             value={categoria.cor}
             onChange={(e) => onUpdate(categoria.id, { cor: e.target.value })}
-            className="cursor-pointer w-8 h-6 border border-gray-300 rounded"
+            className="w-8 h-6 border border-gray-300 rounded cursor-pointer"
           />
           <span>{categoria.cor}</span>
         </div>
 
         <div className="space-y-2">
           {categoria.subeixos.map((subeixo) => (
-            <div key={subeixo.id}>
+            <div key={subeixo.id} className="relative">
               <input
                 value={subeixo.nome}
                 onChange={(e) =>
                   onUpdateSubeixo(categoria.id, subeixo.id, e.target.value)
                 }
+                onFocus={(e) => {
+                  if (e.target.value === "Novo subeixo") {
+                    e.target.select();
+                    onUpdateSubeixo(categoria.id, subeixo.id, "");
+                  }
+                }}
                 className="w-full mb-1 px-2 py-1 border rounded text-sm bg-white dark:bg-zinc-800"
                 placeholder="Nome do subeixo"
               />
+              <button
+                onClick={() => onRemoveSubeixo(categoria.id, subeixo.id)}
+                className="absolute right-2 top-1 text-red-600 hover:text-red-800 text-sm cursor-pointer"
+                title="Remover subeixo"
+              >
+                ×
+              </button>
               <SubeixoCard
                 nome={subeixo.nome}
                 indicadores={subeixo.indicadores}
@@ -76,6 +101,15 @@ export function CategoriaCard({
               />
             </div>
           ))}
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={() => onAddSubeixo(categoria.id)}
+            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+          >
+            + Adicionar subeixo
+          </button>
         </div>
       </div>
     </div>

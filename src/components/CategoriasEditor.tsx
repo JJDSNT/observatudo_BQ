@@ -85,6 +85,39 @@ export default function CategoriasEditor() {
     );
   };
 
+  const adicionarSubeixo = (categoriaId: number) => {
+    setEdicaoLocal((prev) =>
+      prev.map((cat) =>
+        cat.id === categoriaId
+          ? {
+              ...cat,
+              subeixos: [
+                ...cat.subeixos,
+                {
+                  id: `sub-${Date.now()}`,
+                  nome: "",
+                  indicadores: [],
+                },
+              ],
+            }
+          : cat
+      )
+    );
+  };
+
+  const removerSubeixo = (categoriaId: number, subeixoId: string) => {
+    setEdicaoLocal((prev) =>
+      prev.map((cat) =>
+        cat.id === categoriaId
+          ? {
+              ...cat,
+              subeixos: cat.subeixos.filter((s) => s.id !== subeixoId),
+            }
+          : cat
+      )
+    );
+  };
+
   const removerIndicadorSubeixo = (
     categoriaId: number,
     subeixoId: string,
@@ -128,6 +161,8 @@ export default function CategoriasEditor() {
             onRemoveIndicador={removerIndicadorSubeixo}
             iconesDisponiveis={iconesDisponiveis}
             onDelete={deletarCategoria}
+            onAddSubeixo={adicionarSubeixo}
+            onRemoveSubeixo={removerSubeixo}
           />
         ))}
       </div>
