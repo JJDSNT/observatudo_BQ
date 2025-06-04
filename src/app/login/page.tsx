@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { signInWithPopup } from 'firebase/auth';
-import { auth, provider } from '@/lib/firebase';
-import { useAuth } from '@/hooks/useAuth';
+import Image from "next/image";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "@/lib/firebase";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const { user, loading, logout } = useAuth();
@@ -11,13 +12,13 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log('✅ Login bem-sucedido:', {
+      console.log("✅ Login bem-sucedido:", {
         nome: user.displayName,
         email: user.email,
         foto: user.photoURL,
       });
     } catch (err) {
-      console.error('❌ Erro no login:', err);
+      console.error("❌ Erro no login:", err);
     }
   };
 
@@ -42,7 +43,13 @@ export default function LoginPage() {
           <p className="text-sm text-green-700">
             Logado como: <strong>{user.displayName}</strong> ({user.email})
           </p>
-          <img src={user.photoURL ?? ''} alt="Avatar" className="w-10 h-10 rounded-full" />
+          <Image
+            src={user.photoURL ?? "/avatar-placeholder.png"} // coloque uma imagem fallback real
+            alt="Avatar"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />{" "}
           <button
             onClick={logout}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
