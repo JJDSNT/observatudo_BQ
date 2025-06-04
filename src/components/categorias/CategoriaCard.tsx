@@ -22,7 +22,8 @@ interface CategoriaCardProps {
     indicadorId: string
   ) => void;
   onDelete: (id: number) => void;
-  mapaNomes: Map<string, string>;
+  getNome?: (id: string) => string;
+  loading?: boolean;
 }
 
 export function CategoriaCard({
@@ -34,7 +35,8 @@ export function CategoriaCard({
   onRemoveSubeixo,
   onRemoveIndicador,
   onDelete,
-  mapaNomes,
+  getNome,
+  loading = false,
 }: Readonly<CategoriaCardProps>) {
   const nomeCategoria = new Intl.ListFormat('pt-BR', {
     style: 'long',
@@ -100,7 +102,8 @@ export function CategoriaCard({
               <SubeixoCard
                 nome={subeixo.nome}
                 indicadores={subeixo.indicadores}
-                mapaNomes={mapaNomes}
+                getNome={getNome}
+                loading={loading}
                 onRemoveIndicador={(indicadorId) =>
                   onRemoveIndicador(categoria.id, subeixo.id, indicadorId)
                 }
