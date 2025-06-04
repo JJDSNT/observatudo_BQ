@@ -6,6 +6,16 @@ import {
   getInfoPais,
 } from "../lib/analytics/localidadeUtils";
 
+export async function getIndicadoresPorRegiao(
+  categoria: string,
+  regiao: string,
+  periodo: { inicio: string; fim: string }
+) {
+  const query = IndicadorCivico.consultarPorRegiao(categoria, regiao, periodo);
+  return await query.execute();
+}
+
+
 // Função principal - busca indicadores por subeixos para município, estado e país
 export async function getLocalidadeFullPorSubeixos(
   municipioId: string,
