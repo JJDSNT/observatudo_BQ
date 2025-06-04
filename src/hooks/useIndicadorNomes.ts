@@ -76,7 +76,7 @@ export function useIndicadorNomes(indicadorIds: string[]) {
         abortControllerRef.current.abort();
       }
     };
-  }, [idsString, fetchNomes]); // Usa idsString em vez de idsOrdenados
+  }, [idsOrdenados, idsString, fetchNomes]); // Usa idsString em vez de idsOrdenados
 
   // Limpa o AbortController quando o componente é desmontado
   useEffect(() => {
