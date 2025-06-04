@@ -4,6 +4,7 @@
 import { useCategoriasIndicadores } from "@/hooks/useCategoriasIndicadores";
 import { CategoriaIndicador } from "@/types/categorias-indicadores";
 import { useEffect, useMemo, useState } from "react";
+import { Pencil } from "lucide-react";
 
 export default function CategoriasEditor() {
   const { categoriasIndicadores, setCategoriasIndicadores, loading, error } =
@@ -33,6 +34,12 @@ export default function CategoriasEditor() {
     setEdicaoLocal([...edicaoLocal, novaCategoria]);
   };
 
+  const atualizarNomeCategoria = (index: number, novoNome: string) => {
+    const atualizadas = [...edicaoLocal];
+    (atualizadas[index] as any).nome = novoNome;
+    setEdicaoLocal(atualizadas);
+  };
+
   if (loading) return <p>Carregando categorias...</p>;
   if (error) return <p>Erro: {error}</p>;
 
@@ -41,13 +48,18 @@ export default function CategoriasEditor() {
       <h2 className="text-2xl font-bold">Editor de Categorias</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {edicaoLocal.map((categoria) => (
+        {edicaoLocal.map((categoria, index) => (
           <div
             key={categoria.id}
             className="border rounded-xl p-4 shadow space-y-2 bg-white dark:bg-zinc-900"
           >
             <div className="flex items-center justify-between">
-              <span className="font-semibold">Categoria #{categoria.id}</span>
+              <input
+                type="text"
+                value={(categoria as any).nome || `Categoria ${categoria.id}`}
+                onChange={(e) => atualizarNomeCategoria(index, e.target.value)}
+                className="font-semibold text-lg bg-transparent border-b border-zinc-300 focus:outline-none focus:border-blue-500 dark:border-zinc-700 dark:text-white"
+              />
               <span className="text-sm">Ícone: {categoria.icone}</span>
             </div>
             <div className="text-sm">
