@@ -2,7 +2,7 @@
 "use client";
 
 import { useCategoriasIndicadores } from "@/hooks/useCategoriasIndicadores";
-import { CategoriaIndicador } from "@/types/categorias-indicadores";
+import { CategoriaIndicador, Subeixo } from "@/types/categorias-indicadores";
 import { useEffect, useMemo, useState } from "react";
 import { LucideIconName } from "@/components/IconSelector";
 import { CategoriaCard } from "./CategoriaCard";
@@ -17,16 +17,22 @@ const iconesDisponiveis: LucideIconName[] = [
   "BarChart2",
 ];
 
+// 🔧 Função utilitária para criar subeixos
+function criarSubeixoPadrao(categoriaId: number): Subeixo {
+  return {
+    id: `sub-${categoriaId}-${Date.now()}`,
+    nome: "Novo subeixo",
+    indicadores: [],
+  };
+}
+
 export default function CategoriasEditor() {
   const { categoriasIndicadores, setCategoriasIndicadores, loading, error } =
     useCategoriasIndicadores();
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
-  const categoriasMemo = useMemo(
-    () => categoriasIndicadores,
-    [categoriasIndicadores]
-  );
+  const categoriasMemo = useMemo(() => categoriasIndicadores, [categoriasIndicadores]);
 
   useEffect(() => {
     if (categoriasMemo.length > 0) {
@@ -46,13 +52,7 @@ export default function CategoriasEditor() {
       id: timestamp,
       cor: "#000000",
       icone: "Circle",
-      subeixos: [
-        {
-          id: `sub-${timestamp}`,
-          nome: "Novo Subeixo",
-          indicadores: [],
-        },
-      ],
+      subeixos: [criarSubeixoPadrao(timestamp)],
     };
     setEdicaoLocal((prev) => [...prev, novaCategoria]);
   };
@@ -91,14 +91,7 @@ export default function CategoriasEditor() {
         cat.id === categoriaId
           ? {
               ...cat,
-              subeixos: [
-                ...cat.subeixos,
-                {
-                  id: `sub-${Date.now()}`,
-                  nome: "",
-                  indicadores: [],
-                },
-              ],
+              subeixos: [...cat.subeixos, criarSubeixoPadrao(categoriaId)],
             }
           : cat
       )
@@ -132,9 +125,7 @@ export default function CategoriasEditor() {
                 s.id === subeixoId
                   ? {
                       ...s,
-                      indicadores: s.indicadores.filter(
-                        (id) => id !== indicadorId
-                      ),
+                      indicadores: s.indicadores.filter((id) => id !== indicadorId),
                     }
                   : s
               ),
