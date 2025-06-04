@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+  - name: dados
+    database: observatudo-infra  # opcional se já for o padrão
+    schema: dados
+    tables:
+      - name: dim_localidades
+        description: "Dimensão de localidades contendo país, estados e cidades com hierarquia e metadados como coordenadas e capital."
+        columns:
+          - name: localidade_id
+            description: "ID único da localidade (ex: BR, BR-SP, 3550308)"
+          - name: nome
+            description: "Nome da localidade"
+          - name: tipo
+            description: "Tipo da localidade (pais, estado, cidade)"
+          - name: localidade_pai_id
+            description: "ID da localidade imediatamente superior na hierarquia"
+          - name: sigla
+            description: "Sigla da localidade (se aplicável)"
+          - name: regiao
+            description: "Região (não utilizado no momento)"
+          - name: é_capital
+            description: "Se a cidade é capital do estado"
+          - name: capital_localidade_id
+            description: "ID da localidade que é capital"
+          - name: latitude
+          - name: longitude
+          - name: populacao
+          - name: codigo_oficial
+            description: "Código oficial do IBGE ou equivalente"
+          - name: data_inclusao
+            description: "Timestamp de inclusão no sistema"
