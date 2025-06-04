@@ -13,15 +13,18 @@
  * - Adição e remoção de subeixos
  * - Edição de nome do subeixo
  * - Remoção de indicadores de um subeixo
+ * - Exibição dos nomes dos indicadores (hook `useIndicadorNomes`)
+ * - Organização dos componentes em arquivos separados (`CategoriaCard`, `SubeixoCard`)
  *
  * 💡 SUGESTÕES FUTURAS:
  * - Adicionar botão de reset para restaurar categorias padrão do JSON manualmente
- * - Implementar "drag and drop" para reordenar categorias e subeixos
- * - Adicionar indicadores a subeixos usando um seletor baseado em busca
+ * - Implementar "drag and drop" para reordenar categorias e subeixos (dnd-kit)
+ * - Adicionar indicadores a subeixos usando um seletor baseado em busca (`buscarIndicadores`)
  * - Implementar validações (ex: evitar nomes em branco ou duplicados)
  * - Mostrar um toast de confirmação ao salvar ou resetar
- * - Refatorar os subcomponentes em arquivos separados para melhor organização
+ * - Adicionar suporte a persistência otimista ou undo/redo
  */
+
 
 'use client';
 
