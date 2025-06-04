@@ -1,4 +1,3 @@
-// src/components/CategoriaCard.tsx
 "use client";
 
 import { IconSelector, LucideIconName } from "./IconSelector";
@@ -34,6 +33,11 @@ export function CategoriaCard({
   onRemoveIndicador,
   onDelete,
 }: Readonly<CategoriaCardProps>) {
+  const nomeCategoria = new Intl.ListFormat("pt-BR", {
+    style: "long",
+    type: "conjunction",
+  }).format(categoria.subeixos.map((s) => s.nome || "Subeixo"));
+
   return (
     <div className="relative border rounded-xl p-4 shadow space-y-4 bg-white dark:bg-zinc-900">
       <button
@@ -52,9 +56,7 @@ export function CategoriaCard({
             onChange={(icon) => onUpdate(categoria.id, { icone: icon })}
             icons={iconesDisponiveis}
           />
-          <span className="font-semibold text-lg">
-            {categoria.subeixos[0]?.nome ?? `Categoria ${categoria.id}`}
-          </span>
+          <span className="font-semibold text-lg">{nomeCategoria}</span>
         </div>
 
         <div className="text-sm flex items-center gap-2">
