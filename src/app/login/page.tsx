@@ -1,5 +1,5 @@
 //transformar isso em um componente embutido na própria navbar, com modal ou dropdown
-
+'use client';
 import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth, provider } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
