@@ -1,18 +1,17 @@
-export type SubeixoDTO = {
+// src/types/categorias.ts
+import type { LucideIconName } from "@/components/IconSelector";
+
+export interface Subeixo {
   id: string;
   nome: string;
   indicadores: string[];
-};
+}
 
-export type Subeixo = {
-  id: string;
-  nome: string;
-  indicadores: string[];
-};
-
-export type EixoTematico = {
+export interface CategoriaIndicador {
   id: number;
   cor: string;
-  icone: string; // Usado como chave em lucide-react (ex: "HeartPulse", "School")
+  icone: LucideIconName;
   subeixos: Subeixo[];
-};
+}
+
+

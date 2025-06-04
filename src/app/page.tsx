@@ -6,13 +6,17 @@ import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
 import { useState, useEffect } from "react";
 import eixosTematicosJson from "@/data/categoriasIndicadores.json";
-import { EixoTematico, SubeixoDTO } from "@/types/categorias";
+import { CategoriaIndicador, Subeixo } from "@/types/categorias";
+import type { LucideIconName } from "@/components/IconSelector";
 
-const EIXOS_TEMATICOS: EixoTematico[] = eixosTematicosJson;
+const EIXOS_TEMATICOS: CategoriaIndicador[] = eixosTematicosJson.map((eixo) => ({
+  ...eixo,
+  icone: eixo.icone as LucideIconName,
+}));
 
 export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
-  const [subeixosSelecionados, setSubeixosSelecionados] = useState<SubeixoDTO[]>([]);
+  const [subeixosSelecionados, setSubeixosSelecionados] = useState<Subeixo[]>([]);
 
   const { data: payload, loading, error } = useIndicadoresDashboard(
     municipioId,
