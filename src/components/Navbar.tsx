@@ -10,7 +10,9 @@ const links = [
   { label: 'Indicadores', href: '/indicadores' },
   { label: 'Global', href: '/world' },
   { label: 'Sobre', href: '/sobre' },
+  { label: 'Categorias', href: '/configuracoes/categorias' },
 ];
+
 
 export default function Navbar() {
   const pathname = usePathname();
