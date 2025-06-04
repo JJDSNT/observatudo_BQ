@@ -1,28 +1,40 @@
-"use client";
+//transformar isso em um componente embutido na própria navbar, com modal ou dropdown
 
-import Image from "next/image";
-import { signInWithPopup } from "firebase/auth";
-import { auth, provider } from "@/lib/firebase";
-import { useAuth } from "@/hooks/useAuth";
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { auth, provider } from '@/lib/firebase';
+import { useAuth } from '@/hooks/useAuth';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    // Tenta recuperar resultado de redirecionamento
+    getRedirectResult(auth).then((result) => {
+      if (result?.user) {
+        console.log('✅ Login com redirect bem-sucedido:', result.user);
+      }
+    }).catch((err) => {
+      console.error('❌ Erro no redirect login:', err);
+    });
+  }, []);
+
+  const isMobile = typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent);
 
   const handleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log("✅ Login bem-sucedido:", {
-        nome: user.displayName,
-        email: user.email,
-        foto: user.photoURL,
-      });
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        const result = await signInWithPopup(auth, provider);
+        console.log('✅ Login com popup bem-sucedido:', result.user);
+      }
     } catch (err) {
-      console.error("❌ Erro no login:", err);
+      console.error('❌ Erro no login:', err);
     }
   };
 
-  if (loading) return null; // ou spinner
+  if (loading) return null;
 
   return (
     <section className="space-y-4">
@@ -31,32 +43,12 @@ export default function LoginPage() {
       {!user ? (
         <>
           <p className="text-sm text-gray-600">Entre com sua conta Google</p>
-          <button
-            onClick={handleLogin}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={handleLogin} className="px-4 py-2 bg-cyan-600 text-white rounded">
             Entrar com Google
           </button>
         </>
       ) : (
-        <>
-          <p className="text-sm text-green-700">
-            Logado como: <strong>{user.displayName}</strong> ({user.email})
-          </p>
-          <Image
-            src={user.photoURL ?? "/avatar-placeholder.png"} // coloque uma imagem fallback real
-            alt="Avatar"
-            width={40}
-            height={40}
-            className="rounded-full"
-          />{" "}
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Sair
-          </button>
-        </>
+        <p>Você já está logado!</p>
       )}
     </section>
   );
