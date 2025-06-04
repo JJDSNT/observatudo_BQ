@@ -47,22 +47,40 @@ for row in result:
             "é_capital": row["é_capital"] or False
         }
 
-# === AGRUPAR ===
-for uf, cidades_dict in cidades_por_estado.items():
-    if uf in estados:
-        cidades_unicas = list(cidades_dict.values())
-        cidades_ordenadas = sorted(
-            cidades_unicas,
-            key=lambda c: c["nome"]
-        )
-        estados[uf]["cidades"] = cidades_ordenadas
+# === AGRUPAR CIDADES E FORMATAR ===
+estado_objs = []
 
+for uf in sorted(estados.keys()):
+    estado = estados[uf]
+    cidades_dict = cidades_por_estado.get(uf, {})
+    cidades_ordenadas = sorted(cidades_dict.values(), key=lambda c: c["nome"])
+
+    cidades_formatadas = [
+        { "label": cidade["nome"], "value": cidade["id"] }
+        for cidade in cidades_ordenadas
+    ]
+
+    estado_objs.append({
+        "label": uf,
+        "value": uf,
+        "default": estado["capital_id"],
+        "children": cidades_formatadas
+    })
+
+# === FORMATO FINAL COM O PAÍS ===
+localidades_json = [
+    {
+        "label": "Brasil",
+        "value": "BR",
+        "children": estado_objs
+    }
+]
 
 # === CRIAR DIRETÓRIO SE NECESSÁRIO ===
 os.makedirs(os.path.dirname(DESTINO_JSON), exist_ok=True)
 
 # === ESCREVER JSON ===
 with open(DESTINO_JSON, "w", encoding="utf-8") as f:
-    json.dump(estados, f, ensure_ascii=False, indent=2)
+    json.dump(localidades_json, f, ensure_ascii=False, indent=2)
 
 print(f"✅ JSON de localidades gerado com sucesso em: {DESTINO_JSON}")
