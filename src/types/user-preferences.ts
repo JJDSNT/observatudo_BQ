@@ -1,4 +1,4 @@
-import type { CategoriaIndicador } from '@/types/categorias-indicadores';
+import type { CategoriaIndicador } from '@/types/categorias';
 
 export interface UserPreferences {
   categoriasIndicadores?: CategoriaIndicador[];
