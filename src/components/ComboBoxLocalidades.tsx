@@ -1,24 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import type { PaisDropdown } from "@/types/localidadesDropdown.types";
 import localidadesJson from "@/data/localidades_dropdown.json";
-
-interface CidadeDropdown {
-  label: string;
-  value: string;
-}
-
-interface EstadoDropdown {
-  label: string;
-  value: string;
-  default: string;
-  children: CidadeDropdown[];
-}
-
-interface PaisDropdown {
-  label: string;
-  value: string;
-  children: EstadoDropdown[];
-}
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
@@ -27,7 +10,9 @@ interface ComboBoxLocalidadesProps {
   onChange: (municipioId: string) => void;
 }
 
-export default function ComboBoxLocalidades({ onChange }: Readonly<ComboBoxLocalidadesProps>) {
+export default function ComboBoxLocalidades({
+  onChange,
+}: Readonly<ComboBoxLocalidadesProps>) {
   const [ufSelecionado, setUfSelecionado] = useState<string>("");
   const [cidadeSelecionada, setCidadeSelecionada] = useState<string>("");
 
@@ -79,7 +64,9 @@ export default function ComboBoxLocalidades({ onChange }: Readonly<ComboBoxLocal
             disabled={!ufSelecionado}
             className="border p-2 rounded w-full"
           >
-            <option value="">Selecione uma cidade</option>
+            <option value="">
+              {ufSelecionado ? "Selecione uma cidade" : "Selecione um estado"}
+            </option>
             {cidades.map((cidade) => (
               <option key={cidade.value} value={cidade.value}>
                 {cidade.label}
