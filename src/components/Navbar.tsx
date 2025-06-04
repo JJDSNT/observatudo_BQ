@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import ModalLogin from './ModalLogin';
 
 const links = [
   { label: 'Dashboard', href: '/' },
@@ -48,12 +49,7 @@ export default function Navbar() {
               />
             </button>
           ) : (
-            <Link
-              href="/login"
-              className="text-sm px-3 py-1.5 rounded-full bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Entrar
-            </Link>
+            <ModalLogin />
           )}
         </div>
       </div>

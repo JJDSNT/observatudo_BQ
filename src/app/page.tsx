@@ -35,12 +35,6 @@ export default function Home() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-2xl font-semibold tracking-tight">
-        Bem-vindo ao Observatudo
-      </h2>
-      <p className="text-sm opacity-70">
-        Em breve, você poderá navegar por indicadores por estado, cidade e tema.
-      </p>
 
       <ComboBoxLocalidades onChange={setMunicipioId} />
 
