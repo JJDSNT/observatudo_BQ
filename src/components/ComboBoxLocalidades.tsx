@@ -75,12 +75,6 @@ export default function ComboBoxLocalidades({
           </select>
         </div>
       </div>
-
-      {cidadeSelecionada && (
-        <div className="text-sm text-gray-600">
-          Selecionado: <strong>{cidadeSelecionada}</strong>
-        </div>
-      )}
     </div>
   );
 }
