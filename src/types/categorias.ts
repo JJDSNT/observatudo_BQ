@@ -1,3 +1,9 @@
+export type SubeixoDTO = {
+  id: string;
+  nome: string;
+  indicadores: string[];
+};
+
 export type Subeixo = {
   id: string;
   nome: string;

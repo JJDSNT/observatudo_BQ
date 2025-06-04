@@ -1,13 +1,19 @@
+// src/types/localidadesDropdown.types.ts
+
 export interface CidadeDropdown {
-  id: string
-  nome: string
-  é_capital: boolean
+  label: string; // Nome da cidade
+  value: string; // ID da cidade
 }
 
 export interface EstadoDropdown {
-  nome: string
-  capital_id: string
-  cidades: CidadeDropdown[]
+  label: string;     // Sigla do estado, ex: "SP"
+  value: string;     // Mesmo valor da sigla, ex: "SP"
+  default: string;   // ID da capital
+  children: CidadeDropdown[]; // Lista de cidades
 }
 
-export type LocalidadesMap = Record<string, EstadoDropdown> // Ex: { "SP": Estado, "RJ": Estado }
+export interface PaisDropdown {
+  label: string; // Nome do país, ex: "Brasil"
+  value: string; // ID do país, ex: "BR"
+  children: EstadoDropdown[];
+}

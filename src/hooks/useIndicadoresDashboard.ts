@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { LocalidadeFullResponse } from "@/types/indicadores";
-import { Categoria } from "@/types/categorias";
+
+// Novo tipo usado no payload
+export type SubeixoDTO = {
+  id: string;
+  nome: string;
+  indicadores: string[];
+};
 
 export function useIndicadoresDashboard(
   municipioId: string,
-  categorias?: Categoria[]
+  subeixos?: SubeixoDTO[]
 ) {
   const [data, setData] = useState<LocalidadeFullResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,10 +19,10 @@ export function useIndicadoresDashboard(
   useEffect(() => {
     console.groupCollapsed("📊 useIndicadoresDashboard");
     console.log("🏷️ Município:", municipioId);
-    console.log("📚 Categorias:", categorias);
+    console.log("📚 Subeixos:", subeixos);
 
-    if (!municipioId || !categorias || categorias.length === 0) {
-      console.warn("⚠️ Categorias não definidas ou vazias, abortando fetch.");
+    if (!municipioId || !subeixos || subeixos.length === 0) {
+      console.warn("⚠️ Subeixos não definidos ou vazios, abortando fetch.");
       console.groupEnd();
       return;
     }
@@ -33,7 +39,7 @@ export function useIndicadoresDashboard(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ categorias }),
+      body: JSON.stringify({ categorias: subeixos }),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
@@ -52,7 +58,7 @@ export function useIndicadoresDashboard(
       .finally(() => {
         console.groupEnd();
       });
-  }, [municipioId, categorias]);
+  }, [municipioId, subeixos]);
 
   return { data, loading, error };
 }

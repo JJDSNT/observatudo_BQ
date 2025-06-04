@@ -1,8 +1,7 @@
 // types/indicadores.ts
-import { Categoria } from "./categorias";
 
 export interface ValorSerie {
-  data: string;   // "2022-01-01" ou ano simples, se preferir
+  data: string;   // "2022-01-01" ou apenas ano, se preferir
   valor: number | null;
 }
 
@@ -14,17 +13,26 @@ export interface Indicador {
   serie: ValorSerie[];
 }
 
-export type CategoriaComIndicadores = Categoria & {
-  indicadores: Indicador[];
-};
+// DTO usado no frontend para enviar subeixos
+export interface SubeixoDTO {
+  id: string;
+  nome: string;
+  indicadores: string[];
+}
 
+// Resultado completo de um subeixo com dados reais
+export interface SubeixoResultado {
+  id: string;
+  nome: string;
+  indicadores: Indicador[];
+}
 
 export interface LocalidadePayload {
   id: string;
   nome: string;
-  sigla?: string;        // Opcional para municípios (útil para estado e país)
-  uf?: string;           // Opcional: sigla do estado para municípios
-  categorias: CategoriaComIndicadores[];
+  sigla?: string;  // para estado ou país
+  uf?: string;     // para município
+  subeixos: SubeixoResultado[]; // ✅ trocado de 'categorias' para 'subeixos'
 }
 
 export interface LocalidadeFullResponse {

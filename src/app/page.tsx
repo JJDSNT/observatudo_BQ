@@ -5,25 +5,25 @@ import Dashboard from "@/components/Dashboard";
 import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
 import { useState, useEffect } from "react";
-import eixosTematicosJson from "@/data/categoriasIndicadores.json"; // renomeado para refletir a nova estrutura
-import { EixoTematico } from "@/types/categorias";
+import eixosTematicosJson from "@/data/categoriasIndicadores.json";
+import { EixoTematico, SubeixoDTO } from "@/types/categorias";
 
 const EIXOS_TEMATICOS: EixoTematico[] = eixosTematicosJson;
 
 export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
-  const [indicadoresSelecionados, setIndicadoresSelecionados] = useState<string[]>([]);
+  const [subeixosSelecionados, setSubeixosSelecionados] = useState<SubeixoDTO[]>([]);
 
   const { data: payload, loading, error } = useIndicadoresDashboard(
     municipioId,
-    indicadoresSelecionados
+    subeixosSelecionados
   );
 
   useEffect(() => {
     if (payload) {
       console.log("📊 Dados prontos para renderização no Dashboard:", {
         municipio: payload?.municipio?.nome,
-        totalCategorias: payload?.municipio?.categorias?.length ?? 0,
+        totalSubeixos: payload?.municipio?.subeixos?.length ?? 0,
         raw: payload,
       });
     }
@@ -42,7 +42,7 @@ export default function Home() {
 
       <CategoriaSelector
         eixos={EIXOS_TEMATICOS}
-        onCategoriaChange={setIndicadoresSelecionados}
+        onCategoriaChange={setSubeixosSelecionados}
       />
 
       {loading && <p>⏳ Carregando indicadores...</p>}

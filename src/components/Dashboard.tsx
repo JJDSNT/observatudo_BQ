@@ -1,5 +1,9 @@
 import React from "react";
-import { CategoriaComIndicadores, Indicador, LocalidadePayload } from "@/types/indicadores";
+import {
+  SubeixoResultado,
+  Indicador,
+  LocalidadePayload,
+} from "@/types/indicadores";
 import { MetricCard } from "./MetricCard/MetricCard";
 
 type DashboardPayload = {
@@ -19,12 +23,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ payload }) => {
         {label}: {localidade.nome}
       </h2>
 
-      {localidade.categorias.map((categoria: CategoriaComIndicadores) => (
-        <div key={`${localidade.id}-${categoria.id}`} className="mb-6">
-          <h3 className="text-md font-medium mb-2">{categoria.nome}</h3>
+      {localidade.subeixos.map((subeixo: SubeixoResultado) => (
+        <div key={`${localidade.id}-${subeixo.id}`} className="mb-6">
+          <h3 className="text-md font-medium mb-2">{subeixo.nome}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categoria.indicadores.length > 0 ? (
-              categoria.indicadores.map((indicador: Indicador) => (
+            {subeixo.indicadores.length > 0 ? (
+              subeixo.indicadores.map((indicador: Indicador) => (
                 <MetricCard
                   key={`${indicador.id}-${localidade.id}`}
                   indicador={indicador}
@@ -33,7 +37,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ payload }) => {
               ))
             ) : (
               <div className="text-sm text-gray-400 col-span-full">
-                Nenhum indicador nesta categoria.
+                Nenhum indicador neste subeixo.
               </div>
             )}
           </div>

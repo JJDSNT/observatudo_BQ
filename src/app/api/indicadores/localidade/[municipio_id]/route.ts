@@ -1,6 +1,6 @@
 // app/api/indicadores/localidade/[municipio_id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getLocalidadeFullPorCategorias } from '@/services/indicadores';
+import { getLocalidadeFullPorSubeixos } from '@/services/indicadores';
 
 export async function POST(
   req: NextRequest,
@@ -10,18 +10,30 @@ export async function POST(
 
   try {
     const body = await req.json();
-    const categorias = body.categorias;
+    const subeixos = body.categorias;
 
-    if (!Array.isArray(categorias)) {
+    if (
+      !Array.isArray(subeixos) ||
+      !subeixos.every(
+        (s) =>
+          typeof s === 'object' &&
+          typeof s.id === 'string' &&
+          typeof s.nome === 'string' &&
+          Array.isArray(s.indicadores)
+      )
+    ) {
       return NextResponse.json(
         { error: 'Formato de categorias inválido' },
         { status: 400 }
       );
     }
 
-    console.log(`📩 POST recebido com ${categorias.length} categorias para ${municipio_id}`);
+    console.log(`📩 POST recebido com ${subeixos.length} subeixos para ${municipio_id}`);
+    subeixos.forEach((s) => {
+      console.log(`  - ${s.id} (${s.nome}): ${s.indicadores.join(', ')}`);
+    });
 
-    const data = await getLocalidadeFullPorCategorias(municipio_id, categorias);
+    const data = await getLocalidadeFullPorSubeixos(municipio_id, subeixos);
     return NextResponse.json(data);
   } catch (error) {
     console.error('❌ Erro ao processar POST /localidade:', error);

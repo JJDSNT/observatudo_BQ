@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-type Subeixo = {
+type SubeixoDTO = {
   id: string;
   nome: string;
   indicadores: string[];
@@ -13,13 +13,13 @@ type Subeixo = {
 type EixoTematico = {
   id: number;
   cor: string;
-  icone: string; // ex: "Globe", "Heart"
-  subeixos: Subeixo[];
+  icone: string; // ex: "globe", "heart"
+  subeixos: SubeixoDTO[];
 };
 
 type CategoriaSelectorProps = {
   eixos: EixoTematico[];
-  onCategoriaChange: (indicadores: string[]) => void;
+  onCategoriaChange: (subeixos: SubeixoDTO[]) => void;
 };
 
 export default function CategoriaSelector({
@@ -30,13 +30,11 @@ export default function CategoriaSelector({
 
   useEffect(() => {
     const eixo = eixos.find((e) => e.id === eixoSelecionado);
-    const indicadores = eixo
-      ? eixo.subeixos.flatMap((s) => s.indicadores)
-      : [];
-    onCategoriaChange(indicadores);
+    const subeixosSelecionados = eixo ? eixo.subeixos : [];
+    onCategoriaChange(subeixosSelecionados);
   }, [eixoSelecionado, eixos, onCategoriaChange]);
 
-  const formatarNome = (subeixos: Subeixo[]) => {
+  const formatarNome = (subeixos: SubeixoDTO[]) => {
     const nomes = subeixos.map((s) => s.nome);
     if (nomes.length === 1) return nomes[0];
     return nomes.slice(0, -1).join(", ") + " & " + nomes[nomes.length - 1];
@@ -45,8 +43,9 @@ export default function CategoriaSelector({
   return (
     <div className="flex flex-wrap gap-3">
       {eixos.map((eixo) => {
-        const Icon = (LucideIcons[eixo.icone as keyof typeof LucideIcons] ??
-          LucideIcons.LayoutGrid) as LucideIcon;
+        const Icon =
+          (LucideIcons[eixo.icone as keyof typeof LucideIcons] ??
+            LucideIcons.LayoutGrid) as LucideIcon;
         const isActive = eixo.id === eixoSelecionado;
         const nomeEixo = formatarNome(eixo.subeixos);
 

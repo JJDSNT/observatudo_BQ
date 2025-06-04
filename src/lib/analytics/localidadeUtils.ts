@@ -1,7 +1,6 @@
 import localidadesJson from '@/data/localidades_dropdown.json';
-import type { LocalidadesMap } from '@/types/localidadesDropdown.types';
 
-const localidades = localidadesJson as LocalidadesMap;
+const brasil = localidadesJson[0]; // único país
 
 export function getInfoMunicipio(municipioId: string): {
   id: string;
@@ -10,15 +9,15 @@ export function getInfoMunicipio(municipioId: string): {
   sigla: string;
   estadoNome: string;
 } | null {
-  for (const [sigla, estado] of Object.entries(localidades)) {
-    const cidade = estado.cidades.find(c => c.id === municipioId);
+  for (const estado of brasil.children) {
+    const cidade = estado.children.find(c => c.value === municipioId);
     if (cidade) {
       return {
-        id: cidade.id,
-        nome: cidade.nome,
-        estadoId: sigla,
-        sigla: sigla,
-        estadoNome: estado.nome,
+        id: cidade.value,
+        nome: cidade.label,
+        estadoId: estado.value,
+        sigla: estado.value,
+        estadoNome: estado.label,
       };
     }
   }
