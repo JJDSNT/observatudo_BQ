@@ -27,6 +27,16 @@ resource "google_cloud_run_service" "www_observatudo" {
         ports {
           container_port = 8080
         }
+
+        env {
+          name  = "BIGQUERY_PROJECT_ID"
+          value = var.project_id
+        }
+
+        env {
+          name  = "BIGQUERY_DATASET_ID"
+          value = var.bigquery_dataset_id
+        }
       }
     }
   }
@@ -36,6 +46,7 @@ resource "google_cloud_run_service" "www_observatudo" {
     latest_revision = true
   }
 }
+
 
 resource "google_cloud_run_service_iam_member" "public_access" {
   location = google_cloud_run_service.www_observatudo.location
