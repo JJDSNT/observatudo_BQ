@@ -1,14 +1,16 @@
 // src/hooks/useCategoriasIndicadores.ts
-'use client';
+"use client";
 
-import { useUserPreferences } from './useUserPreferences';
-import { CategoriaIndicador } from '@/types/categorias';
+import { useUserPreferences } from "./useUserPreferences";
+import { CategoriaIndicador } from "@/types/categorias";
 
 export function useCategoriasIndicadores() {
-  const { preferencias, updatePreferencias, loading, error } = useUserPreferences();
+  const { preferencias, updatePreferencias, loading, error } =
+    useUserPreferences();
 
   const categoriasIndicadores: CategoriaIndicador[] | undefined =
-    preferencias?.categoriasIndicadores?.length > 0
+    Array.isArray(preferencias?.categoriasIndicadores) &&
+    preferencias.categoriasIndicadores.length > 0
       ? preferencias.categoriasIndicadores
       : undefined;
 
