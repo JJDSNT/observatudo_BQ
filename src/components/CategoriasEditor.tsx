@@ -35,6 +35,12 @@ export default function CategoriasEditor() {
     setEdicaoLocal([...edicaoLocal, novaCategoria]);
   };
 
+  const atualizarCorCategoria = (id: number, novaCor: string) => {
+    setEdicaoLocal((prev) =>
+      prev.map((cat) => (cat.id === id ? { ...cat, cor: novaCor } : cat))
+    );
+  };
+
   if (loading) return <p>Carregando categorias...</p>;
   if (error) return <p>Erro: {error}</p>;
 
@@ -54,8 +60,15 @@ export default function CategoriasEditor() {
               </span>
               <span className="text-sm">Ícone: {categoria.icone}</span>
             </div>
-            <div className="text-sm">
-              Cor: <span style={{ color: categoria.cor }}>{categoria.cor}</span>
+            <div className="text-sm flex items-center gap-2">
+              Cor:
+              <input
+                type="color"
+                value={categoria.cor}
+                onChange={(e) => atualizarCorCategoria(categoria.id, e.target.value)}
+                className="w-8 h-6 border border-gray-300 rounded"
+              />
+              <span>{categoria.cor}</span>
             </div>
             <div className="text-xs text-zinc-500">
               {categoria.subeixos.length} subeixos definidos
