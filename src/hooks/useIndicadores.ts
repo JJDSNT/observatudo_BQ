@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import type { Indicador } from '@/types/indicadores';
 
 export default function useIndicadores() {
-  const { data, error, isLoading } = useSWR<Indicador[]>('/api/indicadores');
+  const { data, error, isLoading } = useSWR<Indicador[]>('/api/indicadores/list');
 
   return {
     indicadores: data ?? [],
