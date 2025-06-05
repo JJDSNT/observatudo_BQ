@@ -7,7 +7,6 @@ const withPWA = withPWAInit({
   register: true, // ✅ ainda permitido
   extendDefaultRuntimeCaching: true,
   workboxOptions: {
-    navigateFallback: "/offline.html",
     runtimeCaching: [
       {
         urlPattern: /\/api\/indicadores/,
