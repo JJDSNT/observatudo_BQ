@@ -1,4 +1,5 @@
 
+// src/services/indicadores.ts
 import { IndicadorCivico } from "../lib/analytics/models/indicadorCivico";
 import {
   getInfoMunicipio,

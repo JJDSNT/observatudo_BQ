@@ -8,13 +8,15 @@ export interface ValorSerie {
 export interface Indicador {
   id: string;
   nome: string;
-  unidade: string;
-  fonte: string;
+  descricao?: string;
+  unidade?: string;
+  fonte?: string;
+  periodicidade?: string;
   serie: ValorSerie[];
 }
 
 // DTO usado no frontend para enviar subeixos
-export interface SubeixoDTO {
+export interface Subeixo {
   id: string;
   nome: string;
   indicadores: string[];

@@ -1,64 +1,52 @@
-import { useEffect, useState } from "react";
-import { LocalidadeFullResponse } from "@/types/indicadores";
+// src/hooks/useIndicadoresDashboard.ts
+import useSWR from 'swr';
+import { LocalidadeFullResponse, Subeixo } from '@/types/indicadores';
 
-// Novo tipo usado no payload
-export type SubeixoDTO = {
-  id: string;
-  nome: string;
-  indicadores: string[];
+const fetcherPost = async (
+  url: string,
+  body: Subeixo[]
+): Promise<LocalidadeFullResponse> => {
+  console.groupCollapsed('📊 useIndicadoresDashboard');
+  console.log('📡 Enviando POST para:', url);
+  console.log('📚 Subeixos:', body);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ categorias: body }),
+  });
+
+  if (!res.ok) {
+    const error = new Error(`Erro HTTP ${res.status}`);
+    console.error('❌ Erro ao buscar indicadores:', error);
+    console.groupEnd();
+    throw error;
+  }
+
+  const json: LocalidadeFullResponse = await res.json();
+  console.log('✅ Resposta recebida:', json);
+  console.groupEnd();
+  return json;
 };
 
 export function useIndicadoresDashboard(
   municipioId: string,
-  subeixos?: SubeixoDTO[]
+  subeixos?: Subeixo[]
 ) {
-  const [data, setData] = useState<LocalidadeFullResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const shouldFetch = municipioId && subeixos && subeixos.length > 0;
 
-  useEffect(() => {
-    console.groupCollapsed("📊 useIndicadoresDashboard");
-    console.log("🏷️ Município:", municipioId);
-    console.log("📚 Subeixos:", subeixos);
-
-    if (!municipioId || !subeixos || subeixos.length === 0) {
-      console.warn("⚠️ Subeixos não definidos ou vazios, abortando fetch.");
-      console.groupEnd();
-      return;
+  const { data, error, isLoading } = useSWR<LocalidadeFullResponse>(
+    shouldFetch ? [`/api/indicadores/localidade/${municipioId}`, subeixos] : null,
+    ([url, body]: [string, Subeixo[]]) => fetcherPost(url, body),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 12 * 60 * 60 * 1000, // 12 horas
     }
+  );
 
-    setLoading(true);
-    setError(null);
-
-    const url = `/api/indicadores/localidade/${municipioId}`;
-
-    console.log("📡 Enviando POST para:", url);
-
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ categorias: subeixos }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => {
-        console.log("✅ Resposta recebida:", json);
-        setData(json);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("❌ Erro ao buscar indicadores:", err);
-        setError(err);
-        setLoading(false);
-      })
-      .finally(() => {
-        console.groupEnd();
-      });
-  }, [municipioId, subeixos]);
-
-  return { data, loading, error };
+  return {
+    data,
+    error,
+    loading: isLoading,
+  };
 }

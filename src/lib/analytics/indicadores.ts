@@ -1,10 +1,17 @@
 //src/lib/analytics/indicadores.ts
 import { QueryBuilder } from "./query";
+import type { Indicador } from '@/types/indicadores';
 
-export interface Indicador {
-  id: string;
-  nome: string;
-  descricao: string;
+export async function listarIndicadores(): Promise<Indicador[]> {
+  const qb = new QueryBuilder('dim_indicadores')
+    .addDimension({ name: 'id', sql: 'indicador_id', type: 'string' })
+    .addDimension({ name: 'nome', sql: 'nome', type: 'string' })
+    .addDimension({ name: 'descricao', sql: 'descricao', type: 'string' })
+    .addDimension({ name: 'unidade', sql: 'unidade', type: 'string' })
+    .addDimension({ name: 'fonte', sql: 'fonte', type: 'string' })
+    .addDimension({ name: 'periodicidade', sql: 'periodicidade', type: 'string' });
+
+  return qb.execute<Indicador>();
 }
 
 export async function buscarIndicadores(query: string): Promise<Indicador[]> {

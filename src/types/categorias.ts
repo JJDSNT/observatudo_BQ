@@ -1,11 +1,6 @@
 // src/types/categorias.ts
+import type { Subeixo } from "@/types/indicadores";
 import type { LucideIconName } from "@/components/IconSelector";
-
-export interface Subeixo {
-  id: string;
-  nome: string;
-  indicadores: string[];
-}
 
 export interface CategoriaIndicador {
   id: number;
