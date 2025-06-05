@@ -47,7 +47,7 @@ export default function Navbar() {
                 className="cursor-pointer"
               >
                 <Image
-                  src={user.photoURL ?? '/user-placeholder.png'}
+                  src={user.photoURL ?? '/user-placeholder.jpg'}
                   alt="Avatar"
                   width={32}
                   height={32}
