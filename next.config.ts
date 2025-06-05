@@ -4,10 +4,24 @@ import type { NextConfig } from "next";
 const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
-  register: true, // ✅ ainda permitido
+  register: true,
   extendDefaultRuntimeCaching: true,
   workboxOptions: {
     runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/lh3\.googleusercontent\.com\/.*$/,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "google-avatars-cache",
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 7 * 24 * 60 * 60, // 7 dias
+          },
+          cacheableResponse: {
+            statuses: [0, 200],
+          },
+        },
+      },
       {
         urlPattern: /\/api\/indicadores/,
         handler: "StaleWhileRevalidate",
