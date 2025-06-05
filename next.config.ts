@@ -28,7 +28,8 @@ export default withPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
-  buildExcludes: [/middleware-manifest\.json$/], // garante exposição correta do SW
+  buildExcludes: [/middleware-manifest\.json$/],
+  navigateFallback: "/offline.html",
   runtimeCaching: [
     {
       urlPattern: /\/api\/indicadores/,
@@ -37,7 +38,7 @@ export default withPWA({
         cacheName: "indicadores-cache",
         expiration: {
           maxEntries: 50,
-          maxAgeSeconds: 3600, // 1 hora
+          maxAgeSeconds: 3600,
         },
       },
     },
@@ -48,7 +49,7 @@ export default withPWA({
         cacheName: "localidades-cache",
         expiration: {
           maxEntries: 20,
-          maxAgeSeconds: 86400, // 1 dia
+          maxAgeSeconds: 86400,
         },
       },
     },
@@ -59,18 +60,19 @@ export default withPWA({
         cacheName: "categorias-cache",
         expiration: {
           maxEntries: 10,
-          maxAgeSeconds: 86400, // 1 dia
+          maxAgeSeconds: 86400,
         },
       },
     },
     {
-      urlPattern: /^https?.*/, // fallback genérico
+      urlPattern: /^https?.*/,
       handler: "NetworkFirst",
       options: {
         cacheName: "offline-cache",
         expiration: {
           maxEntries: 200,
         },
+        networkTimeoutSeconds: 3,
       },
     },
   ],
