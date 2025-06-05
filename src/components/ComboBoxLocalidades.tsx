@@ -30,6 +30,7 @@ export default function ComboBoxLocalidades({
   const cidades = estadoAtual?.children || [];
 
   useEffect(() => {
+    console.log('📦 Zustand (local):', useUserPreferences.getState().preferences);
     if (cidadeSelecionada) {
       onChange(cidadeSelecionada);
       setPreferences({ cidadeSelecionada });
