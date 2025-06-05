@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCategoriasIndicadores } from './useCategoriasIndicadores';
-import { CATEGORIAS_INDICADORES } from '@/data/categoriasIndicadores';
+import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 import { CategoriaIndicador } from '@/types';
 import {
   criarCategoriaPadrao,
@@ -29,7 +29,7 @@ export function useCategoriaEditorState() {
       setEdicaoLocal(categoriasIndicadores);
     } else if (!loading) {
       console.warn('⚠️ Nenhuma categoria encontrada. Usando padrão do arquivo TS...');
-      setEdicaoLocal(CATEGORIAS_INDICADORES);
+      setEdicaoLocal(CATEGORIAS_DEFAULT);
     }
   }, [categoriasIndicadores, loading]);
 

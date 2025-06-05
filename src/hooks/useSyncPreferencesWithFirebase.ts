@@ -4,7 +4,7 @@ import { useUserPreferences } from '@/store/useUserPreferences';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from './useAuth';
-import { CATEGORIAS_INDICADORES } from '@/data/categoriasIndicadores';
+import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 
 export function useSyncPreferencesWithFirebase() {
   const { user } = useAuth();
@@ -26,8 +26,8 @@ export function useSyncPreferencesWithFirebase() {
         setPreferences(prefsFromFirebase);
       } else {
         // Se for o primeiro login, salva as categorias padrão
-        setPreferences({ categoriasIndicadores: CATEGORIAS_INDICADORES });
-        await setDoc(ref, { categoriasIndicadores: CATEGORIAS_INDICADORES });
+        setPreferences({ categoriasIndicadores: CATEGORIAS_DEFAULT });
+        await setDoc(ref, { categoriasIndicadores: CATEGORIAS_DEFAULT });
       }
 
       syncedRef.current = true;

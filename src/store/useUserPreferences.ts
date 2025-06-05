@@ -1,8 +1,8 @@
 // src/store/useUserPreferences.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserPreferences, CategoriaIndicador } from '@/types';
-import { CATEGORIAS_INDICADORES } from '@/data/categoriasIndicadores';
+import type { UserPreferences } from '@/types';
+import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 
 interface UserPreferencesStore {
   preferences: UserPreferences;
@@ -27,7 +27,7 @@ export const useUserPreferences = create<UserPreferencesStore>()(
           set((state) => ({
             preferences: {
               ...state.preferences,
-              categoriasIndicadores: CATEGORIAS_INDICADORES as CategoriaIndicador[],
+              categoriasIndicadores: CATEGORIAS_DEFAULT,
             },
           }));
           console.log('ℹ️ categoriasIndicadores default carregadas no Zustand.');

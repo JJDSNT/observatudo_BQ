@@ -1,7 +1,7 @@
 // src/data/categoriasIndicadores.ts
 import { CategoriaIndicador, LucideIconName } from '@/types';
 
-export const CATEGORIAS_INDICADORES: CategoriaIndicador[] = [
+export const CATEGORIAS_DEFAULT: CategoriaIndicador[] = [
   {
     id: 1,
     cor: '#2563eb',

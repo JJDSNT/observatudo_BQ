@@ -6,14 +6,8 @@ import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
 import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
-import eixosTematicosJson from "@/data/categoriasIndicadores.json";
-import { CategoriaIndicador, Subeixo } from "@/types";
-import type { LucideIconName } from "@/types";
-
-const EIXOS_TEMATICOS: CategoriaIndicador[] = eixosTematicosJson.map((eixo) => ({
-  ...eixo,
-  icone: eixo.icone as LucideIconName,
-}));
+import { CATEGORIAS_DEFAULT } from "@/data/categoriasIndicadores";
+import { Subeixo } from "@/types";
 
 export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
@@ -38,10 +32,9 @@ export default function Home() {
     <section className="space-y-6">
       <ComboBoxLocalidades onChange={setMunicipioId} />
       <CategoriaSelector
-        eixos={EIXOS_TEMATICOS}
+        eixos={CATEGORIAS_DEFAULT}
         onCategoriaChange={setSubeixosSelecionados}
       />
-
       {loading && <p>⏳ Carregando indicadores...</p>}
       {error && <p className="text-red-500">❌ Erro: {error.message}</p>}
       {!loading && !error && payload && <Dashboard payload={payload} />}

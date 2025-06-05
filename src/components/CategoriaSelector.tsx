@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import { useUserPreferences } from "@/store/useUserPreferences";
+import { formatarNomeCategoria } from "@/utils/categoriaUtils";
 import type { CategoriaIndicador, Subeixo } from "@/types";
 
 type CategoriaSelectorProps = {
@@ -51,19 +52,12 @@ export default function CategoriaSelector({
     onCategoriaChange(subeixosSelecionados);
   }, [eixoSelecionado, eixos, preferences, onCategoriaChange, setPreferences]);
 
-  const formatarNome = (subeixos: Subeixo[]) => {
-    const nomes = subeixos.map((s) => s.nome);
-    return nomes.length <= 1
-      ? nomes[0] ?? ""
-      : nomes.slice(0, -1).join(", ") + " & " + nomes[nomes.length - 1];
-  };
-
   return (
     <div className="flex flex-wrap gap-3">
       {eixos.map((eixo) => {
         const Icon = LucideIcons[eixo.icone as keyof typeof LucideIcons] as React.ElementType;
         const isActive = eixo.id === eixoSelecionado;
-        const nomeEixo = formatarNome(eixo.subeixos);
+        const nomeEixo = formatarNomeCategoria(eixo);
 
         return (
           <button

@@ -4,23 +4,17 @@
 import { useUserPreferences } from "@/store/useUserPreferences";
 import { useEffect, useState } from "react";
 import localidadesJson from "@/data/localidades_dropdown.json";
-import type { PaisDropdown, CategoriaIndicador, LucideIconName } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import categoriasJson from "@/data/categoriasIndicadores.json";
+import { CATEGORIAS_DEFAULT } from "@/data/categoriasIndicadores";
+import { formatarNomeCategoria } from "@/utils/categoriaUtils";
+import type { PaisDropdown, CategoriaIndicador } from "@/types";
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
 
-// 🔄 Inicializar fora do componente para evitar redefinição a cada render
-const categoriasDefault: CategoriaIndicador[] = categoriasJson.map((eixo) => ({
-  ...eixo,
-  icone: eixo.icone as LucideIconName,
-}));
-
 export default function ConfiguracoesPage() {
   const { user, logout } = useAuth();
-  const { preferences, setPreferences, clearPreferences } =
-    useUserPreferences();
+  const { preferences, setPreferences, clearPreferences } = useUserPreferences();
   const [infoHealthz, setInfoHealthz] = useState<string>("Carregando...");
 
   const handleChangeEstado = (uf: string) => {
@@ -54,19 +48,16 @@ export default function ConfiguracoesPage() {
   const cidades = estadoAtual?.children ?? [];
 
   const eixosDisponiveis: CategoriaIndicador[] =
-    (preferences.categoriasIndicadores ?? []).length > 0
-      ? preferences.categoriasIndicadores!
-      : categoriasDefault;
+    preferences.categoriasIndicadores?.length
+      ? preferences.categoriasIndicadores
+      : CATEGORIAS_DEFAULT;
 
   const eixoSelecionado = eixosDisponiveis.find(
     (e) => e.id === preferences.eixoSelecionado
   );
 
   const nomeEixoSelecionado = eixoSelecionado
-    ? eixoSelecionado.subeixos
-        .map((s) => s.nome)
-        .join(", ")
-        .replace(/, ([^,]*)$/, " & $1")
+    ? formatarNomeCategoria(eixoSelecionado)
     : "Nenhuma";
 
   return (
@@ -78,6 +69,7 @@ export default function ConfiguracoesPage() {
         </p>
       </header>
 
+      {/* Preferências Gerais */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Preferências Gerais</h2>
 
@@ -150,6 +142,7 @@ export default function ConfiguracoesPage() {
         </div>
       </div>
 
+      {/* Ações rápidas */}
       <div className="flex gap-4">
         <button
           onClick={clearPreferences}
@@ -167,11 +160,11 @@ export default function ConfiguracoesPage() {
         )}
       </div>
 
+      {/* Exportar / Importar Preferências */}
       <div className="space-y-4 pt-6">
         <h2 className="text-xl font-semibold">
           Exportar / Importar Preferências
         </h2>
-
         <div className="flex gap-4 flex-wrap">
           <button
             onClick={() => {
@@ -215,6 +208,7 @@ export default function ConfiguracoesPage() {
         </div>
       </div>
 
+      {/* Painéis de Debug */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Painéis de Debug</h2>
         <label className="flex items-center gap-2">
@@ -243,6 +237,7 @@ export default function ConfiguracoesPage() {
         </label>
       </div>
 
+      {/* Sistema */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Sistema</h2>
         <pre className="text-sm bg-zinc-100 dark:bg-zinc-900 p-3 rounded overflow-auto max-h-64">
