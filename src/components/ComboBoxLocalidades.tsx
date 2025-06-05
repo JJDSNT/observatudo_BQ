@@ -1,7 +1,10 @@
+//src/components/ComboBoxLocalidades.tsx
 "use client";
+
 import { useState, useEffect } from "react";
 import type { PaisDropdown } from "@/types/location-selector";
 import localidadesJson from "@/data/localidades_dropdown.json";
+import { useUserPreferences } from "@/store/useUserPreferences";
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
@@ -13,8 +16,15 @@ interface ComboBoxLocalidadesProps {
 export default function ComboBoxLocalidades({
   onChange,
 }: Readonly<ComboBoxLocalidadesProps>) {
-  const [ufSelecionado, setUfSelecionado] = useState<string>("");
-  const [cidadeSelecionada, setCidadeSelecionada] = useState<string>("");
+  const { preferences, setPreferences } = useUserPreferences();
+
+  const [ufSelecionado, setUfSelecionado] = useState<string>(
+    preferences.estadoSelecionado ?? ""
+  );
+
+  const [cidadeSelecionada, setCidadeSelecionada] = useState<string>(
+    preferences.cidadeSelecionada ?? ""
+  );
 
   const estadoAtual = estados.find((e) => e.value === ufSelecionado);
   const cidades = estadoAtual?.children || [];
@@ -22,13 +32,19 @@ export default function ComboBoxLocalidades({
   useEffect(() => {
     if (cidadeSelecionada) {
       onChange(cidadeSelecionada);
+      setPreferences({ cidadeSelecionada });
     }
-  }, [cidadeSelecionada, onChange]);
+  }, [cidadeSelecionada, onChange, setPreferences]);
 
   const handleSelecionarUF = (uf: string) => {
     setUfSelecionado(uf);
     const estado = estados.find((e) => e.value === uf);
-    setCidadeSelecionada(estado?.default || "");
+    const cidadeDefault = estado?.default || "";
+    setCidadeSelecionada(cidadeDefault);
+    setPreferences({
+      estadoSelecionado: uf,
+      cidadeSelecionada: cidadeDefault,
+    });
   };
 
   return (
