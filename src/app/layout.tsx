@@ -7,6 +7,7 @@ import AppleSplashScreens from "@/components/AppleSplashScreens";
 import AppShell from "@/components/AppShell";
 import Navbar from "@/components/Navbar";
 import { ThemeApplier } from '@/components/Theme/ThemeApplier';
+import DebugZustandPanel from "@/components/DebugZustandPanel";
 
 export { metadata, viewport };
 
@@ -44,6 +45,7 @@ export default function RootLayout({
         </header>
         <AppShell>
           <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
+          <DebugZustandPanel />
         </AppShell>
       </body>
     </html>

@@ -8,7 +8,6 @@ import { useState, useEffect } from "react";
 import eixosTematicosJson from "@/data/categoriasIndicadores.json";
 import { CategoriaIndicador, Subeixo } from "@/types";
 import type { LucideIconName } from "@/types";
-import DebugZustandPanel from "@/components/DebugZustandPanel";
 
 const EIXOS_TEMATICOS: CategoriaIndicador[] = eixosTematicosJson.map((eixo) => ({
   ...eixo,
@@ -38,7 +37,6 @@ export default function Home() {
     <section className="space-y-6">
 
       <ComboBoxLocalidades onChange={setMunicipioId} />
-      <DebugZustandPanel />
       <CategoriaSelector
         eixos={EIXOS_TEMATICOS}
         onCategoriaChange={setSubeixosSelecionados}
