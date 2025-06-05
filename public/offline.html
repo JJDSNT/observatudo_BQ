@@ -1,16 +1,51 @@
-<!-- public/offline.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Sem conexão</title>
+    <title>Você está offline • ObservaTudo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#00d6d6" />
+
+    <!-- ✅ Favicon padrão -->
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- ✅ Ícone da Apple (opcional) -->
+    <link rel="apple-touch-icon" href="/assets/apple-icon-180.png" />
+
     <style>
-      body { font-family: sans-serif; text-align: center; padding: 3rem; background: #f9f9f9; }
+      body {
+        margin: 0;
+        padding: 2rem;
+        font-family: system-ui, sans-serif;
+        background-color: #ffffff;
+        color: #1e293b;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100vh;
+      }
+      .logo {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+      }
+      p {
+        color: #475569;
+        font-size: 1rem;
+        max-width: 300px;
+      }
     </style>
   </head>
   <body>
-    <h1>🔌 Você está offline</h1>
-    <p>Esta página não está disponível no momento.</p>
-    <p>Tente novamente quando estiver conectado.</p>
+    <img src="/logo.png" alt="Logo ObservaTudo" class="logo" />
+    <h1>Você está offline</h1>
+    <p>Alguns dados ou páginas não estão disponíveis no momento. Tente novamente quando estiver conectado.</p>
   </body>
 </html>
