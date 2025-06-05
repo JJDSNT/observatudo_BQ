@@ -2,7 +2,7 @@
 'use client';
 
 import useSWRImmutable from 'swr/immutable';
-import type { Indicador } from '@/types/indicadores';
+import type { Indicador } from '@/types/oldindicadores';
 
 async function fetchIndicadorNomes(ids: string[]): Promise<Map<string, string>> {
   const res = await fetch('/api/indicadores/nomeados', {

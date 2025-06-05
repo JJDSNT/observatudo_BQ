@@ -1,7 +1,9 @@
-// types/indicadores.ts
+// src/types/indicadores-model.ts
+import type { LucideIconName } from '@/types/lucide-icons';
 
+// --- Indicadores
 export interface ValorSerie {
-  data: string;   // "2022-01-01" ou apenas ano, se preferir
+  data: string; // "2022-01-01" ou apenas ano, se preferir
   valor: number | null;
 }
 
@@ -15,26 +17,34 @@ export interface Indicador {
   serie: ValorSerie[];
 }
 
-// DTO usado no frontend para enviar subeixos
+// --- Subeixos
 export interface Subeixo {
   id: string;
   nome: string;
-  indicadores: string[];
+  indicadores: string[]; // apenas os IDs
 }
 
-// Resultado completo de um subeixo com dados reais
 export interface SubeixoResultado {
   id: string;
   nome: string;
-  indicadores: Indicador[];
+  indicadores: Indicador[]; // dados completos
 }
 
+// --- Categorias
+export interface CategoriaIndicador {
+  id: number;
+  cor: string;
+  icone: LucideIconName;
+  subeixos: Subeixo[];
+}
+
+// --- Localidade e Payloads
 export interface LocalidadePayload {
   id: string;
   nome: string;
-  sigla?: string;  // para estado ou país
-  uf?: string;     // para município
-  subeixos: SubeixoResultado[]; // ✅ trocado de 'categorias' para 'subeixos'
+  sigla?: string;
+  uf?: string;
+  subeixos: SubeixoResultado[];
 }
 
 export interface LocalidadeFullResponse {

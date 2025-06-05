@@ -1,6 +1,6 @@
 // src/hooks/useIndicadoresDashboard.ts
 import useSWR from 'swr';
-import { LocalidadeFullResponse, Subeixo } from '@/types/indicadores';
+import { LocalidadeFullResponse, Subeixo } from '@/types/oldindicadores';
 
 const fetcherPost = async (
   url: string,

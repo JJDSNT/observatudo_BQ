@@ -1,6 +1,6 @@
 // src/components/MetricCard/MetricCard.tsx
 import React from "react";
-import { Indicador } from "../../types/indicadores";
+import { Indicador } from "../../types/oldindicadores";
 
 type MetricCardProps = {
   indicador: Indicador;

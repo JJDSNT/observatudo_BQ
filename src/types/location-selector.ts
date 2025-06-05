@@ -1,5 +1,4 @@
-// src/types/localidadesDropdown.types.ts
-
+// src/types/location-selector.ts
 export interface CidadeDropdown {
   label: string; // Nome da cidade
   value: string; // ID da cidade

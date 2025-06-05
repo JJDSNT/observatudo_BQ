@@ -5,8 +5,7 @@ import { useState, ComponentType, useRef, useEffect } from "react";
 import * as Icons from "lucide-react";
 import { cn } from "@/utils/classnames";
 import { LucideProps } from "lucide-react";
-
-export type LucideIconName = keyof typeof Icons;
+import type { LucideIconName } from "@/types";
 
 interface IconSelectorProps {
   value: LucideIconName;

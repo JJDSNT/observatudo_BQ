@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import type { PaisDropdown } from "@/types/localidadesDropdown.types";
+import type { PaisDropdown } from "@/types/location-selector";
 import localidadesJson from "@/data/localidades_dropdown.json";
 
 const brasil: PaisDropdown = localidadesJson[0];
