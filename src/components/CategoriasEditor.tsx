@@ -29,7 +29,7 @@
 "use client";
 
 import { CategoriaCard } from "@/components/categorias/CategoriaCard";
-import { LucideIconName } from "@/components/IconSelector";
+import { LucideIconName } from "@/types";
 import { useCategoriaEditorState } from "@/hooks/useCategoriaEditorState";
 import { useIndicadorNomes } from "@/hooks/useIndicadorNomes";
 

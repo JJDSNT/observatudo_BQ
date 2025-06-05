@@ -1,9 +1,9 @@
 // src/components/categorias/CategoriasCard.tsx
 'use client';
 
-import { IconSelector, LucideIconName } from '@/components/IconSelector';
+import { CategoriaIndicador, LucideIconName } from '@/types';
+import { IconSelector } from '@/components/IconSelector';
 import { SubeixoCard } from '@/components/categorias/SubeixoCard';
-import { CategoriaIndicador } from '@/types/categorias';
 
 interface CategoriaCardProps {
   categoria: CategoriaIndicador;

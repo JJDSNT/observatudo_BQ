@@ -1,7 +1,5 @@
 // src/utils/categoriaUtils.ts
-import { CategoriaIndicador } from '@/types/categorias';
-import type { Subeixo } from "@/types/oldindicadores";
-import { LucideIconName } from '@/components/IconSelector';
+import type { CategoriaIndicador, Subeixo, LucideIconName } from '@/types';
 
 export function criarSubeixoPadrao(categoriaId: number): Subeixo {
   return {

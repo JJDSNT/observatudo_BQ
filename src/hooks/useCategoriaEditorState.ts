@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useCategoriasIndicadores } from './useCategoriasIndicadores';
 import { CATEGORIAS_INDICADORES } from '@/data/categoriasIndicadores';
-import { CategoriaIndicador } from '@/types/categorias';
+import { CategoriaIndicador } from '@/types';
 import {
   criarCategoriaPadrao,
   criarSubeixoPadrao,

@@ -1,6 +1,6 @@
 //src/lib/analytics/indicadores.ts
 import { QueryBuilder } from "./query";
-import type { Indicador } from '@/types/oldindicadores';
+import type { Indicador } from '@/types';
 
 export async function listarIndicadores(): Promise<Indicador[]> {
   const qb = new QueryBuilder('dim_indicadores')

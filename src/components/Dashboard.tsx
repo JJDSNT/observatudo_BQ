@@ -3,7 +3,7 @@ import {
   SubeixoResultado,
   Indicador,
   LocalidadePayload,
-} from "@/types/oldindicadores";
+} from "@/types";
 import { MetricCard } from "./MetricCard/MetricCard";
 
 type DashboardPayload = {

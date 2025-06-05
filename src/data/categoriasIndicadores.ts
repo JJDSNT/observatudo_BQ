@@ -1,6 +1,5 @@
 // src/data/categoriasIndicadores.ts
-import { CategoriaIndicador } from '@/types/categorias';
-import { LucideIconName } from '@/components/IconSelector';
+import { CategoriaIndicador, LucideIconName } from '@/types';
 
 export const CATEGORIAS_INDICADORES: CategoriaIndicador[] = [
   {

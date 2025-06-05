@@ -1,6 +1,6 @@
 // src/hooks/useIndicadores.ts
 import useSWR from 'swr';
-import type { Indicador } from '@/types/oldindicadores';
+import type { Indicador } from '@/types';
 
 export default function useIndicadores() {
   const { data, error, isLoading } = useSWR<Indicador[]>('/api/indicadores/list');
