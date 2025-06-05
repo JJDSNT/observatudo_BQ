@@ -1,5 +1,5 @@
-import { metadata } from './metadata';
-import { viewport } from './viewport';
+import { metadata } from "./metadata";
+import { viewport } from "./viewport";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
@@ -27,6 +27,11 @@ export default function RootLayout({
     <html lang="pt-BR">
       <head>
         <AppleSplashScreens />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/assets/apple-icon-180.png"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[--color-background] text-[--color-foreground]`}
