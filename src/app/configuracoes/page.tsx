@@ -1,3 +1,4 @@
+//src/app/configuracoes/page.tsx
 "use client";
 
 import { useUserPreferences } from "@/store/useUserPreferences";
@@ -5,7 +6,6 @@ import { useEffect, useState } from "react";
 import localidadesJson from "@/data/localidades_dropdown.json";
 import type { PaisDropdown } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import LatencyMonitorGlobal from "@/components/debug/LatencyMonitorGlobal";
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
