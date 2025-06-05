@@ -2,11 +2,12 @@
   "name": "ObservaTudo",
   "short_name": "ObservaTudo",
   "description": "Dados Abertos. Decisões Informadas.",
-  "theme_color": "#000000",
-  "background_color": "#00d6d6",
+  "theme_color": "#00d6d6",
+  "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "icons": [
     {
       "src": "/assets/manifest-icon-192.maskable.png",

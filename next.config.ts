@@ -8,10 +8,43 @@ const withPWAConfig = withPWA({
   disable: process.env.NODE_ENV === "development",
   runtimeCaching: [
     {
-      urlPattern: /^https?.*/,
+      urlPattern: /\/api\/indicadores/,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "indicadores-cache",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 3600, // 1 hora
+        },
+      },
+    },
+    {
+      urlPattern: /\/api\/localidades/,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "localidades-cache",
+        expiration: {
+          maxEntries: 20,
+          maxAgeSeconds: 86400, // 1 dia
+        },
+      },
+    },
+    {
+      urlPattern: /\/api\/categorias/,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "categorias-cache",
+        expiration: {
+          maxEntries: 10,
+          maxAgeSeconds: 86400, // 1 dia
+        },
+      },
+    },
+    {
+      urlPattern: /^https?.*/, // fallback genérico
       handler: "NetworkFirst",
       options: {
-        cacheName: "offlineCache",
+        cacheName: "offline-cache",
         expiration: {
           maxEntries: 200,
         },

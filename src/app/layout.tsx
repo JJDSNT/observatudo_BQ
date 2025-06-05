@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
 import Navbar from "@/components/Navbar";
-import GlobalHealthNotifier from "@/components/GlobalHealthNotifier";
+import AppShell from "@/components/AppShell";
 
 export { metadata, viewport };
 
@@ -31,11 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[--color-background] text-[--color-foreground]`}
       >
-        <GlobalHealthNotifier />
         <header className="px-6 py-4 border-b border-gray-300/40 dark:border-gray-700/50">
           <Navbar />
         </header>
-        <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
+        <AppShell>
+          <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
+        </AppShell>
       </body>
     </html>
   );

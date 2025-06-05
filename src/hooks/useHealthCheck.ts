@@ -1,29 +1,36 @@
-// src/hooks/useHealthCheck.ts
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export function useHealthCheck(pollInterval = 30000) {
   const [backendHealthy, setBackendHealthy] = useState(true);
-  const [isOffline, setIsOffline] = useState<boolean>(() => {
-    if (typeof navigator !== "undefined") {
-      return !navigator.onLine;
-    }
-    return false; // assume online durante SSR
-  });
+  const [isOffline, setIsOffline] = useState(() =>
+    typeof navigator !== "undefined" ? !navigator.onLine : false
+  );
+
+  const isChecking = useRef(false); // impede sobreposição de requisições
 
   useEffect(() => {
     const checkHealth = async () => {
+      if (isOffline || isChecking.current) return;
+
+      isChecking.current = true;
       try {
-        const res = await fetch("/api/healthz");
+        const res = await fetch("/api/healthz", { cache: "no-store" });
         setBackendHealthy(res.ok);
       } catch {
         setBackendHealthy(false);
+      } finally {
+        isChecking.current = false;
       }
     };
 
-    checkHealth();
+    checkHealth(); // primeira verificação imediata
     const interval = setInterval(checkHealth, pollInterval);
 
-    const handleOnline = () => setIsOffline(false);
+    const handleOnline = () => {
+      setIsOffline(false);
+      checkHealth(); // força checagem ao voltar online
+    };
+
     const handleOffline = () => setIsOffline(true);
 
     window.addEventListener("online", handleOnline);
@@ -34,7 +41,7 @@ export function useHealthCheck(pollInterval = 30000) {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [pollInterval]);
+  }, [isOffline, pollInterval]);
 
   return { backendHealthy, isOffline };
 }
