@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 import localidadesJson from "@/data/localidades_dropdown.json";
 import type { PaisDropdown } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import LatencyMonitor from '@/components/debug/LatencyMonitor';
+import LatencyMonitorGlobal from "@/components/debug/LatencyMonitorGlobal";
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
 
 export default function ConfiguracoesPage() {
-
   const { user, logout } = useAuth();
   const { preferences, setPreferences, clearPreferences } =
     useUserPreferences();
@@ -185,13 +184,43 @@ export default function ConfiguracoesPage() {
           </label>
         </div>
       </div>
+      {/* Painéis de Debug */}
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Painéis de Debug</h2>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={preferences.debugLatency ?? true}
+            onChange={(e) =>
+              setPreferences({ debugLatency: e.target.checked })
+            }
+          />
+          Ativar painel de latência
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={preferences.debugZustand ?? false}
+            onChange={(e) => setPreferences({ debugZustand: e.target.checked })}
+          />
+          Exibir painel do Zustand
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={preferences.debugPwa ?? false}
+            onChange={(e) => setPreferences({ debugPwa: e.target.checked })}
+          />
+          Exibir painel do PWA
+        </label>
+      </div>
       {/* Sistema */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Sistema</h2>
         <pre className="text-sm bg-zinc-100 dark:bg-zinc-900 p-3 rounded overflow-auto max-h-64">
           {infoHealthz}
         </pre>
-      <LatencyMonitor />
+        {preferences.debugLatency && <LatencyMonitorGlobal />}
       </div>
     </section>
   );

@@ -1,13 +1,10 @@
-import { useEffect, useState } from 'react';
+//src//hooks/useLatencyInit.ts
+'use client';
+import { useEffect } from 'react';
+import { useLatencyStore } from '@/store/useLatencyStore';
 
-export function useHealthLatency() {
-  const [latencias, setLatencias] = useState<{
-    total: number;
-    backend: number;
-    rede: number;
-    timestamp: string;
-    error?: string;
-  } | null>(null);
+export function useLatencyInit(intervalMs = 10000) {
+  const registrar = useLatencyStore((s) => s.registrar);
 
   useEffect(() => {
     const medir = async () => {
@@ -21,25 +18,24 @@ export function useHealthLatency() {
         const backend = json.latencyMs ?? 0;
         const rede = total - backend;
 
-        setLatencias({
+        registrar({
           total: Math.round(total),
           backend,
           rede: Math.max(0, Math.round(rede)),
           timestamp: json.timestamp,
         });
-      } catch (err) {
-        setLatencias({
+      } catch {
+        registrar({
           total: 0,
           backend: 0,
           rede: 0,
           timestamp: new Date().toISOString(),
-          error: 'Erro ao medir latência',
         });
       }
     };
 
     medir();
-  }, []);
-
-  return latencias;
+    const id = setInterval(medir, intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs, registrar]);
 }

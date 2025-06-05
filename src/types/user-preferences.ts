@@ -1,5 +1,5 @@
 // src/types/user-preferences.ts
-import type { CategoriaIndicador } from '@/types';
+import type { CategoriaIndicador } from "@/types";
 
 /**
  * Preferências personalizadas do usuário, salvas localmente ou remotamente.
@@ -13,17 +13,21 @@ export interface UserPreferences {
   /**
    * Tema visual da interface
    */
-  tema?: 'claro' | 'escuro';
+  tema?: "claro" | "escuro";
 
   /**
    * Idioma da interface
    */
-  idioma?: 'pt-BR' | 'en-US';
+  idioma?: "pt-BR" | "en-US";
 
   /**
    * Permite ou não notificações
    */
   notificacoesAtivas?: boolean;
+
+  debugZustand?: boolean;
+  debugPwa?: boolean;
+  debugLatency?: boolean
 
   /**
    * ID da cidade selecionada (localidade atual)

@@ -1,31 +1,42 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { SWRConfig } from 'swr';
-import SplashScreen from '@/components/SplashScreen';
-import GlobalHealthNotifier from '@/components/GlobalHealthNotifier';
-import { useSyncPreferencesWithFirebase } from '@/hooks/useSyncPreferencesWithFirebase';
-import DebugZustandPanel from './debug/DebugZustandPanel';
-import PwaDebugPanel from './debug/PwaDebugPanel';
+import { useEffect, useState } from "react";
+import { SWRConfig } from "swr";
+import SplashScreen from "@/components/SplashScreen";
+import GlobalHealthNotifier from "@/components/GlobalHealthNotifier";
+import { useSyncPreferencesWithFirebase } from "@/hooks/useSyncPreferencesWithFirebase";
+import { useUserPreferences } from "@/store/useUserPreferences";
+import DebugZustandPanel from "@/components/debug/DebugZustandPanel";
+import PwaDebugPanel from "@/components/debug/PwaDebugPanel";
 
-export default function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
+import LatencyMonitorGlobal from "./debug/LatencyMonitorGlobal";
+import { useLatencyInit } from "@/hooks/useLatencyInit";
+
+export default function AppShell({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const [ready, setReady] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const { preferences } = useUserPreferences();
 
+  // 🔄 Sincroniza com Firebase
   useSyncPreferencesWithFirebase();
+
+  // 🕵️‍♂️ Inicia medição contínua de latência
+  useLatencyInit();
 
   useEffect(() => {
     const checkHealth = async () => {
       const start = performance.now();
       try {
-        const res = await fetch('/api/healthz', { cache: 'no-store' });
+        const res = await fetch("/api/healthz", { cache: "no-store" });
         if (!res.ok) throw new Error();
         const duration = performance.now() - start;
         if (duration > 1500) {
-          setMessage('Iniciando servidor... Aguarde alguns segundos.');
+          setMessage("Iniciando servidor... Aguarde alguns segundos.");
         }
       } catch {
-        setMessage('Servidor indisponível. Tentando novamente...');
+        setMessage("Servidor indisponível. Tentando novamente...");
       } finally {
         const elapsed = performance.now();
         window.__splashTime = Math.round(elapsed);
@@ -41,15 +52,16 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
   return (
     <SWRConfig
       value={{
-        fetcher: (url: string) => fetch(url).then(res => res.json()),
+        fetcher: (url: string) => fetch(url).then((res) => res.json()),
         revalidateOnFocus: false,
         dedupingInterval: 6 * 60 * 60 * 1000, // 6 horas
       }}
     >
       <GlobalHealthNotifier />
       {children}
-      <DebugZustandPanel />
-      <PwaDebugPanel />
+      {preferences.debugZustand && <DebugZustandPanel />}
+      {preferences.debugPwa && <PwaDebugPanel />}
+      {preferences.debugLatency && <LatencyMonitorGlobal />}
     </SWRConfig>
   );
 }
