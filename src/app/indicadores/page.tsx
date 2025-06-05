@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { IndicadorSearch } from '@/components/IndicadorSearch';
+import { useState } from "react";
+import { IndicadorSearch } from "@/components/IndicadorSearch";
 
 type IndicadorBusca = {
   id: string;
@@ -9,7 +9,8 @@ type IndicadorBusca = {
 };
 
 export default function IndicadoresPage() {
-  const [indicadorSelecionado, setIndicadorSelecionado] = useState<IndicadorBusca | null>(null);
+  const [indicadorSelecionado, setIndicadorSelecionado] =
+    useState<IndicadorBusca | null>(null);
 
   const handleIndicadorSelect = (indicador: IndicadorBusca) => {
     setIndicadorSelecionado(indicador);
@@ -31,6 +32,11 @@ export default function IndicadoresPage() {
           Indicador selecionado: <strong>{indicadorSelecionado.nome}</strong>
         </div>
       )}
+      <div className="p-6 bg-white text-black dark:bg-black dark:text-white rounded">
+        <p>
+          Se o modo escuro estiver ativo, o fundo ficará preto e o texto branco.
+        </p>
+      </div>
     </section>
   );
 }

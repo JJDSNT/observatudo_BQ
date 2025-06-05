@@ -1,10 +1,12 @@
+
 import { metadata } from "./metadata";
 import { viewport } from "./viewport";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
-import Navbar from "@/components/Navbar";
 import AppShell from "@/components/AppShell";
+import Navbar from "@/components/Navbar";
+import { ThemeApplier } from '@/components/Theme/ThemeApplier';
 
 export { metadata, viewport };
 
@@ -36,6 +38,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[--color-background] text-[--color-foreground]`}
       >
+        <ThemeApplier />
         <header className="px-6 py-4 border-b border-gray-300/40 dark:border-gray-700/50">
           <Navbar />
         </header>

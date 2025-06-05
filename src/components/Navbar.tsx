@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import ModalLogin from './ModalLogin';
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import ModalLogin from "./ModalLogin";
+import { ThemeToggle } from "@/components/Theme/ThemeToggle";
 
 const links = [
-  { label: 'Dashboard', href: '/' },
-  { label: 'Indicadores', href: '/indicadores' },
-  { label: 'Global', href: '/world' },
-  { label: 'Sobre', href: '/sobre' },
-  { label: 'Categorias', href: '/configuracoes/categorias' },
+  { label: "Dashboard", href: "/" },
+  { label: "Indicadores", href: "/indicadores" },
+  { label: "Global", href: "/world" },
+  { label: "Sobre", href: "/sobre" },
+  { label: "Categorias", href: "/configuracoes/categorias" },
 ];
 
 export default function Navbar() {
@@ -37,17 +38,17 @@ export default function Navbar() {
           />
           ObservaTudo
         </Link>
-
+        <ThemeToggle />
         <div className="relative flex items-center">
           {user ? (
             <div className="relative">
               <button
                 onClick={() => setMenuAberto((prev) => !prev)}
-                title={user.displayName ?? ''}
+                title={user.displayName ?? ""}
                 className="cursor-pointer"
               >
                 <Image
-                  src={user.photoURL ?? '/user-placeholder.jpg'}
+                  src={user.photoURL ?? "/user-placeholder.jpg"}
                   alt="Avatar"
                   width={32}
                   height={32}
@@ -80,11 +81,11 @@ export default function Navbar() {
             <Link
               key={href}
               href={href}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-amber-500 text-black shadow-md dark:text-black'
-                  : 'text-zinc-700 dark:text-zinc-300 hover:underline hover:text-amber-600 dark:hover:text-amber-400'
+                  ? "bg-amber-500 text-black shadow-md dark:text-black"
+                  : "text-zinc-700 dark:text-zinc-300 hover:underline hover:text-amber-600 dark:hover:text-amber-400"
               }`}
             >
               {label}
