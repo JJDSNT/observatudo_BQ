@@ -1,5 +1,61 @@
+import withPWAInit from "@ducanh2912/next-pwa";
 import type { NextConfig } from "next";
-import withPWA from "next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true, // ✅ ainda permitido
+  extendDefaultRuntimeCaching: true,
+  workboxOptions: {
+    navigateFallback: "/offline.html",
+    runtimeCaching: [
+      {
+        urlPattern: /\/api\/indicadores/,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "indicadores-cache",
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 3600,
+          },
+        },
+      },
+      {
+        urlPattern: /\/api\/localidades/,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "localidades-cache",
+          expiration: {
+            maxEntries: 20,
+            maxAgeSeconds: 86400,
+          },
+        },
+      },
+      {
+        urlPattern: /\/api\/categorias/,
+        handler: "StaleWhileRevalidate",
+        options: {
+          cacheName: "categorias-cache",
+          expiration: {
+            maxEntries: 10,
+            maxAgeSeconds: 86400,
+          },
+        },
+      },
+      {
+        urlPattern: /^https?.*/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "offline-cache",
+          expiration: {
+            maxEntries: 200,
+          },
+          networkTimeoutSeconds: 3,
+        },
+      },
+    ],
+  },
+});
 
 const nextConfig: NextConfig = {
   async redirects() {
@@ -12,7 +68,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
   images: {
     remotePatterns: [
       {
@@ -23,57 +78,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-  buildExcludes: [/middleware-manifest\.json$/],
-  navigateFallback: "/offline.html",
-  runtimeCaching: [
-    {
-      urlPattern: /\/api\/indicadores/,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "indicadores-cache",
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 3600,
-        },
-      },
-    },
-    {
-      urlPattern: /\/api\/localidades/,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "localidades-cache",
-        expiration: {
-          maxEntries: 20,
-          maxAgeSeconds: 86400,
-        },
-      },
-    },
-    {
-      urlPattern: /\/api\/categorias/,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "categorias-cache",
-        expiration: {
-          maxEntries: 10,
-          maxAgeSeconds: 86400,
-        },
-      },
-    },
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "offline-cache",
-        expiration: {
-          maxEntries: 200,
-        },
-        networkTimeoutSeconds: 3,
-      },
-    },
-  ],
-})(nextConfig);
+export default withPWA(nextConfig);
