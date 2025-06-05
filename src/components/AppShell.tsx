@@ -9,8 +9,9 @@ import { useUserPreferences } from "@/store/useUserPreferences";
 import DebugZustandPanel from "@/components/debug/DebugZustandPanel";
 import PwaDebugPanel from "@/components/debug/PwaDebugPanel";
 
-import LatencyMonitorGlobal from "./debug/LatencyMonitorGlobal";
+
 import { useLatencyInit } from "@/hooks/useLatencyInit";
+import LatencyMonitorGlobal from "@/components/debug/LatencyMonitorGlobal";
 
 export default function AppShell({
   children,
