@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-
+//passar esses types para o arquivo de types
 type SubeixoDTO = {
   id: string;
   nome: string;

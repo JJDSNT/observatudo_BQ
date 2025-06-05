@@ -1,4 +1,4 @@
-//src/components/categorias/CategoriasCard.tsx
+// src/components/categorias/CategoriasCard.tsx
 'use client';
 
 import { IconSelector, LucideIconName } from '@/components/IconSelector';
@@ -22,7 +22,7 @@ interface CategoriaCardProps {
     indicadorId: string
   ) => void;
   onDelete: (id: number) => void;
-  getNome?: (id: string) => string;
+  getNome: (id: string) => string;
   loading?: boolean;
 }
 

@@ -23,6 +23,7 @@
  * - Implementar validações (ex: evitar nomes em branco ou duplicados)
  * - Mostrar um toast de confirmação ao salvar ou resetar
  * - Adicionar suporte a persistência otimista ou undo/redo
+ * - Mensagem amigável quando edicaoLocal estiver vazio
  */
 
 "use client";
