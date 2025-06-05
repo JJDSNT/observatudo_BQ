@@ -5,7 +5,8 @@ import { SWRConfig } from 'swr';
 import SplashScreen from '@/components/SplashScreen';
 import GlobalHealthNotifier from '@/components/GlobalHealthNotifier';
 import { useSyncPreferencesWithFirebase } from '@/hooks/useSyncPreferencesWithFirebase';
-import DebugZustandPanel from './DebugZustandPanel';
+import DebugZustandPanel from './debug/DebugZustandPanel';
+import PwaDebugPanel from './debug/PwaDebugPanel';
 
 export default function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const [ready, setReady] = useState(false);
@@ -26,6 +27,8 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
       } catch {
         setMessage('Servidor indisponível. Tentando novamente...');
       } finally {
+        const elapsed = performance.now();
+        window.__splashTime = Math.round(elapsed);
         setTimeout(() => setReady(true), 500);
       }
     };
@@ -46,6 +49,7 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
       <GlobalHealthNotifier />
       {children}
       <DebugZustandPanel />
+      <PwaDebugPanel />
     </SWRConfig>
   );
 }
