@@ -18,10 +18,10 @@ export default function ComboBoxLocalidades({
   const { preferences, setPreferences } = useUserPreferences();
 
   const [ufSelecionado, setUfSelecionado] = useState(
-    preferences.estadoSelecionado ?? ""
+    preferences.selecionado?.estado ?? ""
   );
   const [cidadeSelecionada, setCidadeSelecionada] = useState(
-    preferences.cidadeSelecionada ?? ""
+    preferences.selecionado?.cidade ?? ""
   );
 
   const estadoAtual = estados.find((e) => e.value === ufSelecionado);
@@ -32,10 +32,15 @@ export default function ComboBoxLocalidades({
 
     onChange(cidadeSelecionada);
 
-    if (preferences.cidadeSelecionada !== cidadeSelecionada) {
-      setPreferences({ cidadeSelecionada });
+    if (preferences.selecionado?.cidade !== cidadeSelecionada) {
+      setPreferences({
+        selecionado: {
+          ...preferences.selecionado,
+          cidade: cidadeSelecionada,
+        },
+      });
     }
-  }, [cidadeSelecionada, onChange, preferences.cidadeSelecionada, setPreferences]);
+  }, [cidadeSelecionada, onChange, preferences.selecionado, setPreferences]);
 
   const handleChangeEstado = (uf: string) => {
     setUfSelecionado(uf);
@@ -45,8 +50,11 @@ export default function ComboBoxLocalidades({
     setCidadeSelecionada(cidadeDefault);
 
     setPreferences({
-      estadoSelecionado: uf,
-      cidadeSelecionada: cidadeDefault,
+      selecionado: {
+        ...preferences.selecionado,
+        estado: uf,
+        cidade: cidadeDefault,
+      },
     });
   };
 

@@ -1,4 +1,3 @@
-// src/app/configuracoes/page.tsx
 "use client";
 
 import { useUserPreferences } from "@/store/useUserPreferences";
@@ -21,13 +20,21 @@ export default function ConfiguracoesPage() {
     const estado = estados.find((e) => e.value === uf);
     const cidadePadrao = estado?.default ?? "";
     setPreferences({
-      estadoSelecionado: uf,
-      cidadeSelecionada: cidadePadrao,
+      selecionado: {
+        ...preferences.selecionado,
+        estado: uf,
+        cidade: cidadePadrao,
+      },
     });
   };
 
   const handleChangeCidade = (cidadeId: string) => {
-    setPreferences({ cidadeSelecionada: cidadeId });
+    setPreferences({
+      selecionado: {
+        ...preferences.selecionado,
+        cidade: cidadeId,
+      },
+    });
   };
 
   const toggleTema = () => {
@@ -43,7 +50,7 @@ export default function ConfiguracoesPage() {
   }, []);
 
   const estadoAtual = estados.find(
-    (e) => e.value === preferences.estadoSelecionado
+    (e) => e.value === preferences.selecionado?.estado
   );
   const cidades = estadoAtual?.children ?? [];
 
@@ -53,7 +60,7 @@ export default function ConfiguracoesPage() {
       : CATEGORIAS_DEFAULT;
 
   const eixoSelecionado = eixosDisponiveis.find(
-    (e) => e.id === preferences.eixoSelecionado
+    (e) => e.id === preferences.selecionado?.eixo
   );
 
   const nomeEixoSelecionado = eixoSelecionado
@@ -90,7 +97,7 @@ export default function ConfiguracoesPage() {
             </label>
             <select
               id="estado"
-              value={preferences.estadoSelecionado ?? ""}
+              value={preferences.selecionado?.estado ?? ""}
               onChange={(e) => handleChangeEstado(e.target.value)}
               className="border p-2 rounded min-w-[150px]"
             >
@@ -109,13 +116,13 @@ export default function ConfiguracoesPage() {
             </label>
             <select
               id="cidade"
-              value={preferences.cidadeSelecionada ?? ""}
+              value={preferences.selecionado?.cidade ?? ""}
               onChange={(e) => handleChangeCidade(e.target.value)}
-              disabled={!preferences.estadoSelecionado}
+              disabled={!preferences.selecionado?.estado}
               className="border p-2 rounded min-w-[200px]"
             >
               <option value="">
-                {preferences.estadoSelecionado
+                {preferences.selecionado?.estado
                   ? "Selecione"
                   : "Primeiro o estado"}
               </option>
@@ -214,24 +221,45 @@ export default function ConfiguracoesPage() {
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
-            checked={preferences.debugLatency ?? true}
-            onChange={(e) => setPreferences({ debugLatency: e.target.checked })}
+            checked={preferences.debug?.latency ?? true}
+            onChange={(e) =>
+              setPreferences({
+                debug: {
+                  ...preferences.debug,
+                  latency: e.target.checked,
+                },
+              })
+            }
           />
           Ativar painel de latência
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
-            checked={preferences.debugZustand ?? false}
-            onChange={(e) => setPreferences({ debugZustand: e.target.checked })}
+            checked={preferences.debug?.zustand ?? false}
+            onChange={(e) =>
+              setPreferences({
+                debug: {
+                  ...preferences.debug,
+                  zustand: e.target.checked,
+                },
+              })
+            }
           />
           Exibir painel do Zustand
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
-            checked={preferences.debugPwa ?? false}
-            onChange={(e) => setPreferences({ debugPwa: e.target.checked })}
+            checked={preferences.debug?.pwa ?? false}
+            onChange={(e) =>
+              setPreferences({
+                debug: {
+                  ...preferences.debug,
+                  pwa: e.target.checked,
+                },
+              })
+            }
           />
           Exibir painel do PWA
         </label>

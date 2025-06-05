@@ -9,7 +9,6 @@ import { useUserPreferences } from "@/store/useUserPreferences";
 import DebugZustandPanel from "@/components/debug/DebugZustandPanel";
 import PwaDebugPanel from "@/components/debug/PwaDebugPanel";
 
-
 import { useLatencyInit } from "@/hooks/useLatencyInit";
 import LatencyMonitorGlobal from "@/components/debug/LatencyMonitorGlobal";
 
@@ -60,9 +59,9 @@ export default function AppShell({
     >
       <GlobalHealthNotifier />
       {children}
-      {preferences.debugZustand && <DebugZustandPanel />}
-      {preferences.debugPwa && <PwaDebugPanel />}
-      {preferences.debugLatency && <LatencyMonitorGlobal />}
+      {preferences.debug?.zustand && <DebugZustandPanel />}
+      {preferences.debug?.pwa && <PwaDebugPanel />}
+      {preferences.debug?.latency && <LatencyMonitorGlobal />}
     </SWRConfig>
   );
 }

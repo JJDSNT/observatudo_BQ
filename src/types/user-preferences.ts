@@ -1,4 +1,3 @@
-// src/types/user-preferences.ts
 import type { CategoriaIndicador } from "@/types";
 
 /**
@@ -25,32 +24,23 @@ export interface UserPreferences {
    */
   notificacoesAtivas?: boolean;
 
-  debugZustand?: boolean;
-  debugPwa?: boolean;
-  debugLatency?: boolean
+  /**
+   * Grupo de preferências de debug
+   */
+  debug?: {
+    zustand?: boolean;
+    pwa?: boolean;
+    latency?: boolean;
+    latencyMonitor?: boolean;
+  };
 
   /**
-   * ID da cidade selecionada (localidade atual)
+   * Agrupamento dos filtros principais selecionados
    */
-  cidadeSelecionada?: string;
-
-  /**
-   * Sigla ou ID do estado selecionado
-   */
-  estadoSelecionado?: string;
-
-  /**
-   * ID da categoria atualmente selecionada
-   */
-  categoriaSelecionada?: number;
-
-  /**
-   * ID do eixo temático atualmente selecionado
-   */
-  eixoSelecionado?: number;
-
-  /**
-   * Lista de subeixos filtrados ou destacados
-   */
-  subeixosSelecionados?: string[];
+  selecionado?: {
+    estado?: string;
+    cidade?: string;
+    eixo?: number;
+    subeixos?: string[];
+  };
 }

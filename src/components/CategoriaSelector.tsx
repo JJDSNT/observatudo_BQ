@@ -1,4 +1,3 @@
-// src/components/CategoriaSelector.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -18,7 +17,7 @@ export default function CategoriaSelector({
 }: Readonly<CategoriaSelectorProps>) {
   const { preferences, setPreferences } = useUserPreferences();
   const [eixoSelecionado, setEixoSelecionado] = useState<number | undefined>(
-    preferences.eixoSelecionado ?? undefined
+    preferences.selecionado?.eixo ?? undefined
   );
 
   useEffect(() => {
@@ -38,13 +37,16 @@ export default function CategoriaSelector({
         : [];
 
     const precisaAtualizar =
-      preferences.eixoSelecionado !== eixoSelecionado ||
+      preferences.selecionado?.eixo !== eixoSelecionado ||
       JSON.stringify(preferences.categoriasIndicadores) !==
         JSON.stringify(categoriasIndicadores);
 
     if (precisaAtualizar) {
       setPreferences({
-        eixoSelecionado,
+        selecionado: {
+          ...preferences.selecionado,
+          eixo: eixoSelecionado,
+        },
         categoriasIndicadores,
       });
     }
@@ -55,16 +57,14 @@ export default function CategoriaSelector({
   return (
     <div className="flex flex-wrap gap-3">
       {eixos.map((eixo) => {
-        const Icon = LucideIcons[eixo.icone as keyof typeof LucideIcons] as React.ElementType;
+        const Icon = LucideIcons[eixo.icone as keyof typeof LucideIcons] as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
         const isActive = eixo.id === eixoSelecionado;
         const nomeEixo = formatarNomeCategoria(eixo);
 
         return (
           <button
             key={eixo.id}
-            onClick={() =>
-              setEixoSelecionado(isActive ? undefined : eixo.id)
-            }
+            onClick={() => setEixoSelecionado(isActive ? undefined : eixo.id)}
             aria-pressed={isActive}
             className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
               isActive
