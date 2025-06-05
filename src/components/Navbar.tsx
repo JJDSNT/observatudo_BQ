@@ -14,6 +14,7 @@ const links = [
   { label: "Global", href: "/world" },
   { label: "Sobre", href: "/sobre" },
   { label: "Categorias", href: "/configuracoes/categorias" },
+  { label: "Configurações", href: "/configuracoes" },
 ];
 
 export default function Navbar() {
