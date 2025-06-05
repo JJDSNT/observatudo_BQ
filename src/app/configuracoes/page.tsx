@@ -220,7 +220,6 @@ export default function ConfiguracoesPage() {
         <pre className="text-sm bg-zinc-100 dark:bg-zinc-900 p-3 rounded overflow-auto max-h-64">
           {infoHealthz}
         </pre>
-        {preferences.debugLatency && <LatencyMonitorGlobal />}
       </div>
     </section>
   );

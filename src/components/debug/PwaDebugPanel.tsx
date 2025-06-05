@@ -1,3 +1,4 @@
+// src/components/debug/PwaDebugPanel.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -48,8 +49,7 @@ export default function PwaDebugPanel() {
       window.matchMedia("(display-mode: standalone)").matches ||
       (typeof navigator !== "undefined" &&
         "standalone" in navigator &&
-        (navigator as Navigator & { standalone?: boolean }).standalone ===
-          true);
+        (navigator as Navigator & { standalone?: boolean }).standalone === true);
 
     setMetrics((prev) => ({ ...prev, isStandalone: standalone }));
 
@@ -86,7 +86,7 @@ export default function PwaDebugPanel() {
   };
 
   return (
-    <section className="text-xs p-4 border-t border-zinc-300 dark:border-zinc-700 mt-12 text-zinc-600 dark:text-zinc-400 space-y-2">
+    <div className="fixed bottom-4 left-4 z-50 w-80 max-h-[60vh] overflow-auto rounded-lg border bg-white dark:bg-zinc-900 p-4 text-xs shadow-lg space-y-2 text-zinc-600 dark:text-zinc-300">
       <h2 className="font-semibold text-sm">🔧 Painel de Debug PWA</h2>
       <p>📱 Modo: {metrics.isStandalone ? "PWA Instalado" : "Navegador"}</p>
       <p>⏱ Splash: {metrics.splashTime} ms</p>
@@ -111,6 +111,6 @@ export default function PwaDebugPanel() {
           </p>
         </>
       )}
-    </section>
+    </div>
   );
 }
