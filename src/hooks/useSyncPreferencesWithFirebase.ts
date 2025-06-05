@@ -1,34 +1,43 @@
-import { useEffect } from 'react';
+// src/hooks/useSyncPreferencesWithFirebase.ts
+import { useEffect, useRef } from 'react';
 import { useUserPreferences } from '@/store/useUserPreferences';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { useAuth } from './useAuth'; // assume que retorna { user }
+import { useAuth } from './useAuth';
 
 export function useSyncPreferencesWithFirebase() {
   const { user } = useAuth();
   const { preferences, setPreferences } = useUserPreferences();
 
-  // 🔄 Puxar do Firebase quando logar
-  useEffect(() => {
-    if (!user) return;
+  // Evita sobrescrever store local com dados antigos do Firebase
+  const syncedRef = useRef(false);
 
-    const sync = async () => {
+  // 🔄 Carrega preferências do Firebase após login
+  useEffect(() => {
+    if (!user || syncedRef.current) return;
+
+    const load = async () => {
       const ref = doc(db, 'users', user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
         const prefsFromFirebase = snap.data();
         setPreferences(prefsFromFirebase);
       }
+      syncedRef.current = true;
     };
 
-    sync();
-  }, [user]);
+    load();
+  }, [user, setPreferences]);
 
-  // ☁️ Salvar mudanças no Firestore
+  // ☁️ Salva preferências locais no Firebase após alteração
   useEffect(() => {
-    if (!user) return;
+    if (!user || !syncedRef.current) return;
 
-    const ref = doc(db, 'users', user.uid);
-    setDoc(ref, preferences, { merge: true });
+    const save = async () => {
+      const ref = doc(db, 'users', user.uid);
+      await setDoc(ref, preferences, { merge: true });
+    };
+
+    save();
   }, [preferences, user]);
 }

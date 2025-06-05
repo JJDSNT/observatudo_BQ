@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { SWRConfig } from 'swr';
 import SplashScreen from '@/components/SplashScreen';
 import GlobalHealthNotifier from '@/components/GlobalHealthNotifier';
+import { useSyncPreferencesWithFirebase } from '@/hooks/useSyncPreferencesWithFirebase';
+import DebugZustandPanel from './DebugZustandPanel';
 
 export default function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState('');
 
+  useSyncPreferencesWithFirebase();
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -42,6 +45,7 @@ export default function AppShell({ children }: Readonly<{ children: React.ReactN
     >
       <GlobalHealthNotifier />
       {children}
+      <DebugZustandPanel />
     </SWRConfig>
   );
 }
