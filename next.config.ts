@@ -1,11 +1,34 @@
 import type { NextConfig } from "next";
 import withPWA from "next-pwa";
 
-const withPWAConfig = withPWA({
+const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/",
+        has: [{ type: "host", value: "observatudo.com.br" }],
+        destination: "https://www.observatudo.com.br",
+        permanent: true,
+      },
+    ];
+  },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+    ],
+  },
+};
+
+export default withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
+  buildExcludes: [/middleware-manifest\.json$/], // garante exposição correta do SW
   runtimeCaching: [
     {
       urlPattern: /\/api\/indicadores/,
@@ -51,28 +74,4 @@ const withPWAConfig = withPWA({
       },
     },
   ],
-});
-
-const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      {
-        source: "/",
-        has: [{ type: "host", value: "observatudo.com.br" }],
-        destination: "https://www.observatudo.com.br",
-        permanent: true,
-      },
-    ];
-  },
-
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-    ],
-  },
-};
-
-export default withPWAConfig(nextConfig);
+})(nextConfig);
