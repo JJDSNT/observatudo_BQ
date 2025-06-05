@@ -1,4 +1,3 @@
-//src/components/ComboBoxLocalidades.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,30 +17,33 @@ export default function ComboBoxLocalidades({
 }: Readonly<ComboBoxLocalidadesProps>) {
   const { preferences, setPreferences } = useUserPreferences();
 
-  const [ufSelecionado, setUfSelecionado] = useState<string>(
+  const [ufSelecionado, setUfSelecionado] = useState(
     preferences.estadoSelecionado ?? ""
   );
-
-  const [cidadeSelecionada, setCidadeSelecionada] = useState<string>(
+  const [cidadeSelecionada, setCidadeSelecionada] = useState(
     preferences.cidadeSelecionada ?? ""
   );
 
   const estadoAtual = estados.find((e) => e.value === ufSelecionado);
-  const cidades = estadoAtual?.children || [];
+  const cidades = estadoAtual?.children ?? [];
 
   useEffect(() => {
-    console.log('📦 Zustand (local):', useUserPreferences.getState().preferences);
-    if (cidadeSelecionada) {
-      onChange(cidadeSelecionada);
+    if (!cidadeSelecionada) return;
+
+    onChange(cidadeSelecionada);
+
+    if (preferences.cidadeSelecionada !== cidadeSelecionada) {
       setPreferences({ cidadeSelecionada });
     }
-  }, [cidadeSelecionada, onChange, setPreferences]);
+  }, [cidadeSelecionada, onChange, preferences.cidadeSelecionada, setPreferences]);
 
-  const handleSelecionarUF = (uf: string) => {
+  const handleChangeEstado = (uf: string) => {
     setUfSelecionado(uf);
     const estado = estados.find((e) => e.value === uf);
-    const cidadeDefault = estado?.default || "";
+    const cidadeDefault = estado?.default ?? "";
+
     setCidadeSelecionada(cidadeDefault);
+
     setPreferences({
       estadoSelecionado: uf,
       cidadeSelecionada: cidadeDefault,
@@ -58,7 +60,7 @@ export default function ComboBoxLocalidades({
           <select
             id="select-uf"
             value={ufSelecionado}
-            onChange={(e) => handleSelecionarUF(e.target.value)}
+            onChange={(e) => handleChangeEstado(e.target.value)}
             className="border p-2 rounded w-24"
           >
             <option value="">UF</option>

@@ -1,25 +1,31 @@
-//src/app/configuracoes/page.tsx
+// src/app/configuracoes/page.tsx
 "use client";
 
 import { useUserPreferences } from "@/store/useUserPreferences";
 import { useEffect, useState } from "react";
 import localidadesJson from "@/data/localidades_dropdown.json";
-import type { PaisDropdown } from "@/types";
+import type { PaisDropdown, CategoriaIndicador, LucideIconName } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
+import categoriasJson from "@/data/categoriasIndicadores.json";
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
+
+// 🔄 Inicializar fora do componente para evitar redefinição a cada render
+const categoriasDefault: CategoriaIndicador[] = categoriasJson.map((eixo) => ({
+  ...eixo,
+  icone: eixo.icone as LucideIconName,
+}));
 
 export default function ConfiguracoesPage() {
   const { user, logout } = useAuth();
   const { preferences, setPreferences, clearPreferences } =
     useUserPreferences();
-
   const [infoHealthz, setInfoHealthz] = useState<string>("Carregando...");
 
   const handleChangeEstado = (uf: string) => {
     const estado = estados.find((e) => e.value === uf);
-    const cidadePadrao = estado?.default || "";
+    const cidadePadrao = estado?.default ?? "";
     setPreferences({
       estadoSelecionado: uf,
       cidadeSelecionada: cidadePadrao,
@@ -45,7 +51,23 @@ export default function ConfiguracoesPage() {
   const estadoAtual = estados.find(
     (e) => e.value === preferences.estadoSelecionado
   );
-  const cidades = estadoAtual?.children || [];
+  const cidades = estadoAtual?.children ?? [];
+
+  const eixosDisponiveis: CategoriaIndicador[] =
+    (preferences.categoriasIndicadores ?? []).length > 0
+      ? preferences.categoriasIndicadores!
+      : categoriasDefault;
+
+  const eixoSelecionado = eixosDisponiveis.find(
+    (e) => e.id === preferences.eixoSelecionado
+  );
+
+  const nomeEixoSelecionado = eixoSelecionado
+    ? eixoSelecionado.subeixos
+        .map((s) => s.nome)
+        .join(", ")
+        .replace(/, ([^,]*)$/, " & $1")
+    : "Nenhuma";
 
   return (
     <section className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-zinc-800 dark:text-zinc-200">
@@ -55,7 +77,7 @@ export default function ConfiguracoesPage() {
           Personalize sua experiência com o ObservaTudo
         </p>
       </header>
-      {/* Preferências Gerais */}
+
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Preferências Gerais</h2>
 
@@ -71,8 +93,11 @@ export default function ConfiguracoesPage() {
 
         <div className="flex gap-4 flex-wrap">
           <div>
-            <label className="block text-sm mb-1">Estado</label>
+            <label htmlFor="estado" className="block text-sm mb-1">
+              Estado
+            </label>
             <select
+              id="estado"
               value={preferences.estadoSelecionado ?? ""}
               onChange={(e) => handleChangeEstado(e.target.value)}
               className="border p-2 rounded min-w-[150px]"
@@ -87,8 +112,11 @@ export default function ConfiguracoesPage() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Cidade</label>
+            <label htmlFor="cidade" className="block text-sm mb-1">
+              Cidade
+            </label>
             <select
+              id="cidade"
               value={preferences.cidadeSelecionada ?? ""}
               onChange={(e) => handleChangeCidade(e.target.value)}
               disabled={!preferences.estadoSelecionado}
@@ -109,16 +137,19 @@ export default function ConfiguracoesPage() {
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Categoria selecionada</label>
+          <label htmlFor="categoriaSelecionada" className="block text-sm mb-1">
+            Categoria selecionada
+          </label>
           <input
+            id="categoriaSelecionada"
             type="text"
-            value={preferences.categoriaSelecionada ?? ""}
+            value={nomeEixoSelecionado}
             disabled
             className="border p-2 rounded bg-zinc-100 dark:bg-zinc-800 w-full"
           />
         </div>
       </div>
-      {/* Ações rápidas */}
+
       <div className="flex gap-4">
         <button
           onClick={clearPreferences}
@@ -135,7 +166,7 @@ export default function ConfiguracoesPage() {
           </button>
         )}
       </div>
-      {/* Exportar / Importar Preferências */}
+
       <div className="space-y-4 pt-6">
         <h2 className="text-xl font-semibold">
           Exportar / Importar Preferências
@@ -167,7 +198,6 @@ export default function ConfiguracoesPage() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = () => {
                   try {
@@ -184,16 +214,14 @@ export default function ConfiguracoesPage() {
           </label>
         </div>
       </div>
-      {/* Painéis de Debug */}
+
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Painéis de Debug</h2>
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={preferences.debugLatency ?? true}
-            onChange={(e) =>
-              setPreferences({ debugLatency: e.target.checked })
-            }
+            onChange={(e) => setPreferences({ debugLatency: e.target.checked })}
           />
           Ativar painel de latência
         </label>
@@ -214,7 +242,7 @@ export default function ConfiguracoesPage() {
           Exibir painel do PWA
         </label>
       </div>
-      {/* Sistema */}
+
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Sistema</h2>
         <pre className="text-sm bg-zinc-100 dark:bg-zinc-900 p-3 rounded overflow-auto max-h-64">

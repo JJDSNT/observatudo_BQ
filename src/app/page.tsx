@@ -1,10 +1,11 @@
+// src/app/page.tsx
 "use client";
 
+import { useState, useEffect } from "react";
 import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
 import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
-import { useState, useEffect } from "react";
 import eixosTematicosJson from "@/data/categoriasIndicadores.json";
 import { CategoriaIndicador, Subeixo } from "@/types";
 import type { LucideIconName } from "@/types";
@@ -35,7 +36,6 @@ export default function Home() {
 
   return (
     <section className="space-y-6">
-
       <ComboBoxLocalidades onChange={setMunicipioId} />
       <CategoriaSelector
         eixos={EIXOS_TEMATICOS}

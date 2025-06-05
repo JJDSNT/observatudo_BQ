@@ -1,51 +1,67 @@
+// src/components/CategoriaSelector.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-//passar esses types para o arquivo de types
-type SubeixoDTO = {
-  id: string;
-  nome: string;
-  indicadores: string[];
-};
-
-type EixoTematico = {
-  id: number;
-  cor: string;
-  icone: string; // ex: "globe", "heart"
-  subeixos: SubeixoDTO[];
-};
+import { useUserPreferences } from "@/store/useUserPreferences";
+import type { CategoriaIndicador, Subeixo } from "@/types";
 
 type CategoriaSelectorProps = {
-  eixos: EixoTematico[];
-  onCategoriaChange: (subeixos: SubeixoDTO[]) => void;
+  eixos: CategoriaIndicador[];
+  onCategoriaChange: (subeixos: Subeixo[]) => void;
 };
 
 export default function CategoriaSelector({
   eixos,
   onCategoriaChange,
 }: Readonly<CategoriaSelectorProps>) {
-  const [eixoSelecionado, setEixoSelecionado] = useState<number | null>(null);
+  const { preferences, setPreferences } = useUserPreferences();
+  const [eixoSelecionado, setEixoSelecionado] = useState<number | undefined>(
+    preferences.eixoSelecionado ?? undefined
+  );
 
   useEffect(() => {
     const eixo = eixos.find((e) => e.id === eixoSelecionado);
-    const subeixosSelecionados = eixo ? eixo.subeixos : [];
-    onCategoriaChange(subeixosSelecionados);
-  }, [eixoSelecionado, eixos, onCategoriaChange]);
+    const subeixosSelecionados = eixo?.subeixos ?? [];
 
-  const formatarNome = (subeixos: SubeixoDTO[]) => {
+    const categoriasIndicadores =
+      eixoSelecionado !== undefined && eixo
+        ? [
+            {
+              id: eixoSelecionado,
+              cor: eixo.cor,
+              icone: eixo.icone,
+              subeixos: subeixosSelecionados,
+            },
+          ]
+        : [];
+
+    const precisaAtualizar =
+      preferences.eixoSelecionado !== eixoSelecionado ||
+      JSON.stringify(preferences.categoriasIndicadores) !==
+        JSON.stringify(categoriasIndicadores);
+
+    if (precisaAtualizar) {
+      setPreferences({
+        eixoSelecionado,
+        categoriasIndicadores,
+      });
+    }
+
+    onCategoriaChange(subeixosSelecionados);
+  }, [eixoSelecionado, eixos, preferences, onCategoriaChange, setPreferences]);
+
+  const formatarNome = (subeixos: Subeixo[]) => {
     const nomes = subeixos.map((s) => s.nome);
-    if (nomes.length === 1) return nomes[0];
-    return nomes.slice(0, -1).join(", ") + " & " + nomes[nomes.length - 1];
+    return nomes.length <= 1
+      ? nomes[0] ?? ""
+      : nomes.slice(0, -1).join(", ") + " & " + nomes[nomes.length - 1];
   };
 
   return (
     <div className="flex flex-wrap gap-3">
       {eixos.map((eixo) => {
-        const Icon =
-          (LucideIcons[eixo.icone as keyof typeof LucideIcons] ??
-            LucideIcons.LayoutGrid) as LucideIcon;
+        const Icon = LucideIcons[eixo.icone as keyof typeof LucideIcons] as React.ElementType;
         const isActive = eixo.id === eixoSelecionado;
         const nomeEixo = formatarNome(eixo.subeixos);
 
@@ -53,8 +69,9 @@ export default function CategoriaSelector({
           <button
             key={eixo.id}
             onClick={() =>
-              setEixoSelecionado(isActive ? null : eixo.id)
+              setEixoSelecionado(isActive ? undefined : eixo.id)
             }
+            aria-pressed={isActive}
             className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
               isActive
                 ? "text-white"
