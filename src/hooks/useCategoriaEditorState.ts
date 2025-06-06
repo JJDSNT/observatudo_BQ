@@ -1,9 +1,8 @@
 // src/hooks/useCategoriaEditorState.ts
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCategoriasPreferidas } from '@/hooks/useCategoriasPreferidas';
-
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 import { CategoriaIndicador } from '@/types';
 import {
@@ -11,12 +10,8 @@ import {
   criarSubeixoPadrao,
 } from '@/utils/categoriaUtils';
 
-// 🔧 Funções auxiliares para edição
-function atualizarNomeSubeixoNaCategoria(
-  categoria: CategoriaIndicador,
-  subeixoId: string,
-  novoNome: string
-): CategoriaIndicador {
+// 🔧 Utilitários internos
+function atualizarNomeSubeixoNaCategoria(categoria: CategoriaIndicador, subeixoId: string, novoNome: string): CategoriaIndicador {
   return {
     ...categoria,
     subeixos: categoria.subeixos.map((s) =>
@@ -32,21 +27,14 @@ function adicionarSubeixoNaCategoria(categoria: CategoriaIndicador): CategoriaIn
   };
 }
 
-function removerSubeixoNaCategoria(
-  categoria: CategoriaIndicador,
-  subeixoId: string
-): CategoriaIndicador {
+function removerSubeixoNaCategoria(categoria: CategoriaIndicador, subeixoId: string): CategoriaIndicador {
   return {
     ...categoria,
     subeixos: categoria.subeixos.filter((s) => s.id !== subeixoId),
   };
 }
 
-function removerIndicador(
-  categoria: CategoriaIndicador,
-  subeixoId: string,
-  indicadorId: string
-): CategoriaIndicador {
+function removerIndicador(categoria: CategoriaIndicador, subeixoId: string, indicadorId: string): CategoriaIndicador {
   return {
     ...categoria,
     subeixos: categoria.subeixos.map((s) =>
@@ -81,6 +69,11 @@ export function useCategoriaEditorState() {
     setCategoriasIndicadores(edicaoLocal);
   }, [edicaoLocal, setCategoriasIndicadores]);
 
+  const temAlteracoes = useMemo(() => {
+    return JSON.stringify(edicaoLocal) !== JSON.stringify(categoriasIndicadores);
+  }, [edicaoLocal, categoriasIndicadores]);
+
+  // Ações
   const deletarCategoria = useCallback((id: number) => {
     setEdicaoLocal((prev) => prev.filter((cat) => cat.id !== id));
   }, []);
@@ -137,6 +130,7 @@ export function useCategoriaEditorState() {
     edicaoLocal,
     loading,
     error,
+    temAlteracoes,
     adicionarCategoria,
     atualizarCategoria,
     deletarCategoria,

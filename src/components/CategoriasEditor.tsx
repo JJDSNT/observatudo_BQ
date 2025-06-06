@@ -1,37 +1,10 @@
-// src/components/CategoriasEditor.tsx
-
-/**
- * 📘 CATEGORIAS EDITOR
- *
- * Esta página permite editar as categorias e seus respectivos subeixos e indicadores.
- *
- * ✅ FUNCIONALIDADES IMPLEMENTADAS:
- * - Carregamento dos dados salvos no banco (hook `useCategoriasIndicadores`)
- * - Fallback automático para `categoriasIndicadores.json` caso o banco esteja vazio
- * - Edição de cor e ícone da categoria
- * - Adição e remoção de categorias
- * - Adição e remoção de subeixos
- * - Edição de nome do subeixo
- * - Remoção de indicadores de um subeixo
- * - Exibição dos nomes dos indicadores (hook `useIndicadorNomes`)
- * - Organização dos componentes em arquivos separados (`CategoriaCard`, `SubeixoCard`)
- *
- * 💡 SUGESTÕES FUTURAS:
- * - Adicionar botão de reset para restaurar categorias padrão do JSON manualmente
- * - Implementar "drag and drop" para reordenar categorias e subeixos (dnd-kit)
- * - Adicionar indicadores a subeixos usando um seletor baseado em busca (`buscarIndicadores`)
- * - Implementar validações (ex: evitar nomes em branco ou duplicados)
- * - Mostrar um toast de confirmação ao salvar ou resetar
- * - Adicionar suporte a persistência otimista ou undo/redo
- * - Mensagem amigável quando edicaoLocal estiver vazio
- */
-
 "use client";
 
 import { CategoriaCard } from "@/components/categorias/CategoriaCard";
 import { LucideIconName } from "@/types";
 import { useCategoriaEditorState } from "@/hooks/useCategoriaEditorState";
 import { useIndicadorNomes } from "@/hooks/useIndicadorNomes";
+import { AlertTriangle } from "lucide-react";
 
 const iconesDisponiveis: LucideIconName[] = [
   "Circle",
@@ -48,6 +21,7 @@ export default function CategoriasEditor() {
     edicaoLocal,
     loading,
     error,
+    temAlteracoes,
     adicionarCategoria,
     atualizarCategoria,
     deletarCategoria,
@@ -58,12 +32,10 @@ export default function CategoriasEditor() {
     salvarAlteracoes,
   } = useCategoriaEditorState();
 
-  // 🔍 Reúne todos os IDs de indicadores usados
   const todosIndicadores = edicaoLocal.flatMap((categoria) =>
     categoria.subeixos.flatMap((s) => s.indicadores)
   );
 
-  // Usa a nova API do hook
   const { getNome, loading: loadingNomes } =
     useIndicadorNomes(todosIndicadores);
 
@@ -73,6 +45,21 @@ export default function CategoriasEditor() {
   return (
     <section className="space-y-6">
       <h2 className="text-2xl font-bold">Editor de Categorias</h2>
+
+      {temAlteracoes && (
+        <div className="fixed bottom-4 right-4 z-50 bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg shadow-md flex items-start gap-3 max-w-sm">
+          <AlertTriangle className="w-5 h-5 mt-1 flex-shrink-0" />
+          <div className="text-sm">
+            <strong>Alterações pendentes</strong>
+            <br />
+            Clique em{" "}
+            <span className="underline font-medium">
+              Salvar Alterações
+            </span>{" "}
+            para persistir suas edições.
+          </div>
+        </div>
+      )}
 
       {loadingNomes && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -110,7 +97,12 @@ export default function CategoriasEditor() {
 
         <button
           onClick={salvarAlteracoes}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
+          disabled={!temAlteracoes}
+          className={`px-4 py-2 rounded text-white cursor-pointer transition-colors ${
+            temAlteracoes
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
         >
           Salvar Alterações
         </button>
