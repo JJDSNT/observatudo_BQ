@@ -2,7 +2,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useCategoriasIndicadores } from './useCategoriasIndicadores';
+import { useCategoriasPreferidas } from '@/hooks/useCategoriasPreferidas';
+
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 import { CategoriaIndicador } from '@/types';
 import {
@@ -10,25 +11,68 @@ import {
   criarSubeixoPadrao,
 } from '@/utils/categoriaUtils';
 
+// 🔧 Funções auxiliares para edição
+function atualizarNomeSubeixoNaCategoria(
+  categoria: CategoriaIndicador,
+  subeixoId: string,
+  novoNome: string
+): CategoriaIndicador {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.map((s) =>
+      s.id === subeixoId ? { ...s, nome: novoNome } : s
+    ),
+  };
+}
+
+function adicionarSubeixoNaCategoria(categoria: CategoriaIndicador): CategoriaIndicador {
+  return {
+    ...categoria,
+    subeixos: [...categoria.subeixos, criarSubeixoPadrao(categoria.id)],
+  };
+}
+
+function removerSubeixoNaCategoria(
+  categoria: CategoriaIndicador,
+  subeixoId: string
+): CategoriaIndicador {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.filter((s) => s.id !== subeixoId),
+  };
+}
+
+function removerIndicador(
+  categoria: CategoriaIndicador,
+  subeixoId: string,
+  indicadorId: string
+): CategoriaIndicador {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.map((s) =>
+      s.id === subeixoId
+        ? { ...s, indicadores: s.indicadores.filter((id) => id !== indicadorId) }
+        : s
+    ),
+  };
+}
+
 export function useCategoriaEditorState() {
   const {
     categoriasIndicadores,
     setCategoriasIndicadores,
     loading,
     error,
-  } = useCategoriasIndicadores();
+  } = useCategoriasPreferidas();
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
   useEffect(() => {
-    const categoriasValidas =
-      Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0;
-
-    if (categoriasValidas) {
-      console.log('✅ Carregando categorias do banco de dados');
+    if (Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0) {
+      console.log('✅ Carregando categorias preferidas do usuário');
       setEdicaoLocal(categoriasIndicadores);
     } else if (!loading) {
-      console.warn('⚠️ Nenhuma categoria encontrada. Usando padrão do arquivo TS...');
+      console.warn('⚠️ Nenhuma preferência encontrada. Carregando categorias padrão do sistema.');
       setEdicaoLocal(CATEGORIAS_DEFAULT);
     }
   }, [categoriasIndicadores, loading]);
@@ -42,47 +86,30 @@ export function useCategoriaEditorState() {
   }, []);
 
   const adicionarCategoria = useCallback(() => {
-    const novaCategoria = criarCategoriaPadrao();
-    setEdicaoLocal((prev) => [...prev, novaCategoria]);
+    setEdicaoLocal((prev) => [...prev, criarCategoriaPadrao()]);
   }, []);
 
-  const atualizarCategoria = useCallback((
-    id: number,
-    atualizacao: Partial<CategoriaIndicador>
-  ) => {
+  const atualizarCategoria = useCallback((id: number, atualizacao: Partial<CategoriaIndicador>) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) => (cat.id === id ? { ...cat, ...atualizacao } : cat))
     );
   }, []);
 
-  const atualizarNomeSubeixo = useCallback((
-    categoriaId: number,
-    subeixoId: string,
-    novoNome: string
-  ) => {
-    setEdicaoLocal((prev) =>
-      prev.map((cat) =>
-        cat.id === categoriaId
-          ? {
-              ...cat,
-              subeixos: cat.subeixos.map((s) =>
-                s.id === subeixoId ? { ...s, nome: novoNome } : s
-              ),
-            }
-          : cat
-      )
-    );
-  }, []);
+  const atualizarNomeSubeixo = useCallback(
+    (categoriaId: number, subeixoId: string, novoNome: string) => {
+      setEdicaoLocal((prev) =>
+        prev.map((cat) =>
+          cat.id === categoriaId ? atualizarNomeSubeixoNaCategoria(cat, subeixoId, novoNome) : cat
+        )
+      );
+    },
+    []
+  );
 
   const adicionarSubeixo = useCallback((categoriaId: number) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
-        cat.id === categoriaId
-          ? {
-              ...cat,
-              subeixos: [...cat.subeixos, criarSubeixoPadrao(categoriaId)],
-            }
-          : cat
+        cat.id === categoriaId ? adicionarSubeixoNaCategoria(cat) : cat
       )
     );
   }, []);
@@ -90,39 +117,21 @@ export function useCategoriaEditorState() {
   const removerSubeixo = useCallback((categoriaId: number, subeixoId: string) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
-        cat.id === categoriaId
-          ? {
-              ...cat,
-              subeixos: cat.subeixos.filter((s) => s.id !== subeixoId),
-            }
-          : cat
+        cat.id === categoriaId ? removerSubeixoNaCategoria(cat, subeixoId) : cat
       )
     );
   }, []);
 
-  const removerIndicadorSubeixo = useCallback((
-    categoriaId: number,
-    subeixoId: string,
-    indicadorId: string
-  ) => {
-    setEdicaoLocal((prev) =>
-      prev.map((cat) =>
-        cat.id === categoriaId
-          ? {
-              ...cat,
-              subeixos: cat.subeixos.map((s) =>
-                s.id === subeixoId
-                  ? {
-                      ...s,
-                      indicadores: s.indicadores.filter((id) => id !== indicadorId),
-                    }
-                  : s
-              ),
-            }
-          : cat
-      )
-    );
-  }, []);
+  const removerIndicadorSubeixo = useCallback(
+    (categoriaId: number, subeixoId: string, indicadorId: string) => {
+      setEdicaoLocal((prev) =>
+        prev.map((cat) =>
+          cat.id === categoriaId ? removerIndicador(cat, subeixoId, indicadorId) : cat
+        )
+      );
+    },
+    []
+  );
 
   return {
     edicaoLocal,

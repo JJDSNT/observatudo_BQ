@@ -1,16 +1,18 @@
-// src/hooks/useCategoriasIndicadores.ts
+// src/hooks/useCategoriasPreferidas.ts
 "use client";
 
 import { useUserPreferences } from "./useUserPreferences";
 import { CategoriaIndicador } from "@/types";
 
-export function useCategoriasIndicadores() {
-  const { preferencias, updatePreferencias, loading, error } =
-    useUserPreferences();
+/**
+ * 🎯 Hook para gerenciar as categorias personalizadas definidas pelo usuário.
+ * Utiliza `useUserPreferences` para persistência local.
+ */
+export function useCategoriasPreferidas() {
+  const { preferencias, updatePreferencias, loading, error } = useUserPreferences();
 
   const categoriasIndicadores: CategoriaIndicador[] | undefined =
-    Array.isArray(preferencias?.categoriasIndicadores) &&
-    preferencias.categoriasIndicadores.length > 0
+    Array.isArray(preferencias?.categoriasIndicadores) && preferencias.categoriasIndicadores.length > 0
       ? preferencias.categoriasIndicadores
       : undefined;
 

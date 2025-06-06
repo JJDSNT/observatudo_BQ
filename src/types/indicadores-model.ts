@@ -52,3 +52,12 @@ export interface LocalidadeFullResponse {
   estado: LocalidadePayload;
   pais: LocalidadePayload;
 }
+
+// --- Cache
+export interface IndicadoresPayload {
+  categoriaId: number;
+  estadoId: string;
+  cidadeId: string;
+  subeixos: SubeixoResultado[];
+  atualizadoEm: string; // ISO string (ex: "2025-06-05T22:14:00Z")
+}
