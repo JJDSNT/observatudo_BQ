@@ -38,3 +38,5 @@ export function useIndicadorNomes(indicadorIds: string[]) {
     getNome: (id: string) => mapa?.get(id) ?? id,
   };
 }
+
+export type GetNomeIndicadorFn = (id: string) => string;

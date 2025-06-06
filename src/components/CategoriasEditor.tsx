@@ -1,10 +1,23 @@
 "use client";
 
-import { CategoriaCard } from "@/components/categorias/CategoriaCard";
 import { LucideIconName } from "@/types";
 import { useCategoriaEditorState } from "@/hooks/useCategoriaEditorState";
 import { useIndicadorNomes } from "@/hooks/useIndicadorNomes";
 import { AlertTriangle } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableCategoria } from "./categorias/SortableCategoria";
+import type { DragEndEvent } from '@dnd-kit/core';
 
 const iconesDisponiveis: LucideIconName[] = [
   "Circle",
@@ -30,6 +43,7 @@ export default function CategoriasEditor() {
     atualizarNomeSubeixo,
     removerIndicadorSubeixo,
     salvarAlteracoes,
+    reordenarCategorias,
   } = useCategoriaEditorState();
 
   const todosIndicadores = edicaoLocal.flatMap((categoria) =>
@@ -38,6 +52,24 @@ export default function CategoriasEditor() {
 
   const { getNome, loading: loadingNomes } =
     useIndicadorNomes(todosIndicadores);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = edicaoLocal.findIndex((c) => c.id === active.id);
+    const newIndex = edicaoLocal.findIndex((c) => c.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const novaOrdem = arrayMove(edicaoLocal, oldIndex, newIndex).map(
+      (c) => c.id
+    );
+    reordenarCategorias(novaOrdem);
+  }
 
   if (loading) return <p>Carregando categorias...</p>;
   if (error) return <p>Erro: {error}</p>;
@@ -69,23 +101,34 @@ export default function CategoriasEditor() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {edicaoLocal.map((categoria) => (
-          <CategoriaCard
-            key={categoria.id}
-            categoria={categoria}
-            onUpdate={atualizarCategoria}
-            onUpdateSubeixo={atualizarNomeSubeixo}
-            onRemoveIndicador={removerIndicadorSubeixo}
-            iconesDisponiveis={iconesDisponiveis}
-            onDelete={deletarCategoria}
-            onAddSubeixo={adicionarSubeixo}
-            onRemoveSubeixo={removerSubeixo}
-            getNome={getNome}
-            loading={loadingNomes}
-          />
-        ))}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={edicaoLocal.map((c) => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {edicaoLocal.map((categoria) => (
+              <SortableCategoria
+                key={categoria.id}
+                categoria={categoria}
+                onUpdate={atualizarCategoria}
+                onUpdateSubeixo={atualizarNomeSubeixo}
+                onRemoveIndicador={removerIndicadorSubeixo}
+                iconesDisponiveis={iconesDisponiveis}
+                onDelete={deletarCategoria}
+                onAddSubeixo={adicionarSubeixo}
+                onRemoveSubeixo={removerSubeixo}
+                getNome={getNome}
+                loading={loadingNomes}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       <div className="flex gap-4">
         <button
