@@ -44,9 +44,7 @@ export const useUserPreferences = create<UserPreferencesStore>()(
               categoriasIndicadores: CATEGORIAS_DEFAULT,
             },
           }));
-          console.log(
-            "ℹ️ categoriasIndicadores default carregadas no Zustand."
-          );
+          console.log("ℹ️ categoriasIndicadores default carregadas no Zustand.");
         }
       },
     }),
