@@ -4,7 +4,7 @@ import { viewport } from "./viewport";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
-import AppShell from "@/components/AppShell";
+import AppShell from "@/app/appshell";
 import Navbar from "@/components/Navbar";
 import { ThemeApplier } from '@/components/Theme/ThemeApplier';
 
