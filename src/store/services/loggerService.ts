@@ -1,0 +1,1 @@
+Logger reutilizável que respeita configuração de debug.

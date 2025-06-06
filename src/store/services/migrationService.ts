@@ -1,0 +1,1 @@
+Migra preferências legadas para nova estrutura.
