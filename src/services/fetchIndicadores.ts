@@ -1,12 +1,13 @@
 // src/services/fetchIndicadores.ts
-import { getLocalidadeFullPorSubeixos } from "./indicadores";
+import { getLocalidadeFullPorSubeixos } from "@/services/indicadores";
 import { useIndicadoresStore } from "@/store/indicadoresCacheStore";
 import type {
-  CategoriaIndicador,
+  Categoria,
   Indicador,
   IndicadoresPayload,
   SubeixoResultado,
-} from "@/types/indicadores-model";
+  Localidade,
+} from "@/types";
 
 // 🏷️ Tipos para dados brutos da API
 interface RawSeriePonto {
@@ -38,8 +39,7 @@ function sanitizeIndicador(raw: RawIndicador): Indicador {
     descricao: typeof raw.descricao === "string" ? raw.descricao : undefined,
     unidade: typeof raw.unidade === "string" ? raw.unidade : "",
     fonte: typeof raw.fonte === "string" ? raw.fonte : "",
-    periodicidade:
-      typeof raw.periodicidade === "string" ? raw.periodicidade : "",
+    periodicidade: typeof raw.periodicidade === "string" ? raw.periodicidade : "",
     serie: Array.isArray(raw.serie)
       ? raw.serie.map((p: RawSeriePonto) => ({
           data: typeof p?.data === "string" ? p.data : "",
@@ -64,29 +64,29 @@ function sanitizeSubeixoResultado(raw: RawSubeixoResultado): SubeixoResultado {
  * 🔄 Busca e armazena os indicadores para a localidade e categoria selecionadas.
  */
 export async function fetchIndicadoresParaSelecionado(
-  estadoId: string,
-  cidadeId: string,
+  localidade: Localidade,
   categoriaId: number,
-  categoria: CategoriaIndicador
+  categoria: Categoria
 ): Promise<IndicadoresPayload> {
   const store = useIndicadoresStore.getState();
+
   const resposta = await getLocalidadeFullPorSubeixos(
-    cidadeId,
+    localidade.cidade,
     categoria.subeixos
   );
+
   const subeixos = Array.isArray(resposta?.municipio?.subeixos)
     ? resposta.municipio.subeixos.map(sanitizeSubeixoResultado)
     : [];
+
   const payload: IndicadoresPayload = {
     categoriaId,
-    estadoId,
-    cidadeId,
+    localidade,
     atualizadoEm: new Date().toISOString(),
     subeixos,
   };
 
-  store.setPayload(estadoId, cidadeId, payload);
+  store.setPayload(localidade.estado, localidade.cidade, payload);
 
-  // ✅ retorna o payload
   return payload;
 }

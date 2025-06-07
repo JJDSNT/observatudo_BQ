@@ -1,25 +1,25 @@
-//src/store/preferencesStore.ts
+// src/store/preferencesStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
-  DebugModules,
-  LocalizacaoSelecionada,
+  Categoria,
   DebugConfig,
-  CategoriaIndicador,
+  DebugModules,
+  Selecionado,
 } from '@/types';
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 
 interface PreferencesStore {
   tema: 'claro' | 'escuro' | 'auto';
-  selecionado: LocalizacaoSelecionada;
+  selecionado: Partial<Selecionado>;
   debug: DebugConfig;
-  categoriasIndicadores: CategoriaIndicador[];
+  categoriasIndicadores: Categoria[];
 
   setTema: (tema: 'claro' | 'escuro' | 'auto') => void;
-  setSelecionado: (s: LocalizacaoSelecionada) => void;
+  setSelecionado: (s: Partial<Selecionado>) => void;
   setDebug: (debug: DebugConfig) => void;
   setDebugModule: (mod: keyof DebugModules, val: boolean) => void;
-  setCategoriasIndicadores: (categorias: CategoriaIndicador[]) => void;
+  setCategoriasIndicadores: (categorias: Categoria[]) => void;
   initializeDefaultsIfNeeded: () => void;
 }
 
@@ -27,7 +27,11 @@ export const usePreferencesStore = create<PreferencesStore>()(
   persist(
     (set, get) => ({
       tema: 'auto',
-      selecionado: { cidade: '', estado: '', eixo: 0 },
+      selecionado: {
+        estado: '',
+        cidade: '',
+        categoriaId: undefined,
+      },
       debug: {
         enabled: false,
         logLevel: 'warn',

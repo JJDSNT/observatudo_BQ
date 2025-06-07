@@ -1,9 +1,8 @@
 // src/types/preferences.ts
-import type { Categoria } from '@/types/indicadores-model';
-import type { Localizacao } from '@/types/location';
+import type { Categoria, Localidade } from '@/types';
 
-export interface Selecionado extends Localizacao {
-  categoriaId: number;
+export interface Selecionado extends Localidade {
+  categoriaId?: number;
 }
 
 export interface DebugModules {

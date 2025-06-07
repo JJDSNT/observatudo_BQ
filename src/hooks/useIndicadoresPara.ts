@@ -7,10 +7,6 @@ import { useIndicadoresStore } from '@/store/indicadoresCacheStore';
 import { fetchIndicadoresParaSelecionado } from '@/services/fetchIndicadores';
 import type { IndicadoresPayload, Categoria } from '@/types';
 
-/**
- * Hook que retorna os indicadores agrupados por eixo para a localidade selecionada.
- * Opcionalmente realiza o fetch caso não estejam em cache.
- */
 export function useIndicadoresPara(fetchIfMissing = false) {
   const selecionado = usePreferencesStore((s) => s.selecionado);
   const categorias = usePreferencesStore((s) => s.categoriasIndicadores);
@@ -20,19 +16,19 @@ export function useIndicadoresPara(fetchIfMissing = false) {
 
   const estado = selecionado?.estado?.trim();
   const cidade = selecionado?.cidade?.trim();
-  const categoriaId = selecionado?.eixo;
+  const categoriaId = selecionado?.categoriaId;
 
-  const categoria: CategoriaIndicador | undefined = categorias?.find(
+  const categoria: Categoria | undefined = categorias?.find(
     (c) => c.id === categoriaId
   );
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const payload: IndicadoresPayload | null =
     estado && cidade && categoriaId !== undefined
       ? getPayload(estado, cidade) ?? null
       : null;
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!fetchIfMissing || !estado || !cidade || categoriaId === undefined || !categoria) return;
@@ -45,14 +41,15 @@ export function useIndicadoresPara(fetchIfMissing = false) {
       setError(null);
       try {
         const dados = await fetchIndicadoresParaSelecionado(
-          estado,
-          cidade,
+          { estado, cidade },
           categoriaId,
           categoria
         );
         setPayload(estado, cidade, dados);
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Erro desconhecido ao buscar indicadores');
+        setError(
+          err instanceof Error ? err.message : 'Erro desconhecido ao buscar indicadores'
+        );
       } finally {
         setLoading(false);
       }

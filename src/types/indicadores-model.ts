@@ -1,6 +1,6 @@
 // src/types/indicadores-model.ts
 import type { LucideIconName } from '@/types/lucide-icons';
-import type { Localizacao } from '@types/location';
+import type { Localidade } from '@/types';
 
 // --- Indicadores
 export interface ValorSerie {
@@ -57,7 +57,7 @@ export interface LocalidadeFullResponse {
 // --- Cache
 export interface IndicadoresPayload {
   categoriaId: number;
-  localizacao: Localizacao;
+  localidade: Localidade;
   subeixos: SubeixoResultado[];
   atualizadoEm: string; // ISO string (ex: "2025-06-05T22:14:00Z")
 }

@@ -1,66 +1,23 @@
+// src/hooks/useCategoriaEditorState.ts
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCategorias } from '@/store/hooks/useCategorias';
 import { usePreferencesStore } from '@/store/preferencesStore';
-
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
-import { CategoriaIndicador } from '@/types';
+import { Categoria } from '@/types';
 import {
   criarCategoriaPadrao,
-  criarSubeixoPadrao,
+  adicionarSubeixo,
+  removerSubeixo,
+  removerIndicador,
 } from '@/utils/categoriaUtils';
-
-function atualizarNomeSubeixoNaCategoria(
-  categoria: CategoriaIndicador,
-  subeixoId: string,
-  novoNome: string
-): CategoriaIndicador {
-  return {
-    ...categoria,
-    subeixos: categoria.subeixos.map((s) =>
-      s.id === subeixoId ? { ...s, nome: novoNome } : s
-    ),
-  };
-}
-
-function adicionarSubeixoNaCategoria(categoria: CategoriaIndicador): CategoriaIndicador {
-  return {
-    ...categoria,
-    subeixos: [...categoria.subeixos, criarSubeixoPadrao(categoria.id)],
-  };
-}
-
-function removerSubeixoNaCategoria(
-  categoria: CategoriaIndicador,
-  subeixoId: string
-): CategoriaIndicador {
-  return {
-    ...categoria,
-    subeixos: categoria.subeixos.filter((s) => s.id !== subeixoId),
-  };
-}
-
-function removerIndicador(
-  categoria: CategoriaIndicador,
-  subeixoId: string,
-  indicadorId: string
-): CategoriaIndicador {
-  return {
-    ...categoria,
-    subeixos: categoria.subeixos.map((s) =>
-      s.id === subeixoId
-        ? { ...s, indicadores: s.indicadores.filter((id) => id !== indicadorId) }
-        : s
-    ),
-  };
-}
 
 export function useCategoriaEditorState() {
   const categoriasIndicadores = useCategorias();
-  const setCategoriasIndicadores = usePreferencesStore((s) => s.setCategoriasIndicadores);
+  const setCategoriasIndicadores = usePreferencesStore((state) => state.setCategoriasIndicadores);
 
-  const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
+  const [edicaoLocal, setEdicaoLocal] = useState<Categoria[]>([]);
 
   useEffect(() => {
     if (Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0) {
@@ -85,7 +42,7 @@ export function useCategoriaEditorState() {
   }, []);
 
   const atualizarCategoria = useCallback(
-    (id: number, atualizacao: Partial<CategoriaIndicador>) => {
+    (id: number, atualizacao: Partial<Categoria>) => {
       setEdicaoLocal((prev) =>
         prev.map((cat) => (cat.id === id ? { ...cat, ...atualizacao } : cat))
       );
@@ -93,29 +50,18 @@ export function useCategoriaEditorState() {
     []
   );
 
-  const atualizarNomeSubeixo = useCallback(
-    (categoriaId: number, subeixoId: string, novoNome: string) => {
-      setEdicaoLocal((prev) =>
-        prev.map((cat) =>
-          cat.id === categoriaId ? atualizarNomeSubeixoNaCategoria(cat, subeixoId, novoNome) : cat
-        )
-      );
-    },
-    []
-  );
-
-  const adicionarSubeixo = useCallback((categoriaId: number) => {
+  const adicionarSubeixoLocal = useCallback((categoriaId: number) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
-        cat.id === categoriaId ? adicionarSubeixoNaCategoria(cat) : cat
+        cat.id === categoriaId ? adicionarSubeixo(cat) : cat
       )
     );
   }, []);
 
-  const removerSubeixo = useCallback((categoriaId: number, subeixoId: string) => {
+  const removerSubeixoLocal = useCallback((categoriaId: number, subeixoId: string) => {
     setEdicaoLocal((prev) =>
       prev.map((cat) =>
-        cat.id === categoriaId ? removerSubeixoNaCategoria(cat, subeixoId) : cat
+        cat.id === categoriaId ? removerSubeixo(cat, subeixoId) : cat
       )
     );
   }, []);
@@ -132,11 +78,12 @@ export function useCategoriaEditorState() {
   );
 
   const reordenarCategorias = useCallback((novaOrdem: number[]) => {
-    setEdicaoLocal((prev) =>
-      novaOrdem
+    setEdicaoLocal((prev) => {
+      const novaLista: Categoria[] = novaOrdem
         .map((id) => prev.find((cat) => cat.id === id))
-        .filter((cat): cat is CategoriaIndicador => !!cat)
-    );
+        .filter((cat): cat is Categoria => !!cat);
+      return novaLista;
+    });
   }, []);
 
   return {
@@ -144,9 +91,8 @@ export function useCategoriaEditorState() {
     adicionarCategoria,
     atualizarCategoria,
     deletarCategoria,
-    adicionarSubeixo,
-    removerSubeixo,
-    atualizarNomeSubeixo,
+    adicionarSubeixo: adicionarSubeixoLocal,
+    removerSubeixo: removerSubeixoLocal,
     removerIndicadorSubeixo,
     salvarAlteracoes,
     reordenarCategorias,
