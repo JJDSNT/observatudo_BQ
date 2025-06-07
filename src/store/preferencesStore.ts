@@ -1,21 +1,18 @@
 // src/store/preferencesStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import {
-  Categoria,
-  DebugConfig,
-  DebugModules,
-  Selecionado,
-} from '@/types';
-import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { Categoria, DebugConfig, DebugModules, Selecionado } from "@/types";
+import { CATEGORIAS_DEFAULT } from "@/data/categoriasIndicadores";
 
 interface PreferencesStore {
-  tema: 'claro' | 'escuro' | 'auto';
+  tema: "claro" | "escuro" | "auto";
   selecionado: Partial<Selecionado>;
   debug: DebugConfig;
   categoriasIndicadores: Categoria[];
 
-  setTema: (tema: 'claro' | 'escuro' | 'auto') => void;
+  setLocalidade: (loc: { estado: string; cidade: string }) => void;
+
+  setTema: (tema: "claro" | "escuro" | "auto") => void;
   setSelecionado: (s: Partial<Selecionado>) => void;
   setDebug: (debug: DebugConfig) => void;
   setDebugModule: (mod: keyof DebugModules, val: boolean) => void;
@@ -26,15 +23,15 @@ interface PreferencesStore {
 export const usePreferencesStore = create<PreferencesStore>()(
   persist(
     (set, get) => ({
-      tema: 'auto',
+      tema: "auto",
       selecionado: {
-        estado: '',
-        cidade: '',
+        estado: "",
+        cidade: "",
         categoriaId: undefined,
       },
       debug: {
         enabled: false,
-        logLevel: 'warn',
+        logLevel: "warn",
         persistLogs: false,
         maxLogEntries: 100,
         modules: {
@@ -44,6 +41,15 @@ export const usePreferencesStore = create<PreferencesStore>()(
         },
       },
       categoriasIndicadores: [],
+
+      setLocalidade: ({ estado, cidade }) =>
+        set((state) => ({
+          selecionado: {
+            ...state.selecionado,
+            estado,
+            cidade,
+          },
+        })),
 
       setTema: (tema) => set({ tema }),
       setSelecionado: (selecionado) => set({ selecionado }),
@@ -65,12 +71,14 @@ export const usePreferencesStore = create<PreferencesStore>()(
         const { categoriasIndicadores } = get();
         if (!categoriasIndicadores || categoriasIndicadores.length === 0) {
           set({ categoriasIndicadores: CATEGORIAS_DEFAULT });
-          console.log('ℹ️ categoriasIndicadores default carregadas no Zustand.');
+          console.log(
+            "ℹ️ categoriasIndicadores default carregadas no Zustand."
+          );
         }
       },
     }),
     {
-      name: 'user-preferences-storage',
+      name: "user-preferences-storage",
     }
   )
 );

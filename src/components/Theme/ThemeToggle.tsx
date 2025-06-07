@@ -1,15 +1,15 @@
 // src/components/ThemeToggle.tsx
 'use client';
 
-import { useUserPreferences } from '@/store/useUserPreferences';
+import { usePreferencesStore } from '@/store/preferencesStore';
 
 export function ThemeToggle() {
-  const { preferences, setPreferences } = useUserPreferences();
-  const temaAtual = preferences.tema ?? 'claro';
+  const temaAtual = usePreferencesStore((state) => state.tema) ?? 'claro';
+  const setTema = usePreferencesStore((state) => state.setTema);
 
   const toggleTheme = () => {
     const novoTema = temaAtual === 'escuro' ? 'claro' : 'escuro';
-    setPreferences({ tema: novoTema });
+    setTema(novoTema);
   };
 
   return (

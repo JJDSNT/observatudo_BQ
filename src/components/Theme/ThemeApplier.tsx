@@ -2,15 +2,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useUserPreferences } from '@/store/useUserPreferences';
+import { useTema } from '@/store/hooks/useTema';
 
 export function ThemeApplier() {
-  const { preferences } = useUserPreferences();
+  const { tema } = useTema();
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle('dark', preferences.tema === 'escuro');
-  }, [preferences.tema]);
+    root.classList.toggle('dark', tema === 'escuro');
+  }, [tema]);
 
   return null; // componente invisível, só gerencia efeito
 }
