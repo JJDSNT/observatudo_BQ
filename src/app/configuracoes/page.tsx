@@ -1,45 +1,42 @@
+//src/app/configuracoes/page.tsx
 "use client";
 
-import { useUserPreferences } from "@/store/useUserPreferences";
 import { useEffect, useState } from "react";
 import localidadesJson from "@/data/localidades_dropdown.json";
 import { useAuth } from "@/hooks/useAuth";
-import { CATEGORIAS_DEFAULT } from "@/data/categoriasIndicadores";
 import { formatarNomeCategoria } from "@/utils/categoriaUtils";
-import type { PaisDropdown, CategoriaIndicador } from "@/types";
+import type { PaisDropdown, DebugModules } from "@/types";
+import { useSelecionado } from "@/store/hooks/useSelecionado";
+import { useTema } from "@/store/hooks/useTema";
+import { useCategorias } from "@/store/hooks/useCategorias";
+import { useDebug } from "@/store/hooks/useDebug";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 const brasil: PaisDropdown = localidadesJson[0];
 const estados = brasil.children;
 
 export default function ConfiguracoesPage() {
   const { user, logout } = useAuth();
-  const { preferences, setPreferences, clearPreferences } = useUserPreferences();
+
+  const { tema, setTema } = useTema();
+  const [selecionado, setSelecionado] = useSelecionado();
+  const [categorias] = useCategorias();
+  const [debug, , setDebugModule] = useDebug();
   const [infoHealthz, setInfoHealthz] = useState<string>("Carregando...");
 
   const handleChangeEstado = (uf: string) => {
     const estado = estados.find((e) => e.value === uf);
     const cidadePadrao = estado?.default ?? "";
-    setPreferences({
-      selecionado: {
-        ...preferences.selecionado,
-        estado: uf,
-        cidade: cidadePadrao,
-      },
-    });
+    setSelecionado({ ...selecionado, estado: uf, cidade: cidadePadrao });
   };
 
   const handleChangeCidade = (cidadeId: string) => {
-    setPreferences({
-      selecionado: {
-        ...preferences.selecionado,
-        cidade: cidadeId,
-      },
-    });
+    setSelecionado({ ...selecionado, cidade: cidadeId });
   };
 
   const toggleTema = () => {
-    const novoTema = preferences.tema === "escuro" ? "claro" : "escuro";
-    setPreferences({ tema: novoTema });
+    const novoTema = tema === "escuro" ? "claro" : "escuro";
+    setTema(novoTema);
   };
 
   useEffect(() => {
@@ -49,18 +46,11 @@ export default function ConfiguracoesPage() {
       .catch(() => setInfoHealthz("Erro ao carregar informações."));
   }, []);
 
-  const estadoAtual = estados.find(
-    (e) => e.value === preferences.selecionado?.estado
-  );
+  const estadoAtual = estados.find((e) => e.value === selecionado?.estado);
   const cidades = estadoAtual?.children ?? [];
 
-  const eixosDisponiveis: CategoriaIndicador[] =
-    preferences.categoriasIndicadores?.length
-      ? preferences.categoriasIndicadores
-      : CATEGORIAS_DEFAULT;
-
-  const eixoSelecionado = eixosDisponiveis.find(
-    (e) => e.id === preferences.selecionado?.eixo
+  const eixoSelecionado = categorias.find(
+    (e) => e.id === selecionado?.categoriaId
   );
 
   const nomeEixoSelecionado = eixoSelecionado
@@ -76,7 +66,6 @@ export default function ConfiguracoesPage() {
         </p>
       </header>
 
-      {/* Preferências Gerais */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Preferências Gerais</h2>
 
@@ -86,7 +75,7 @@ export default function ConfiguracoesPage() {
             onClick={toggleTema}
             className="px-3 py-1 rounded border hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
           >
-            {preferences.tema === "escuro" ? "🌙 Escuro" : "☀️ Claro"}
+            {tema === "escuro" ? "🌙 Escuro" : "☀️ Claro"}
           </button>
         </div>
 
@@ -97,7 +86,7 @@ export default function ConfiguracoesPage() {
             </label>
             <select
               id="estado"
-              value={preferences.selecionado?.estado ?? ""}
+              value={selecionado?.estado ?? ""}
               onChange={(e) => handleChangeEstado(e.target.value)}
               className="border p-2 rounded min-w-[150px]"
             >
@@ -116,15 +105,13 @@ export default function ConfiguracoesPage() {
             </label>
             <select
               id="cidade"
-              value={preferences.selecionado?.cidade ?? ""}
+              value={selecionado?.cidade ?? ""}
               onChange={(e) => handleChangeCidade(e.target.value)}
-              disabled={!preferences.selecionado?.estado}
+              disabled={!selecionado?.estado}
               className="border p-2 rounded min-w-[200px]"
             >
               <option value="">
-                {preferences.selecionado?.estado
-                  ? "Selecione"
-                  : "Primeiro o estado"}
+                {selecionado?.estado ? "Selecione" : "Primeiro o estado"}
               </option>
               {cidades.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -149,10 +136,31 @@ export default function ConfiguracoesPage() {
         </div>
       </div>
 
-      {/* Ações rápidas */}
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Painéis de Debug</h2>
+
+        {(["latency", "zustand", "pwa"] as (keyof DebugModules)[]).map((mod) => (
+          <label key={mod} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={debug.modules?.[mod] ?? false}
+              onChange={(e) => setDebugModule(mod, e.target.checked)}
+            />
+            {`Exibir painel do ${mod}`}
+          </label>
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Sistema</h2>
+        <pre className="text-sm bg-zinc-100 dark:bg-zinc-900 p-3 rounded overflow-auto max-h-64">
+          {infoHealthz}
+        </pre>
+      </div>
+
       <div className="flex gap-4">
         <button
-          onClick={clearPreferences}
+          onClick={() => usePreferencesStore.persist?.clearStorage()}
           className="px-4 py-2 rounded border border-red-500 text-red-500 hover:bg-red-100 dark:hover:bg-red-900"
         >
           Resetar preferências
@@ -165,112 +173,6 @@ export default function ConfiguracoesPage() {
             Sair da conta
           </button>
         )}
-      </div>
-
-      {/* Exportar / Importar Preferências */}
-      <div className="space-y-4 pt-6">
-        <h2 className="text-xl font-semibold">
-          Exportar / Importar Preferências
-        </h2>
-        <div className="flex gap-4 flex-wrap">
-          <button
-            onClick={() => {
-              const blob = new Blob([JSON.stringify(preferences, null, 2)], {
-                type: "application/json",
-              });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "preferencias-observatudo.json";
-              link.click();
-            }}
-            className="px-4 py-2 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
-          >
-            Exportar Preferências
-          </button>
-
-          <label className="cursor-pointer px-4 py-2 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900">
-            Importar JSON
-            <input
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = () => {
-                  try {
-                    const json = JSON.parse(reader.result as string);
-                    setPreferences(json);
-                    alert("Preferências importadas com sucesso!");
-                  } catch {
-                    alert("Erro ao importar o arquivo.");
-                  }
-                };
-                reader.readAsText(file);
-              }}
-            />
-          </label>
-        </div>
-      </div>
-
-      {/* Painéis de Debug */}
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Painéis de Debug</h2>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={preferences.debug?.latency ?? true}
-            onChange={(e) =>
-              setPreferences({
-                debug: {
-                  ...preferences.debug,
-                  latency: e.target.checked,
-                },
-              })
-            }
-          />
-          Ativar painel de latência
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={preferences.debug?.zustand ?? false}
-            onChange={(e) =>
-              setPreferences({
-                debug: {
-                  ...preferences.debug,
-                  zustand: e.target.checked,
-                },
-              })
-            }
-          />
-          Exibir painel do Zustand
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={preferences.debug?.pwa ?? false}
-            onChange={(e) =>
-              setPreferences({
-                debug: {
-                  ...preferences.debug,
-                  pwa: e.target.checked,
-                },
-              })
-            }
-          />
-          Exibir painel do PWA
-        </label>
-      </div>
-
-      {/* Sistema */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Sistema</h2>
-        <pre className="text-sm bg-zinc-100 dark:bg-zinc-900 p-3 rounded overflow-auto max-h-64">
-          {infoHealthz}
-        </pre>
       </div>
     </section>
   );

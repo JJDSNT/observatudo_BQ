@@ -17,7 +17,7 @@ export interface DebugConfig {
   logLevel?: 'debug' | 'info' | 'warn' | 'error';
   persistLogs?: boolean;
   maxLogEntries?: number;
-  modules?: DebugModules;
+  modules: DebugModules;
 }
 
 export interface UserPreferences {

@@ -3,7 +3,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCategorias } from '@/store/hooks/useCategorias';
-import { usePreferencesStore } from '@/store/preferencesStore';
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 import { Categoria } from '@/types';
 import {
@@ -14,8 +13,7 @@ import {
 } from '@/utils/categoriaUtils';
 
 export function useCategoriaEditorState() {
-  const categoriasIndicadores = useCategorias();
-  const setCategoriasIndicadores = usePreferencesStore((state) => state.setCategoriasIndicadores);
+  const [categoriasIndicadores, setCategoriasIndicadores] = useCategorias();
 
   const [edicaoLocal, setEdicaoLocal] = useState<Categoria[]>([]);
 
@@ -80,7 +78,7 @@ export function useCategoriaEditorState() {
   const reordenarCategorias = useCallback((novaOrdem: number[]) => {
     setEdicaoLocal((prev) => {
       const novaLista: Categoria[] = novaOrdem
-        .map((id) => prev.find((cat) => cat.id === id))
+        .map((id) => prev.find((cat) => cat?.id === id))
         .filter((cat): cat is Categoria => !!cat);
       return novaLista;
     });
