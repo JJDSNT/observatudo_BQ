@@ -1,55 +1,65 @@
 // src/hooks/useIndicadoresPara.ts
-// src/hooks/useIndicadoresPara.ts
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { useIndicadoresStore } from '@/store/useIndicadoresStore';
+import { usePreferencesStore } from '@/store/preferencesStore';
+import { useIndicadoresStore } from '@/store/indicadoresCacheStore';
 import { fetchIndicadoresParaSelecionado } from '@/services/fetchIndicadores';
-import type { CategoriaIndicador } from '@/types';
+import type { IndicadoresPayload, CategoriaIndicador } from '@/types';
 
+/**
+ * Hook que retorna os indicadores agrupados por eixo para a localidade selecionada.
+ * Opcionalmente realiza o fetch caso não estejam em cache.
+ */
 export function useIndicadoresPara(fetchIfMissing = false) {
-  const { preferencias } = useUserPreferences();
-  const store = useIndicadoresStore();
+  const localizacao = usePreferencesStore((s) => s.localizacao);
+  const categorias = usePreferencesStore((s) => s.categoriasIndicadores);
 
-  const estado = preferencias?.selecionado?.estado?.trim();
-  const cidade = preferencias?.selecionado?.cidade?.trim();
-  const categoriaId = preferencias?.selecionado?.eixo;
-  
-  const categoria = preferencias?.categoriasIndicadores?.find((c: CategoriaIndicador) => c.id === categoriaId);
+  const getPayload = useIndicadoresStore((s) => s.getPayload);
+  const setPayload = useIndicadoresStore((s) => s.setPayload);
+
+  const estado = localizacao?.estado?.trim();
+  const cidade = localizacao?.cidade?.trim();
+  const categoriaId = localizacao?.eixo;
+
+  const categoria: CategoriaIndicador | undefined = categorias?.find(
+    (c) => c.id === categoriaId
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const payload =
+  const payload: IndicadoresPayload | null =
     estado && cidade && categoriaId !== undefined
-      ? store.getIndicadores(estado, cidade, String(categoriaId)) ?? null
+      ? getPayload(estado, cidade) ?? null
       : null;
 
   useEffect(() => {
     if (!fetchIfMissing || !estado || !cidade || categoriaId === undefined || !categoria) return;
 
-    const jaTem = store.getIndicadores(estado, cidade, String(categoriaId));
+    const jaTem = getPayload(estado, cidade);
     if (jaTem) return;
 
     const fetch = async () => {
       setLoading(true);
       setError(null);
       try {
-        await fetchIndicadoresParaSelecionado(estado, cidade, categoriaId, categoria);
+        const dados = await fetchIndicadoresParaSelecionado(
+          estado,
+          cidade,
+          categoriaId,
+          categoria
+        );
+        setPayload(estado, cidade, dados);
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('Erro desconhecido ao buscar indicadores');
-        }
+        setError(err instanceof Error ? err.message : 'Erro desconhecido ao buscar indicadores');
       } finally {
         setLoading(false);
       }
     };
 
     fetch();
-  }, [fetchIfMissing, estado, cidade, categoriaId, categoria, store]);
+  }, [fetchIfMissing, estado, cidade, categoriaId, categoria, getPayload, setPayload]);
 
   return {
     indicadores: payload,

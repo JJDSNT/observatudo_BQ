@@ -1,3 +1,4 @@
+//src/store/preferencesStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
@@ -5,17 +6,17 @@ import {
   LocalizacaoSelecionada,
   DebugConfig,
   CategoriaIndicador,
-} from './types/preferences';
+} from '@/types';
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 
 interface PreferencesStore {
   tema: 'claro' | 'escuro' | 'auto';
-  localizacao: LocalizacaoSelecionada;
+  selecionado: LocalizacaoSelecionada;
   debug: DebugConfig;
   categoriasIndicadores: CategoriaIndicador[];
 
   setTema: (tema: 'claro' | 'escuro' | 'auto') => void;
-  setLocalizacao: (loc: LocalizacaoSelecionada) => void;
+  setSelecionado: (s: LocalizacaoSelecionada) => void;
   setDebug: (debug: DebugConfig) => void;
   setDebugModule: (mod: keyof DebugModules, val: boolean) => void;
   setCategoriasIndicadores: (categorias: CategoriaIndicador[]) => void;
@@ -26,7 +27,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
   persist(
     (set, get) => ({
       tema: 'auto',
-      localizacao: { cidade: '', estado: '', eixo: 0 },
+      selecionado: { cidade: '', estado: '', eixo: 0 },
       debug: {
         enabled: false,
         logLevel: 'warn',
@@ -41,7 +42,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
       categoriasIndicadores: [],
 
       setTema: (tema) => set({ tema }),
-      setLocalizacao: (localizacao) => set({ localizacao }),
+      setSelecionado: (selecionado) => set({ selecionado }),
       setDebug: (debug) => set({ debug }),
       setDebugModule: (mod, val) =>
         set((state) => ({
@@ -53,7 +54,8 @@ export const usePreferencesStore = create<PreferencesStore>()(
             },
           },
         })),
-      setCategoriasIndicadores: (categoriasIndicadores) => set({ categoriasIndicadores }),
+      setCategoriasIndicadores: (categoriasIndicadores) =>
+        set({ categoriasIndicadores }),
 
       initializeDefaultsIfNeeded: () => {
         const { categoriasIndicadores } = get();

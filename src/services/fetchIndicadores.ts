@@ -1,12 +1,12 @@
 // src/services/fetchIndicadores.ts
-import { getLocalidadeFullPorSubeixos } from './indicadores';
-import { useIndicadoresStore } from '@/store/useIndicadoresStore';
+import { getLocalidadeFullPorSubeixos } from "./indicadores";
+import { useIndicadoresStore } from "@/store/indicadoresCacheStore";
 import type {
   CategoriaIndicador,
   Indicador,
   IndicadoresPayload,
   SubeixoResultado,
-} from '@/types/indicadores-model';
+} from "@/types/indicadores-model";
 
 // 🏷️ Tipos para dados brutos da API
 interface RawSeriePonto {
@@ -34,15 +34,16 @@ interface RawSubeixoResultado {
 function sanitizeIndicador(raw: RawIndicador): Indicador {
   return {
     id: String(raw.id),
-    nome: typeof raw.nome === 'string' ? raw.nome : `Indicador ${raw.id}`,
-    descricao: typeof raw.descricao === 'string' ? raw.descricao : undefined,
-    unidade: typeof raw.unidade === 'string' ? raw.unidade : '',
-    fonte: typeof raw.fonte === 'string' ? raw.fonte : '',
-    periodicidade: typeof raw.periodicidade === 'string' ? raw.periodicidade : '',
+    nome: typeof raw.nome === "string" ? raw.nome : `Indicador ${raw.id}`,
+    descricao: typeof raw.descricao === "string" ? raw.descricao : undefined,
+    unidade: typeof raw.unidade === "string" ? raw.unidade : "",
+    fonte: typeof raw.fonte === "string" ? raw.fonte : "",
+    periodicidade:
+      typeof raw.periodicidade === "string" ? raw.periodicidade : "",
     serie: Array.isArray(raw.serie)
       ? raw.serie.map((p: RawSeriePonto) => ({
-          data: typeof p?.data === 'string' ? p.data : '',
-          valor: typeof p?.valor === 'number' ? p.valor : null,
+          data: typeof p?.data === "string" ? p.data : "",
+          valor: typeof p?.valor === "number" ? p.valor : null,
         }))
       : [],
   };
@@ -52,7 +53,7 @@ function sanitizeIndicador(raw: RawIndicador): Indicador {
 function sanitizeSubeixoResultado(raw: RawSubeixoResultado): SubeixoResultado {
   return {
     id: String(raw.id),
-    nome: typeof raw.nome === 'string' ? raw.nome : '',
+    nome: typeof raw.nome === "string" ? raw.nome : "",
     indicadores: Array.isArray(raw.indicadores)
       ? raw.indicadores.map(sanitizeIndicador)
       : [],
@@ -67,7 +68,7 @@ export async function fetchIndicadoresParaSelecionado(
   cidadeId: string,
   categoriaId: number,
   categoria: CategoriaIndicador
-) {
+): Promise<IndicadoresPayload> {
   const store = useIndicadoresStore.getState();
   const resposta = await getLocalidadeFullPorSubeixos(
     cidadeId,
@@ -83,5 +84,9 @@ export async function fetchIndicadoresParaSelecionado(
     atualizadoEm: new Date().toISOString(),
     subeixos,
   };
-  store.setIndicadores(estadoId, cidadeId, String(categoriaId), payload);
+
+  store.setPayload(estadoId, cidadeId, payload);
+
+  // ✅ retorna o payload
+  return payload;
 }

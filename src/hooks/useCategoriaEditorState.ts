@@ -1,8 +1,8 @@
-// src/hooks/useCategoriaEditorState.ts
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useCategoriasPreferidas } from '@/hooks/useCategoriasPreferidas';
+import { useCategorias } from '@/store/hooks/useCategorias';
+import { usePreferencesStore } from '@/store/preferencesStore';
 
 import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 import { CategoriaIndicador } from '@/types';
@@ -57,12 +57,8 @@ function removerIndicador(
 }
 
 export function useCategoriaEditorState() {
-  const {
-    categoriasIndicadores,
-    setCategoriasIndicadores,
-    loading,
-    error,
-  } = useCategoriasPreferidas();
+  const categoriasIndicadores = useCategorias();
+  const setCategoriasIndicadores = usePreferencesStore((s) => s.setCategoriasIndicadores);
 
   const [edicaoLocal, setEdicaoLocal] = useState<CategoriaIndicador[]>([]);
 
@@ -70,11 +66,11 @@ export function useCategoriaEditorState() {
     if (Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0) {
       console.log('✅ Carregando categorias preferidas do usuário');
       setEdicaoLocal(categoriasIndicadores);
-    } else if (!loading) {
+    } else {
       console.warn('⚠️ Nenhuma preferência encontrada. Carregando categorias padrão do sistema.');
       setEdicaoLocal(CATEGORIAS_DEFAULT);
     }
-  }, [categoriasIndicadores, loading]);
+  }, [categoriasIndicadores]);
 
   const salvarAlteracoes = useCallback(() => {
     setCategoriasIndicadores(edicaoLocal);
@@ -88,11 +84,14 @@ export function useCategoriaEditorState() {
     setEdicaoLocal((prev) => [...prev, criarCategoriaPadrao()]);
   }, []);
 
-  const atualizarCategoria = useCallback((id: number, atualizacao: Partial<CategoriaIndicador>) => {
-    setEdicaoLocal((prev) =>
-      prev.map((cat) => (cat.id === id ? { ...cat, ...atualizacao } : cat))
-    );
-  }, []);
+  const atualizarCategoria = useCallback(
+    (id: number, atualizacao: Partial<CategoriaIndicador>) => {
+      setEdicaoLocal((prev) =>
+        prev.map((cat) => (cat.id === id ? { ...cat, ...atualizacao } : cat))
+      );
+    },
+    []
+  );
 
   const atualizarNomeSubeixo = useCallback(
     (categoriaId: number, subeixoId: string, novoNome: string) => {
@@ -142,8 +141,6 @@ export function useCategoriaEditorState() {
 
   return {
     edicaoLocal,
-    loading,
-    error,
     adicionarCategoria,
     atualizarCategoria,
     deletarCategoria,

@@ -2,6 +2,7 @@
 'use client';
 
 import useSWRImmutable from 'swr/immutable';
+import { useMemo } from 'react';
 import type { Indicador } from '@/types';
 
 async function fetchIndicadorNomes(ids: string[]): Promise<Map<string, string>> {
@@ -20,7 +21,14 @@ async function fetchIndicadorNomes(ids: string[]): Promise<Map<string, string>> 
 }
 
 export function useIndicadorNomes(indicadorIds: string[]) {
-  const idsOrdenados = Array.from(new Set(indicadorIds)).filter(Boolean).sort((a, b) => a.localeCompare(b));
+  const idsOrdenados = useMemo(
+    () =>
+      Array.from(new Set(indicadorIds))
+        .filter((id): id is string => Boolean(id))
+        .sort((a, b) => a.localeCompare(b)),
+    [indicadorIds]
+  );
+
   const dedupKey = idsOrdenados.join(',');
 
   const { data: mapa, isLoading, error } = useSWRImmutable(
@@ -31,11 +39,13 @@ export function useIndicadorNomes(indicadorIds: string[]) {
     }
   );
 
+  const nomePorId = mapa ?? new Map<string, string>();
+
   return {
-    mapa: mapa ?? new Map(),
+    mapa: nomePorId,
     loading: isLoading,
     error,
-    getNome: (id: string) => mapa?.get(id) ?? id,
+    getNome: (id: string) => nomePorId.get(id) ?? id,
   };
 }
 

@@ -1,4 +1,4 @@
-//src/store/indicadoresCacheStore.ts
+// src/store/indicadoresCacheStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { IndicadoresPayload } from '@/types';
@@ -34,7 +34,7 @@ export const useIndicadoresStore = create<IndicadoresStore>()(
 
       setPayload: (estadoId, cidadeId, payload) => {
         const key = generateKey(estadoId, cidadeId);
-        set((state) => ({
+        set((state: IndicadoresStore) => ({
           indicadoresPorLocalidade: {
             ...state.indicadoresPorLocalidade,
             [key]: payload,
@@ -49,10 +49,10 @@ export const useIndicadoresStore = create<IndicadoresStore>()(
 
       clearPayload: (estadoId, cidadeId) => {
         if (!estadoId || !cidadeId) {
-          set({ indicadoresPorLocalidade: {} });
+          set(() => ({ indicadoresPorLocalidade: {} }));
         } else {
           const key = generateKey(estadoId, cidadeId);
-          set((state) => {
+          set((state: IndicadoresStore) => {
             const novoCache = { ...state.indicadoresPorLocalidade };
             delete novoCache[key];
             return { indicadoresPorLocalidade: novoCache };
