@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { PaisDropdown } from "@/types/location-selector";
+import type { PaisDropdown } from "@/types/location";
 import localidadesJson from "@/data/localidades_dropdown.json";
 import { useUserPreferences } from "@/store/useUserPreferences";
 

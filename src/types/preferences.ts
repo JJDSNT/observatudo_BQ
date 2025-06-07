@@ -1,11 +1,9 @@
 // src/types/preferences.ts
-import type { CategoriaIndicador } from './indicadores-model';
+import type { Categoria } from '@/types/indicadores-model';
+import type { Localizacao } from '@/types/location';
 
-export interface LocalizacaoSelecionada {
-  estado?: string;
-  cidade?: string;
-  eixo?: number;
-  subeixos?: string[];
+export interface Selecionado extends Localizacao {
+  categoriaId: number;
 }
 
 export interface DebugModules {
@@ -24,11 +22,11 @@ export interface DebugConfig {
 }
 
 export interface UserPreferences {
-  categoriasIndicadores?: CategoriaIndicador[];
+  categoriasIndicadores?: Categoria[]; // Preferências disponíveis
   tema?: 'claro' | 'escuro' | 'auto';
   idioma?: 'pt-BR' | 'en-US';
   notificacoesAtivas?: boolean;
-  selecionado?: LocalizacaoSelecionada;
+  selecionado?: Partial<Selecionado>; // Permite seleção parcial
   debug?: DebugConfig;
   _meta?: {
     version: number;

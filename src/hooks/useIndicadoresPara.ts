@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { useIndicadoresStore } from '@/store/indicadoresCacheStore';
 import { fetchIndicadoresParaSelecionado } from '@/services/fetchIndicadores';
-import type { IndicadoresPayload, CategoriaIndicador } from '@/types';
+import type { IndicadoresPayload, Categoria } from '@/types';
 
 /**
  * Hook que retorna os indicadores agrupados por eixo para a localidade selecionada.
