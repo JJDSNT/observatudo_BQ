@@ -20,3 +20,20 @@ export interface LocalidadeChave {
 // Pode usar JSON.stringify(localidade) como chave no cache
 export type CacheIndicadores = Record<string, IndicadorSerie[]>;
 
+export interface IndicadoresPayload {
+  eixos: Array<{
+    id: number;
+    nome: string;
+    cor: string;
+    icone: string;
+    subeixos: Array<{
+      id: string;
+      nome: string;
+      indicadores: Array<{
+        id: string;
+        nome: string;
+        valores: Array<{ ano: number; valor: number | null }>;
+      }>;
+    }>;
+  }>;
+}
