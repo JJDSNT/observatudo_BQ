@@ -1,1 +1,0 @@
-Hooks semânticos para acessar tema, localização, debug e categorias.

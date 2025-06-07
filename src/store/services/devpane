@@ -1,4 +1,0 @@
-DevPanel.tsx	Interface de debug visual, já existe e pode ser atualizada para usar a nova store.	✅ já existe
-useAppStore.ts	Pode ser congelado e marcado como legado (@deprecated) com console.warn se usado.	✅ já existe
-src/pages/api/indicadores.ts	Endpoint que responde ao fetchIndicadoresFromAPI	❌ você precisará garantir que existe
-useIndicadores.ts com SWR	Se quiser pré-carregamento, revalidação e fallback controlado	✳️ opcional
