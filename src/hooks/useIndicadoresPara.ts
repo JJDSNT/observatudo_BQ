@@ -12,15 +12,15 @@ import type { IndicadoresPayload, CategoriaIndicador } from '@/types';
  * Opcionalmente realiza o fetch caso não estejam em cache.
  */
 export function useIndicadoresPara(fetchIfMissing = false) {
-  const localizacao = usePreferencesStore((s) => s.localizacao);
+  const selecionado = usePreferencesStore((s) => s.selecionado);
   const categorias = usePreferencesStore((s) => s.categoriasIndicadores);
 
   const getPayload = useIndicadoresStore((s) => s.getPayload);
   const setPayload = useIndicadoresStore((s) => s.setPayload);
 
-  const estado = localizacao?.estado?.trim();
-  const cidade = localizacao?.cidade?.trim();
-  const categoriaId = localizacao?.eixo;
+  const estado = selecionado?.estado?.trim();
+  const cidade = selecionado?.cidade?.trim();
+  const categoriaId = selecionado?.eixo;
 
   const categoria: CategoriaIndicador | undefined = categorias?.find(
     (c) => c.id === categoriaId

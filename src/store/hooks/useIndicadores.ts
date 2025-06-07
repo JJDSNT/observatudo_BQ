@@ -1,4 +1,3 @@
-// src/store/hooks/useIndicadores.ts
 import { usePreferencesStore } from '../preferencesStore';
 import { useIndicadoresStore } from '../indicadoresCacheStore';
 import type { IndicadoresPayload } from '@/types';
@@ -8,11 +7,11 @@ import type { IndicadoresPayload } from '@/types';
  * Útil para componentes que já assumem que os dados estão disponíveis em cache.
  */
 export function useIndicadores(): IndicadoresPayload | undefined {
-  const localizacao = usePreferencesStore((s) => s.localizacao);
+  const selecionado = usePreferencesStore((s) => s.selecionado);
   const getPayload = useIndicadoresStore((s) => s.getPayload);
 
-  const estado = localizacao?.estado?.trim();
-  const cidade = localizacao?.cidade?.trim();
+  const estado = selecionado?.estado?.trim();
+  const cidade = selecionado?.cidade?.trim();
 
   if (!estado || !cidade) return undefined;
 
