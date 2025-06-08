@@ -23,6 +23,13 @@ export default function CategoriaSelector({
     selecionado.categoriaId
   );
 
+  // ✅ Seleciona automaticamente a primeira categoria se nenhuma estiver selecionada
+  useEffect(() => {
+    if (eixos.length > 0 && categoriaSelecionadaId === undefined) {
+      setCategoriaSelecionadaId(eixos[0].id);
+    }
+  }, [eixos, categoriaSelecionadaId]);
+
   useEffect(() => {
     const eixo = eixos.find((e) => e.id === categoriaSelecionadaId);
     const subeixosSelecionados = eixo?.subeixos ?? [];
@@ -50,7 +57,7 @@ export default function CategoriaSelector({
 
   const getIconComponent = (iconName: string): React.ComponentType<{ size?: number; style?: React.CSSProperties }> => {
     const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
-    if (Icon && typeof Icon === 'function') {
+    if (Icon && typeof Icon === "function") {
       return Icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
     }
     return LucideIcons.Circle;
