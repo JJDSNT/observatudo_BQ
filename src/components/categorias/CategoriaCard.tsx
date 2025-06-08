@@ -1,14 +1,14 @@
-// src/components/categorias/CategoriasCard.tsx
+// src/components/categorias/CategoriaCard.tsx
 'use client';
 
-import { CategoriaIndicador, LucideIconName } from '@/types';
+import { Categoria, LucideIconName } from '@/types';
 import { IconSelector } from '@/components/IconSelector';
 import { SubeixoCard } from '@/components/categorias/SubeixoCard';
 
 interface CategoriaCardProps {
-  categoria: CategoriaIndicador;
+  categoria: Categoria;
   iconesDisponiveis: LucideIconName[];
-  onUpdate: (id: number, atualizacao: Partial<CategoriaIndicador>) => void;
+  onUpdate: (id: number, atualizacao: Partial<Categoria>) => void;
   onUpdateSubeixo: (
     categoriaId: number,
     subeixoId: string,
@@ -41,7 +41,7 @@ export function CategoriaCard({
   const nomeCategoria = new Intl.ListFormat('pt-BR', {
     style: 'long',
     type: 'conjunction',
-  }).format(categoria.subeixos.map((s) => s.nome || 'Subeixo'));
+  }).format(categoria.subeixos.map((s: { nome: string }) => s.nome ?? 'Subeixo'));
 
   return (
     <div className="relative border rounded-xl p-4 shadow space-y-4 bg-white dark:bg-zinc-900">

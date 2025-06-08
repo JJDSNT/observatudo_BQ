@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import type { PaisDropdown } from '@/types/location';
 import localidadesJson from '@/data/localidades_dropdown.json';
-import { usePreferencesStore } from '@/store/preferencesStore';
 import { useSelecionado } from '@/store/hooks/useSelecionado';
 
 const brasil: PaisDropdown = localidadesJson[0];
@@ -17,8 +16,7 @@ interface ComboBoxLocalidadesProps {
 export default function ComboBoxLocalidades({
   onChange,
 }: Readonly<ComboBoxLocalidadesProps>) {
-  const selecionado = useSelecionado();
-  const setSelecionado = usePreferencesStore((s) => s.setSelecionado);
+  const [selecionado, setSelecionado] = useSelecionado();
 
   const [ufSelecionado, setUfSelecionado] = useState(selecionado.estado ?? '');
   const [cidadeSelecionada, setCidadeSelecionada] = useState(selecionado.cidade ?? '');

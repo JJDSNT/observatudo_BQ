@@ -1,13 +1,15 @@
+// src/components/CategoriaSelector.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
-import { useUserPreferences } from "@/store/useUserPreferences";
+import { useSelecionado } from "@/store/hooks/useSelecionado";
+import { usePreferencesStore } from "@/store/preferencesStore";
 import { formatarNomeCategoria } from "@/utils/categoriaUtils";
-import type { CategoriaIndicador, Subeixo } from "@/types";
+import type { Categoria, Subeixo } from "@/types";
 
 type CategoriaSelectorProps = {
-  eixos: CategoriaIndicador[];
+  eixos: Categoria[];
   onCategoriaChange: (subeixos: Subeixo[]) => void;
 };
 
@@ -15,20 +17,21 @@ export default function CategoriaSelector({
   eixos,
   onCategoriaChange,
 }: Readonly<CategoriaSelectorProps>) {
-  const { preferences, setPreferences } = useUserPreferences();
-  const [eixoSelecionado, setEixoSelecionado] = useState<number | undefined>(
-    preferences.selecionado?.eixo ?? undefined
+  const [selecionado, setSelecionado] = useSelecionado();
+  const setCategoriasIndicadores = usePreferencesStore((s) => s.setCategoriasIndicadores);
+  const [categoriaSelecionadaId, setCategoriaSelecionadaId] = useState<number | undefined>(
+    selecionado.categoriaId
   );
 
   useEffect(() => {
-    const eixo = eixos.find((e) => e.id === eixoSelecionado);
+    const eixo = eixos.find((e) => e.id === categoriaSelecionadaId);
     const subeixosSelecionados = eixo?.subeixos ?? [];
 
     const categoriasIndicadores =
-      eixoSelecionado !== undefined && eixo
+      categoriaSelecionadaId !== undefined && eixo
         ? [
             {
-              id: eixoSelecionado,
+              id: categoriaSelecionadaId,
               cor: eixo.cor,
               icone: eixo.icone,
               subeixos: subeixosSelecionados,
@@ -36,35 +39,34 @@ export default function CategoriaSelector({
           ]
         : [];
 
-    const precisaAtualizar =
-      preferences.selecionado?.eixo !== eixoSelecionado ||
-      JSON.stringify(preferences.categoriasIndicadores) !==
-        JSON.stringify(categoriasIndicadores);
+    setSelecionado({
+      ...selecionado,
+      categoriaId: categoriaSelecionadaId,
+    });
 
-    if (precisaAtualizar) {
-      setPreferences({
-        selecionado: {
-          ...preferences.selecionado,
-          eixo: eixoSelecionado,
-        },
-        categoriasIndicadores,
-      });
-    }
-
+    setCategoriasIndicadores(categoriasIndicadores);
     onCategoriaChange(subeixosSelecionados);
-  }, [eixoSelecionado, eixos, preferences, onCategoriaChange, setPreferences]);
+  }, [categoriaSelecionadaId, eixos, selecionado, setSelecionado, setCategoriasIndicadores, onCategoriaChange]);
+
+  const getIconComponent = (iconName: string): React.ComponentType<{ size?: number; style?: React.CSSProperties }> => {
+    const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
+    if (Icon && typeof Icon === 'function') {
+      return Icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+    }
+    return LucideIcons.Circle;
+  };
 
   return (
     <div className="flex flex-wrap gap-3">
       {eixos.map((eixo) => {
-        const Icon = LucideIcons[eixo.icone as keyof typeof LucideIcons] as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-        const isActive = eixo.id === eixoSelecionado;
+        const IconComponent = getIconComponent(eixo.icone);
+        const isActive = eixo.id === categoriaSelecionadaId;
         const nomeEixo = formatarNomeCategoria(eixo);
 
         return (
           <button
             key={eixo.id}
-            onClick={() => setEixoSelecionado(isActive ? undefined : eixo.id)}
+            onClick={() => setCategoriaSelecionadaId(isActive ? undefined : eixo.id)}
             aria-pressed={isActive}
             className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
               isActive
@@ -76,7 +78,7 @@ export default function CategoriaSelector({
               borderColor: isActive ? eixo.cor : "#ccc",
             }}
           >
-            <Icon size={16} style={{ color: isActive ? "white" : eixo.cor }} />
+            <IconComponent size={16} style={{ color: isActive ? "white" : eixo.cor }} />
             {nomeEixo}
           </button>
         );

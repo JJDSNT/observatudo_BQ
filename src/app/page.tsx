@@ -13,7 +13,7 @@ export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
   const [subeixosSelecionados, setSubeixosSelecionados] = useState<Subeixo[]>([]);
 
-  const categorias = useCategorias();
+  const [categorias] = useCategorias(); // ✅ desestrutura apenas o array
   const { data: payload, loading, error } = useIndicadoresDashboard(
     municipioId,
     subeixosSelecionados

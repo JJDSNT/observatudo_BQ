@@ -3,13 +3,13 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CategoriaCard } from "@/components/categorias/CategoriaCard";
-import type { CategoriaIndicador,LucideIconName } from "@/types";
+import type { Categoria,LucideIconName } from "@/types";
 import type { GetNomeIndicadorFn } from "@/hooks/useIndicadorNomes";
 
 interface SortableCategoriaProps {
-  categoria: CategoriaIndicador;
+  categoria: Categoria;
   iconesDisponiveis: LucideIconName[];
-  onUpdate: (id: number, atualizacao: Partial<CategoriaIndicador>) => void;
+  onUpdate: (id: number, atualizacao: Partial<Categoria>) => void;
   onUpdateSubeixo: (categoriaId: number, subeixoId: string, novoNome: string) => void;
   onRemoveIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
   onDelete: (id: number) => void;
