@@ -1,6 +1,8 @@
-import { usePreferencesStore } from '../preferencesStore';
-import { useIndicadoresStore } from '../indicadoresCacheStore';
-import type { IndicadoresPayload } from '@/types';
+// src/store/hooks/useIndicadores.ts
+import { usePreferencesStore } from "../preferencesStore";
+import { useIndicadoresStore, generateIndicadoresKey } from "../indicadoresCacheStore";
+import { useAuthStore } from "../authStore";
+import type { IndicadoresPayload } from "@/types";
 
 /**
  * Hook que retorna os indicadores da localidade selecionada.
@@ -8,12 +10,12 @@ import type { IndicadoresPayload } from '@/types';
  */
 export function useIndicadores(): IndicadoresPayload | undefined {
   const selecionado = usePreferencesStore((s) => s.selecionado);
+  const userId = useAuthStore((s) => s.user?.uid ?? "anon");
   const getPayload = useIndicadoresStore((s) => s.getPayload);
 
-  const estado = selecionado?.estado?.trim();
-  const cidade = selecionado?.cidade?.trim();
+  const { pais, estado, cidade } = selecionado ?? {};
+  if (!pais || !estado || !cidade) return undefined;
 
-  if (!estado || !cidade) return undefined;
-
-  return getPayload(estado, cidade);
+  const key = generateIndicadoresKey(userId, pais, estado, cidade);
+  return getPayload(key);
 }

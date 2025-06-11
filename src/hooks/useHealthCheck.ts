@@ -11,7 +11,7 @@ export function useHealthCheck(pollInterval = 30000) {
   );
 
   const isChecking = useRef(false);
-  const debugAtivo = usePreferencesStore((s) => s.debug?.modules?.pwa ?? false);
+  const debugAtivo = usePreferencesStore((s) => s.debug?.pwa ?? false);
 
   useEffect(() => {
     if (!debugAtivo) return;

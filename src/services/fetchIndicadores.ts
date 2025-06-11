@@ -39,7 +39,8 @@ function sanitizeIndicador(raw: RawIndicador): Indicador {
     descricao: typeof raw.descricao === "string" ? raw.descricao : undefined,
     unidade: typeof raw.unidade === "string" ? raw.unidade : "",
     fonte: typeof raw.fonte === "string" ? raw.fonte : "",
-    periodicidade: typeof raw.periodicidade === "string" ? raw.periodicidade : "",
+    periodicidade:
+      typeof raw.periodicidade === "string" ? raw.periodicidade : "",
     serie: Array.isArray(raw.serie)
       ? raw.serie.map((p: RawSeriePonto) => ({
           data: typeof p?.data === "string" ? p.data : "",
@@ -80,13 +81,37 @@ export async function fetchIndicadoresParaSelecionado(
     : [];
 
   const payload: IndicadoresPayload = {
-    categoriaId,
     localidade,
     atualizadoEm: new Date().toISOString(),
-    subeixos,
+    niveis: {
+      pais: [
+        {
+          id: categoria.id,
+          cor: categoria.cor,
+          icone: categoria.icone,
+          subeixos: [], // TODO: preencher quando disponível
+        },
+      ],
+      estado: [
+        {
+          id: categoria.id,
+          cor: categoria.cor,
+          icone: categoria.icone,
+          subeixos: [], // TODO: preencher quando disponível
+        },
+      ],
+      municipio: [
+        {
+          id: categoria.id,
+          cor: categoria.cor,
+          icone: categoria.icone,
+          subeixos,
+        },
+      ],
+    },
   };
 
-  store.setPayload(localidade.estado, localidade.cidade, payload);
+  store.setPayload(payload);
 
   return payload;
 }

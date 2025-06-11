@@ -8,19 +8,22 @@ import {
   signOut,
   User,
 } from 'firebase/auth';
-import { auth, provider } from '@/lib/firebase'; // Certifique-se de que o `provider` (ex: GoogleAuthProvider) esteja configurado
+import { auth, provider } from '@/lib/firebase';
+import { useAuthStore } from '@/store/authStore';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const setAuthStoreUser = useAuthStore((s) => s.setUser);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+      setAuthStoreUser(firebaseUser); // 🧠 sincroniza Zustand
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [setAuthStoreUser]);
 
   const loginWithGoogle = async () => {
     try {
@@ -32,6 +35,8 @@ export function useAuth() {
 
   const logout = async () => {
     await signOut(auth);
+    setUser(null);
+    setAuthStoreUser(null); // 🧹 limpa também no Zustand
   };
 
   return { user, loading, loginWithGoogle, logout };

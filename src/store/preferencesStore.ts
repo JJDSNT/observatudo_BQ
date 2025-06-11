@@ -10,7 +10,7 @@ interface PreferencesStore {
   debug: DebugConfig;
   categoriasIndicadores: Categoria[];
 
-  setLocalidade: (loc: { estado: string; cidade: string }) => void;
+  setLocalidade: (loc: { pais: string; estado: string; cidade: string }) => void;
 
   setTema: (tema: "claro" | "escuro" | "auto") => void;
   setSelecionado: (s: Partial<Selecionado>) => void;
@@ -25,6 +25,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
     (set, get) => ({
       tema: "auto",
       selecionado: {
+        pais: "",
         estado: "",
         cidade: "",
         categoriaId: undefined,
@@ -41,10 +42,11 @@ export const usePreferencesStore = create<PreferencesStore>()(
       },
       categoriasIndicadores: [],
 
-      setLocalidade: ({ estado, cidade }) =>
+      setLocalidade: ({ pais, estado, cidade }) =>
         set((state) => ({
           selecionado: {
             ...state.selecionado,
+            pais,
             estado,
             cidade,
           },

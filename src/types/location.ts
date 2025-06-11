@@ -1,6 +1,7 @@
 // src/types/location.ts
 
 export interface Localidade {
+  pais: string;
   estado: string;
   cidade: string;
 }
