@@ -12,7 +12,7 @@ interface HealthzResponse {
 
 export function useLatencyInit(intervalMs = 10000) {
   const registrar = useLatencyStore((s) => s.registrar);
-  const debugAtivo = usePreferencesStore((s) => s.debug?.modules?.latency ?? false);
+  const debugAtivo = usePreferencesStore((s) => s.debug?.latency ?? false);
   const isRunning = useRef(false);
 
   useEffect(() => {
