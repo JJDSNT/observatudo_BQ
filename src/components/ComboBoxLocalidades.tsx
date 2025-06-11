@@ -27,15 +27,15 @@ export default function ComboBoxLocalidades({
   useEffect(() => {
     if (!cidadeSelecionada) return;
 
-    onChange(cidadeSelecionada);
-
+    // Evita loop: só executa se a cidade realmente mudou
     if (selecionado.cidade !== cidadeSelecionada) {
+      onChange(cidadeSelecionada);
       setSelecionado({
         ...selecionado,
         cidade: cidadeSelecionada,
       });
     }
-  }, [cidadeSelecionada, onChange, selecionado, setSelecionado]);
+  }, [cidadeSelecionada, selecionado, setSelecionado, onChange]);
 
   const handleChangeEstado = (uf: string) => {
     setUfSelecionado(uf);
@@ -48,6 +48,8 @@ export default function ComboBoxLocalidades({
       estado: uf,
       cidade: cidadeDefault,
     });
+
+    onChange(cidadeDefault); // já atualiza externamente
   };
 
   return (

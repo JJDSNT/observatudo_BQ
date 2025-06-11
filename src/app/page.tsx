@@ -1,19 +1,27 @@
-// src/app/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useLayoutEffect } from "react";
 import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
 import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
 import { useCategorias } from "@/store/hooks/useCategorias";
+import { usePreferencesStore } from "@/store/preferencesStore";
 import { Subeixo } from "@/types";
 
 export default function Home() {
   const [municipioId, setMunicipioId] = useState("4110953");
   const [subeixosSelecionados, setSubeixosSelecionados] = useState<Subeixo[]>([]);
 
-  const [categorias] = useCategorias(); // ✅ desestrutura apenas o array
+  const initializeDefaultsIfNeeded = usePreferencesStore((s) => s.initializeDefaultsIfNeeded);
+  const [categorias] = useCategorias();
+
+  useLayoutEffect(() => {
+    initializeDefaultsIfNeeded();
+  }, [initializeDefaultsIfNeeded]);
+
+  const eixos = useMemo(() => categorias ?? [], [categorias]);
+
   const { data: payload, loading, error } = useIndicadoresDashboard(
     municipioId,
     subeixosSelecionados
@@ -23,9 +31,9 @@ export default function Home() {
     <section className="space-y-6">
       <ComboBoxLocalidades onChange={setMunicipioId} />
 
-      {categorias?.length ? (
+      {eixos.length > 0 ? (
         <CategoriaSelector
-          eixos={categorias}
+          eixos={eixos}
           onCategoriaChange={setSubeixosSelecionados}
         />
       ) : (

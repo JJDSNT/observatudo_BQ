@@ -1,9 +1,10 @@
+// src/components/categorias/SortableCategoria.tsx
 "use client";
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CategoriaCard } from "@/components/categorias/CategoriaCard";
-import type { Categoria,LucideIconName } from "@/types";
+import type { Categoria, LucideIconName } from "@/types";
 import type { GetNomeIndicadorFn } from "@/hooks/useIndicadorNomes";
 
 interface SortableCategoriaProps {
@@ -45,7 +46,7 @@ export function SortableCategoria({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes}>
       <CategoriaCard
         categoria={categoria}
         iconesDisponiveis={iconesDisponiveis}
@@ -57,6 +58,7 @@ export function SortableCategoria({
         onRemoveSubeixo={onRemoveSubeixo}
         getNome={getNome}
         loading={loading}
+        dragHandleProps={listeners} // 👈 usado no botão de arrastar
       />
     </div>
   );

@@ -1,15 +1,14 @@
 // src/components/CategoriaSelector.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import * as LucideIcons from "lucide-react";
 import { useSelecionado } from "@/store/hooks/useSelecionado";
-import { usePreferencesStore } from "@/store/preferencesStore";
 import { formatarNomeCategoria } from "@/utils/categoriaUtils";
 import type { Categoria, Subeixo } from "@/types";
 
 type CategoriaSelectorProps = {
-  eixos: Categoria[];
+  eixos: Categoria[] | undefined;
   onCategoriaChange: (subeixos: Subeixo[]) => void;
 };
 
@@ -17,55 +16,60 @@ export default function CategoriaSelector({
   eixos,
   onCategoriaChange,
 }: Readonly<CategoriaSelectorProps>) {
+  const safeEixos = useMemo(() => {
+    if (!Array.isArray(eixos)) {
+      console.warn("⚠️ CategoriaSelector: 'eixos' não é um array:", eixos);
+      return [];
+    }
+    return eixos;
+  }, [eixos]);
+
   const [selecionado, setSelecionado] = useSelecionado();
-  const setCategoriasIndicadores = usePreferencesStore((s) => s.setCategoriasIndicadores);
-  const [categoriaSelecionadaId, setCategoriaSelecionadaId] = useState<number | undefined>(
-    selecionado.categoriaId
+
+  // Inicializa com a categoria salva ou a primeira disponível
+  const [categoriaSelecionadaId, setCategoriaSelecionadaId] = useState<number | null>(
+    safeEixos.find((e) => e.id === selecionado.categoriaId)?.id ?? safeEixos[0]?.id ?? null
   );
 
-  // ✅ Seleciona automaticamente a primeira categoria se nenhuma estiver selecionada
+  // Garante que sempre exista uma seleção válida quando os eixos mudam
   useEffect(() => {
-    if (eixos.length > 0 && categoriaSelecionadaId === undefined) {
-      setCategoriaSelecionadaId(eixos[0].id);
+    if (!categoriaSelecionadaId && safeEixos.length > 0) {
+      setCategoriaSelecionadaId(safeEixos[0].id);
     }
-  }, [eixos, categoriaSelecionadaId]);
+  }, [safeEixos, categoriaSelecionadaId]);
+
+  const memoizedOnCategoriaChange = useCallback(onCategoriaChange, [onCategoriaChange]);
 
   useEffect(() => {
-    const eixo = eixos.find((e) => e.id === categoriaSelecionadaId);
+    const eixo = safeEixos.find((e) => e.id === categoriaSelecionadaId);
     const subeixosSelecionados = eixo?.subeixos ?? [];
 
-    const categoriasIndicadores =
-      categoriaSelecionadaId !== undefined && eixo
-        ? [
-            {
-              id: categoriaSelecionadaId,
-              cor: eixo.cor,
-              icone: eixo.icone,
-              subeixos: subeixosSelecionados,
-            },
-          ]
-        : [];
-
-    setSelecionado({
-      ...selecionado,
-      categoriaId: categoriaSelecionadaId,
-    });
-
-    setCategoriasIndicadores(categoriasIndicadores);
-    onCategoriaChange(subeixosSelecionados);
-  }, [categoriaSelecionadaId, eixos, selecionado, setSelecionado, setCategoriasIndicadores, onCategoriaChange]);
-
-  const getIconComponent = (iconName: string): React.ComponentType<{ size?: number; style?: React.CSSProperties }> => {
-    const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
-    if (Icon && typeof Icon === "function") {
-      return Icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+    // Atualiza store Zustand apenas se necessário
+    if (categoriaSelecionadaId && selecionado.categoriaId !== categoriaSelecionadaId) {
+      setSelecionado({ categoriaId: categoriaSelecionadaId });
     }
-    return LucideIcons.Circle;
+
+    memoizedOnCategoriaChange(subeixosSelecionados);
+  }, [
+    categoriaSelecionadaId,
+    safeEixos,
+    selecionado.categoriaId,
+    setSelecionado,
+    memoizedOnCategoriaChange,
+  ]);
+
+  const getIconComponent = (
+    iconName: string
+  ): React.FC<{ size?: number; style?: React.CSSProperties }> => {
+    return LucideIcons[iconName as keyof typeof LucideIcons] as React.FC<{
+      size?: number;
+      style?: React.CSSProperties;
+    }>;
   };
 
   return (
     <div className="flex flex-wrap gap-3">
-      {eixos.map((eixo) => {
+      {safeEixos.map((eixo) => {
         const IconComponent = getIconComponent(eixo.icone);
         const isActive = eixo.id === categoriaSelecionadaId;
         const nomeEixo = formatarNomeCategoria(eixo);
@@ -73,7 +77,11 @@ export default function CategoriaSelector({
         return (
           <button
             key={eixo.id}
-            onClick={() => setCategoriaSelecionadaId(isActive ? undefined : eixo.id)}
+            onClick={() => {
+              if (!isActive) {
+                setCategoriaSelecionadaId(eixo.id);
+              }
+            }}
             aria-pressed={isActive}
             className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition cursor-pointer ${
               isActive
@@ -85,7 +93,10 @@ export default function CategoriaSelector({
               borderColor: isActive ? eixo.cor : "#ccc",
             }}
           >
-            <IconComponent size={16} style={{ color: isActive ? "white" : eixo.cor }} />
+            <IconComponent
+              size={16}
+              style={{ color: isActive ? "white" : eixo.cor }}
+            />
             {nomeEixo}
           </button>
         );

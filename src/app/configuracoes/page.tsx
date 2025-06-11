@@ -139,16 +139,18 @@ export default function ConfiguracoesPage() {
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Painéis de Debug</h2>
 
-        {(["latency", "zustand", "pwa"] as (keyof DebugModules)[]).map((mod) => (
-          <label key={mod} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={debug.modules?.[mod] ?? false}
-              onChange={(e) => setDebugModule(mod, e.target.checked)}
-            />
-            {`Exibir painel do ${mod}`}
-          </label>
-        ))}
+        {(["latency", "zustand", "pwa"] as (keyof DebugModules)[]).map(
+          (mod) => (
+            <label key={mod} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={debug[mod] ?? false}
+                onChange={(e) => setDebugModule(mod, e.target.checked)}
+              />
+              {`Exibir painel do ${mod}`}
+            </label>
+          )
+        )}
       </div>
 
       <div className="space-y-4">

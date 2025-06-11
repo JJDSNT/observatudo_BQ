@@ -3,7 +3,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCategorias } from '@/store/hooks/useCategorias';
-import { CATEGORIAS_DEFAULT } from '@/data/categoriasIndicadores';
 import { Categoria } from '@/types';
 import {
   criarCategoriaPadrao,
@@ -18,13 +17,7 @@ export function useCategoriaEditorState() {
   const [edicaoLocal, setEdicaoLocal] = useState<Categoria[]>([]);
 
   useEffect(() => {
-    if (Array.isArray(categoriasIndicadores) && categoriasIndicadores.length > 0) {
-      console.log('✅ Carregando categorias preferidas do usuário');
-      setEdicaoLocal(categoriasIndicadores);
-    } else {
-      console.warn('⚠️ Nenhuma preferência encontrada. Carregando categorias padrão do sistema.');
-      setEdicaoLocal(CATEGORIAS_DEFAULT);
-    }
+    setEdicaoLocal(categoriasIndicadores);
   }, [categoriasIndicadores]);
 
   const salvarAlteracoes = useCallback(() => {

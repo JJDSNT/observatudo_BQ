@@ -1,11 +1,11 @@
 // src/store/hooks/useDebug.ts
 import { usePreferencesStore } from '@/store/preferencesStore';
-import type { DebugConfig } from '@/types';
+import type { DebugConfig, DebugModules } from '@/types';
 
 export function useDebug(): [
   DebugConfig,
   (debug: DebugConfig) => void,
-  (mod: keyof DebugConfig['modules'], val: boolean) => void
+  (mod: keyof DebugModules, val: boolean) => void
 ] {
   const debug = usePreferencesStore((s) => s.debug);
   const setDebug = usePreferencesStore((s) => s.setDebug);

@@ -34,11 +34,10 @@ export const usePreferencesStore = create<PreferencesStore>()(
         logLevel: "warn",
         persistLogs: false,
         maxLogEntries: 100,
-        modules: {
-          pwa: false,
-          zustand: false,
-          latency: false,
-        },
+        zustand: false,
+        latency: false,
+        pwa: false,
+        latencyMonitor: false,
       },
       categoriasIndicadores: [],
 
@@ -52,27 +51,60 @@ export const usePreferencesStore = create<PreferencesStore>()(
         })),
 
       setTema: (tema) => set({ tema }),
-      setSelecionado: (selecionado) => set({ selecionado }),
+
+      setSelecionado: (novoSelecionado) =>
+        set((state) => {
+          const atual: Partial<Selecionado> = state.selecionado;
+          const proximo: Partial<Selecionado> = {
+            ...atual,
+            ...novoSelecionado,
+          };
+
+          const mudou = Object.keys(proximo).some(
+            (chave) =>
+              proximo[chave as keyof Selecionado] !==
+              atual[chave as keyof Selecionado]
+          );
+
+          if (!mudou) return state;
+
+          return { selecionado: proximo };
+        }),
+
       setDebug: (debug) => set({ debug }),
+
       setDebugModule: (mod, val) =>
         set((state) => ({
           debug: {
             ...state.debug,
-            modules: {
-              ...state.debug.modules,
-              [mod]: val,
-            },
+            [mod]: val,
           },
         })),
-      setCategoriasIndicadores: (categoriasIndicadores) =>
-        set({ categoriasIndicadores }),
+
+      setCategoriasIndicadores: (categoriasIndicadores) => {
+        if (
+          !Array.isArray(categoriasIndicadores) ||
+          categoriasIndicadores.length === 0
+        ) {
+          console.warn("⚠️ Nenhuma categoria informada. Restaurando padrão.");
+          set({ categoriasIndicadores: CATEGORIAS_DEFAULT });
+        } else {
+          set({ categoriasIndicadores });
+        }
+      },
 
       initializeDefaultsIfNeeded: () => {
         const { categoriasIndicadores } = get();
-        if (!categoriasIndicadores || categoriasIndicadores.length === 0) {
+
+        if (
+          !Array.isArray(categoriasIndicadores) ||
+          categoriasIndicadores.length === 0
+        ) {
+          console.warn("⚠️ Nenhuma categoria encontrada. Usando padrão.");
           set({ categoriasIndicadores: CATEGORIAS_DEFAULT });
+        } else {
           console.log(
-            "ℹ️ categoriasIndicadores default carregadas no Zustand."
+            "✅ categoriasIndicadores já estavam carregadas no Zustand."
           );
         }
       },

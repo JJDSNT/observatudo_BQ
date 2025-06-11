@@ -61,9 +61,9 @@ export default function AppShell({
     >
       <GlobalHealthNotifier />
       {children}
-      {debug.modules?.zustand && <DebugZustandPanel />}
-      {debug.modules?.pwa && <PwaDebugPanel />}
-      {debug.modules?.latency && <LatencyMonitorGlobal />}
+      {debug.zustand && <DebugZustandPanel />}
+      {debug.pwa && <PwaDebugPanel />}
+      {debug.latency && <LatencyMonitorGlobal />}
     </SWRConfig>
   );
 }
