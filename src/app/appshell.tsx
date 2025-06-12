@@ -12,19 +12,12 @@ import LatencyMonitorGlobal from "@/components/debug/LatencyMonitorGlobal";
 import { useLatencyInit } from "@/hooks/useLatencyInit";
 import { useDebug } from "@/store/hooks/useDebug";
 
-export default function AppShell({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function AppShell() {
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
-
-  // ✅ Usa debug encapsulado
   const [debug] = useDebug();
 
-  // 🔄 Sincroniza com Firebase
   useSyncPreferencesWithFirebase();
-
-  // 🕵️‍♂️ Inicia medição contínua de latência
   useLatencyInit();
 
   useEffect(() => {
@@ -49,7 +42,9 @@ export default function AppShell({
     checkHealth();
   }, []);
 
-  if (!ready) return <SplashScreen message={message} />;
+  if (!ready) {
+    return <SplashScreen message={message} />;
+  }
 
   return (
     <SWRConfig
@@ -60,7 +55,6 @@ export default function AppShell({
       }}
     >
       <GlobalHealthNotifier />
-      {children}
       {debug.zustand && <DebugZustandPanel />}
       {debug.pwa && <PwaDebugPanel />}
       {debug.latency && <LatencyMonitorGlobal />}
