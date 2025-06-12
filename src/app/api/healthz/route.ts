@@ -15,8 +15,11 @@ export async function GET() {
   };
 
   try {
-    const [rows] = await bigquery.query('SELECT 1 AS alive');
-    result.bigquery = (rows[0]?.alive === 1) ? 'connected' : 'unexpected result';
+    await bigquery.createQueryJob({
+      query: 'SELECT 1',
+      dryRun: true,
+    });
+    result.bigquery = 'connected';
   } catch {
     result.bigquery = 'connection failed';
     result.status = 'error';
