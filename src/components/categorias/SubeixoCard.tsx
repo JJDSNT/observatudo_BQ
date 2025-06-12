@@ -5,6 +5,7 @@ import { X, Loader2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 
 interface SubeixoCardProps {
+  readonly id?: string;
   readonly nome: string;
   readonly indicadores: string[];
   readonly getNome: (id: string) => string;
@@ -15,6 +16,7 @@ interface SubeixoCardProps {
 }
 
 export function SubeixoCard({
+  id: _id,
   nome,
   indicadores,
   getNome,
@@ -34,7 +36,9 @@ export function SubeixoCard({
   };
 
   return (
-    <div className={`border rounded-lg p-4 space-y-3 bg-white dark:bg-zinc-900 ${className ?? ''}`}>
+    <div className={`border rounded-lg p-4 space-y-3 bg-white dark:bg-zinc-900 ${className ?? ''}`}
+    data-subeixo-id={_id}
+    >
       <div className="flex items-center justify-between">
         {editando ? (
           <input
