@@ -1,52 +1,38 @@
-// src/app/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useLayoutEffect } from "react";
 import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
 import CategoriaSelector from "@/components/CategoriaSelector";
-import { useIndicadoresDashboard } from "@/hooks/useIndicadoresDashboard";
-import { useCategoriasPreferidas } from "@/hooks/useCategoriasPreferidas";
-import { Subeixo } from "@/types";
+import { useIndicadoresSelecionados } from "@/hooks/useIndicadoresSelecionados";
+import { useCategorias } from "@/store/hooks/useCategorias";
+import { usePreferencesStore } from "@/store/preferencesStore";
 
 export default function Home() {
-  const [municipioId, setMunicipioId] = useState("4110953");
-  const [subeixosSelecionados, setSubeixosSelecionados] = useState<Subeixo[]>([]);
+  const initializeDefaultsIfNeeded = usePreferencesStore((s) => s.initializeDefaultsIfNeeded);
+  const [categorias] = useCategorias();
 
-  const { categoriasIndicadores, loading: categoriasLoading } = useCategoriasPreferidas();
-  const { data: payload, loading, error } = useIndicadoresDashboard(
-    municipioId,
-    subeixosSelecionados
-  );
+  useLayoutEffect(() => {
+    initializeDefaultsIfNeeded();
+  }, [initializeDefaultsIfNeeded]);
 
-  useEffect(() => {
-    if (payload) {
-      console.log("📊 Dados prontos para renderização no Dashboard:", {
-        municipio: payload?.municipio?.nome,
-        totalSubeixos: payload?.municipio?.subeixos?.length ?? 0,
-        raw: payload,
-      });
-    }
-  }, [payload]);
+  const eixos = useMemo(() => categorias ?? [], [categorias]);
+  const { indicadores, loading, error } = useIndicadoresSelecionados(true);
 
   return (
     <section className="space-y-6">
-      <ComboBoxLocalidades onChange={setMunicipioId} />
+      <ComboBoxLocalidades onChange={() => {}} />
 
-      {categoriasLoading ? (
-        <p>⏳ Carregando categorias...</p>
-      ) : categoriasIndicadores ? (
-        <CategoriaSelector
-          eixos={categoriasIndicadores}
-          onCategoriaChange={setSubeixosSelecionados}
-        />
+      {eixos.length > 0 ? (
+        <CategoriaSelector eixos={eixos} onCategoriaChange={() => {}} />
       ) : (
         <p className="text-yellow-500">⚠️ Nenhuma categoria configurada.</p>
       )}
 
       {loading && <p>⏳ Carregando indicadores...</p>}
-      {error && <p className="text-red-500">❌ Erro: {error.message}</p>}
-      {!loading && !error && payload && <Dashboard payload={payload} />}
+      {error && <p className="text-red-500">❌ Erro: {error}</p>}
+      {indicadores && !loading && !error && <Dashboard payload={indicadores} />}
     </section>
+    
   );
 }

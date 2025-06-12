@@ -1,29 +1,23 @@
-// src/components/categorias/CategoriasCard.tsx
-'use client';
+// src/components/categorias/CategoriaCard.tsx
+"use client";
 
-import { CategoriaIndicador, LucideIconName } from '@/types';
-import { IconSelector } from '@/components/IconSelector';
-import { SubeixoCard } from '@/components/categorias/SubeixoCard';
+import { Categoria, LucideIconName } from "@/types";
+import { IconSelector } from "@/components/IconSelector";
+import { SubeixoCard } from "@/components/categorias/SubeixoCard";
+import { GripVertical } from "lucide-react"; // ✅ ícone de drag
 
 interface CategoriaCardProps {
-  categoria: CategoriaIndicador;
+  categoria: Categoria;
   iconesDisponiveis: LucideIconName[];
-  onUpdate: (id: number, atualizacao: Partial<CategoriaIndicador>) => void;
-  onUpdateSubeixo: (
-    categoriaId: number,
-    subeixoId: string,
-    novoNome: string
-  ) => void;
+  onUpdate: (id: number, atualizacao: Partial<Categoria>) => void;
+  onUpdateSubeixo: (categoriaId: number, subeixoId: string, novoNome: string) => void;
   onAddSubeixo: (categoriaId: number) => void;
   onRemoveSubeixo: (categoriaId: number, subeixoId: string) => void;
-  onRemoveIndicador: (
-    categoriaId: number,
-    subeixoId: string,
-    indicadorId: string
-  ) => void;
+  onRemoveIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
   onDelete: (id: number) => void;
   getNome: (id: string) => string;
   loading?: boolean;
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>; // 👈 novo
 }
 
 export function CategoriaCard({
@@ -37,14 +31,16 @@ export function CategoriaCard({
   onDelete,
   getNome,
   loading = false,
+  dragHandleProps,
 }: Readonly<CategoriaCardProps>) {
-  const nomeCategoria = new Intl.ListFormat('pt-BR', {
-    style: 'long',
-    type: 'conjunction',
-  }).format(categoria.subeixos.map((s) => s.nome || 'Subeixo'));
+  const nomeCategoria = new Intl.ListFormat("pt-BR", {
+    style: "long",
+    type: "conjunction",
+  }).format(categoria.subeixos.map((s) => s.nome ?? "Subeixo"));
 
   return (
     <div className="relative border rounded-xl p-4 shadow space-y-4 bg-white dark:bg-zinc-900">
+      {/* Botão remover categoria */}
       <button
         onClick={() => onDelete(categoria.id)}
         className="absolute top-2 right-2 text-sm text-red-600 hover:text-red-800 cursor-pointer"
@@ -55,15 +51,29 @@ export function CategoriaCard({
       </button>
 
       <div className="space-y-2">
+        {/* Header com ícone e nome */}
         <div className="flex items-center justify-between">
           <IconSelector
             value={categoria.icone}
             onChange={(icon) => onUpdate(categoria.id, { icone: icon })}
             icons={iconesDisponiveis}
           />
-          <span className="font-semibold text-lg">{nomeCategoria}</span>
+
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-lg">{nomeCategoria}</span>
+            {dragHandleProps && (
+              <button
+                {...dragHandleProps}
+                className="cursor-grab text-zinc-400 hover:text-zinc-600"
+                title="Arrastar categoria"
+              >
+                <GripVertical size={18} />
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Cor da categoria */}
         <div className="text-sm flex items-center gap-2">
           Cor:
           <input
@@ -75,6 +85,7 @@ export function CategoriaCard({
           <span>{categoria.cor}</span>
         </div>
 
+        {/* Subeixos */}
         <div className="space-y-2">
           {categoria.subeixos.map((subeixo) => (
             <div key={subeixo.id} className="relative">
@@ -84,9 +95,9 @@ export function CategoriaCard({
                   onUpdateSubeixo(categoria.id, subeixo.id, e.target.value)
                 }
                 onFocus={(e) => {
-                  if (e.target.value === 'Novo subeixo') {
+                  if (e.target.value === "Novo subeixo") {
                     e.target.select();
-                    onUpdateSubeixo(categoria.id, subeixo.id, '');
+                    onUpdateSubeixo(categoria.id, subeixo.id, "");
                   }
                 }}
                 className="w-full mb-1 px-2 py-1 border rounded text-sm bg-white dark:bg-zinc-800"
@@ -100,18 +111,23 @@ export function CategoriaCard({
                 ×
               </button>
               <SubeixoCard
+                id={subeixo.id}
                 nome={subeixo.nome}
                 indicadores={subeixo.indicadores}
                 getNome={getNome}
                 loading={loading}
                 onRemoveIndicador={(indicadorId) =>
-                  onRemoveIndicador(categoria.id, subeixo.id, indicadorId)
+                  onRemoveIndicador?.(categoria.id, subeixo.id, indicadorId)
+                }
+                onUpdateNome={(novoNome) =>
+                  onUpdateSubeixo?.(categoria.id, subeixo.id, novoNome)
                 }
               />
             </div>
           ))}
         </div>
 
+        {/* Adicionar subeixo */}
         <div className="flex justify-end">
           <button
             onClick={() => onAddSubeixo(categoria.id)}

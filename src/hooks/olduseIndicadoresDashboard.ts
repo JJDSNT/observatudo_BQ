@@ -1,4 +1,4 @@
-// src/hooks/useIndicadoresDashboard.ts
+// src/hooks/olduseIndicadoresDashboard.ts
 import useSWR from 'swr';
 import { LocalidadeFullResponse, Subeixo } from '@/types';
 

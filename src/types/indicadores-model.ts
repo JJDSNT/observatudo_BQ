@@ -1,5 +1,6 @@
 // src/types/indicadores-model.ts
 import type { LucideIconName } from '@/types/lucide-icons';
+import type { Localidade } from '@/types';
 
 // --- Indicadores
 export interface ValorSerie {
@@ -31,7 +32,7 @@ export interface SubeixoResultado {
 }
 
 // --- Categorias
-export interface CategoriaIndicador {
+export interface Categoria {
   id: number;
   cor: string;
   icone: LucideIconName;
@@ -55,9 +56,18 @@ export interface LocalidadeFullResponse {
 
 // --- Cache
 export interface IndicadoresPayload {
-  categoriaId: number;
-  estadoId: string;
-  cidadeId: string;
+  localidade: Localidade; // já no formato { pais, estado, cidade }
+  atualizadoEm: string; // ISO string
+    niveis: {
+    pais: CategoriaResultado[];
+    estado: CategoriaResultado[];
+    municipio: CategoriaResultado[];
+  };
+}
+
+export interface CategoriaResultado {
+  id: number;
+  cor: string;
+  icone: LucideIconName;
   subeixos: SubeixoResultado[];
-  atualizadoEm: string; // ISO string (ex: "2025-06-05T22:14:00Z")
 }

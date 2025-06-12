@@ -1,3 +1,4 @@
+//src/components/AppShell.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,19 +6,20 @@ import { SWRConfig } from "swr";
 import SplashScreen from "@/components/SplashScreen";
 import GlobalHealthNotifier from "@/components/GlobalHealthNotifier";
 import { useSyncPreferencesWithFirebase } from "@/hooks/useSyncPreferencesWithFirebase";
-import { useUserPreferences } from "@/store/useUserPreferences";
 import DebugZustandPanel from "@/components/debug/DebugZustandPanel";
 import PwaDebugPanel from "@/components/debug/PwaDebugPanel";
-
-import { useLatencyInit } from "@/hooks/useLatencyInit";
 import LatencyMonitorGlobal from "@/components/debug/LatencyMonitorGlobal";
+import { useLatencyInit } from "@/hooks/useLatencyInit";
+import { useDebug } from "@/store/hooks/useDebug";
 
 export default function AppShell({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState("");
-  const { preferences } = useUserPreferences();
+
+  // ✅ Usa debug encapsulado
+  const [debug] = useDebug();
 
   // 🔄 Sincroniza com Firebase
   useSyncPreferencesWithFirebase();
@@ -59,9 +61,9 @@ export default function AppShell({
     >
       <GlobalHealthNotifier />
       {children}
-      {preferences.debug?.zustand && <DebugZustandPanel />}
-      {preferences.debug?.pwa && <PwaDebugPanel />}
-      {preferences.debug?.latency && <LatencyMonitorGlobal />}
+      {debug.zustand && <DebugZustandPanel />}
+      {debug.pwa && <PwaDebugPanel />}
+      {debug.latency && <LatencyMonitorGlobal />}
     </SWRConfig>
   );
 }

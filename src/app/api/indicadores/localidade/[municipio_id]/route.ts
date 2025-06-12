@@ -10,7 +10,7 @@ export async function POST(
 
   try {
     const body = await req.json();
-    const subeixos = body.categorias;
+    const subeixos = body.subeixos; // ✅ Corrigido para 'subeixos'
 
     if (
       !Array.isArray(subeixos) ||
@@ -19,11 +19,12 @@ export async function POST(
           typeof s === 'object' &&
           typeof s.id === 'string' &&
           typeof s.nome === 'string' &&
-          Array.isArray(s.indicadores)
+          Array.isArray(s.indicadores) &&
+          s.indicadores.every((id: unknown) => typeof id === 'string') // ✅ Validação corrigida
       )
     ) {
       return NextResponse.json(
-        { error: 'Formato de categorias inválido' },
+        { error: 'Formato de subeixos inválido' },
         { status: 400 }
       );
     }

@@ -1,5 +1,5 @@
 // src/utils/categoriaUtils.ts
-import type { CategoriaIndicador, Subeixo, LucideIconName } from "@/types";
+import type { Categoria, Subeixo, LucideIconName } from "@/types";
 
 /**
  * Cria um novo subeixo com nome padrão e ID único.
@@ -15,7 +15,7 @@ export function criarSubeixoPadrao(categoriaId: number): Subeixo {
 /**
  * Cria uma nova categoria com valores padrão.
  */
-export function criarCategoriaPadrao(): CategoriaIndicador {
+export function criarCategoriaPadrao(): Categoria {
   const timestamp = Date.now();
   return {
     id: timestamp,
@@ -30,7 +30,7 @@ export function criarCategoriaPadrao(): CategoriaIndicador {
  * Ex: "Educação, Saúde & Segurança"
  */
 export function formatarNomeCategoria(
-  categoria: Pick<CategoriaIndicador, "subeixos">
+  categoria: Pick<Categoria, "subeixos">
 ): string {
   const nomes = categoria.subeixos.map((s) => s.nome);
   return nomes.length <= 1
@@ -42,7 +42,67 @@ export function formatarNomeCategoria(
  * Retorna o ícone de uma categoria ou um fallback padrão.
  */
 export function obterIconeCategoria(
-  categoria: Partial<CategoriaIndicador>
+  categoria: Partial<Categoria>
 ): LucideIconName {
   return categoria.icone ?? "Circle";
+}
+
+/**
+ * Atualiza o nome de um subeixo dentro da categoria.
+ */
+export function atualizarNomeSubeixo(
+  categoria: Categoria,
+  subeixoId: string,
+  novoNome: string
+): Categoria {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.map((s) =>
+      s.id === subeixoId ? { ...s, nome: novoNome } : s
+    ),
+  };
+}
+
+/**
+ * Adiciona um novo subeixo padrão à categoria.
+ */
+export function adicionarSubeixo(categoria: Categoria): Categoria {
+  return {
+    ...categoria,
+    subeixos: [...categoria.subeixos, criarSubeixoPadrao(categoria.id)],
+  };
+}
+
+/**
+ * Remove um subeixo da categoria pelo ID.
+ */
+export function removerSubeixo(
+  categoria: Categoria,
+  subeixoId: string
+): Categoria {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.filter((s) => s.id !== subeixoId),
+  };
+}
+
+/**
+ * Remove um indicador específico de um subeixo da categoria.
+ */
+export function removerIndicador(
+  categoria: Categoria,
+  subeixoId: string,
+  indicadorId: string
+): Categoria {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.map((s) =>
+      s.id === subeixoId
+        ? {
+            ...s,
+            indicadores: s.indicadores.filter((id) => id !== indicadorId),
+          }
+        : s
+    ),
+  };
 }
