@@ -102,35 +102,40 @@ export const usePreferencesStore = create<PreferencesStore>()(
       initializeDefaultsIfNeeded: () => {
         const { categoriasIndicadores, selecionado } = get();
 
+        // 🔥 Remove campo legado 'eixo'
+        if ("eixo" in selecionado) {
+          const novo = { ...selecionado };
+          delete novo.eixo;
+          set({ selecionado: novo });
+        }
+
+        // ✅ Garante que categoria esteja carregada
         if (
           !Array.isArray(categoriasIndicadores) ||
           categoriasIndicadores.length === 0
         ) {
           console.warn("⚠️ Nenhuma categoria encontrada. Usando padrão.");
           set({ categoriasIndicadores: CATEGORIAS_DEFAULT });
-        } else {
-          console.log(
-            "✅ categoriasIndicadores já estavam carregadas no Zustand."
-          );
         }
 
-        // Verifica e preenche valores padrão para seleção
-        if (
-          !selecionado?.cidade ||
-          !selecionado?.estado ||
-          !selecionado?.pais
-        ) {
-          console.warn(
-            "⚠️ Nenhuma localidade selecionada. Usando padrão: BR > BA > 2927408"
-          );
-          set({
+        // ✅ Se o país estiver ausente, define como 'BR' (sem mexer nos outros)
+        if (!selecionado?.pais) {
+          console.info("ℹ️ País ausente. Definindo 'BR' como padrão.");
+          set((state) => ({
             selecionado: {
+              ...state.selecionado,
               pais: "BR",
-              estado: "BA",
-              cidade: "2927408",
-              categoriaId: CATEGORIAS_DEFAULT[0].id,
             },
-          });
+          }));
+        }
+
+        // 👁️ Estado, cidade e categoria agora são responsabilidade do usuário (ou persistência anterior)
+        if (!selecionado?.estado || !selecionado?.cidade) {
+          console.info("ℹ️ Estado ou cidade ausente. Aguardando interação.");
+        }
+
+        if (!selecionado?.categoriaId) {
+          console.info("ℹ️ Categoria ausente. Aguardando interação.");
         }
       },
     }),

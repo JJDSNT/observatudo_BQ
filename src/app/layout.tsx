@@ -4,8 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
 import Navbar from "@/components/Navbar";
-import { ThemeApplier } from '@/components/Theme/ThemeApplier';
+import { ThemeApplier } from "@/components/Theme/ThemeApplier";
 import { metadata } from "./metadata";
+import AppShell from "./appshell";
 export { viewport, metadata };
 
 const geistSans = Geist({
@@ -40,9 +41,8 @@ export default function RootLayout({
         <header className="px-6 py-4 border-b border-gray-300/40 dark:border-gray-700/50">
           <Navbar />
         </header>
-
-          <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
-
+        <AppShell />
+        <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
       </body>
     </html>
   );

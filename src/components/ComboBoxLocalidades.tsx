@@ -1,7 +1,7 @@
 // src/components/ComboBoxLocalidades.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { PaisDropdown } from '@/types/location';
 import localidadesJson from '@/data/localidades_dropdown.json';
 import { useSelecionado } from '@/store/hooks/useSelecionado';
@@ -18,38 +18,56 @@ export default function ComboBoxLocalidades({
 }: Readonly<ComboBoxLocalidadesProps>) {
   const [selecionado, setSelecionado] = useSelecionado();
 
-  const [ufSelecionado, setUfSelecionado] = useState(selecionado.estado ?? '');
-  const [cidadeSelecionada, setCidadeSelecionada] = useState(selecionado.cidade ?? '');
+  const mounted = useRef(false);
 
-  const estadoAtual = estados.find((e) => e.value === ufSelecionado);
+  const ufSelecionado = selecionado.estado?.trim() || '';
+  const cidadeSelecionada = selecionado.cidade?.trim() || '';
+
+  const estadoAtual = estados.find((e) => e.value.trim() === ufSelecionado);
   const cidades = estadoAtual?.children ?? [];
 
+  // Atualiza store quando cidade muda (após montagem inicial)
   useEffect(() => {
-    if (!cidadeSelecionada) return;
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
 
-    // Evita loop: só executa se a cidade realmente mudou
-    if (selecionado.cidade !== cidadeSelecionada) {
-      onChange(cidadeSelecionada);
+    if (ufSelecionado && cidadeSelecionada) {
       setSelecionado({
         ...selecionado,
+        pais: selecionado.pais || 'BR',
+        estado: ufSelecionado,
         cidade: cidadeSelecionada,
       });
+
+      onChange(cidadeSelecionada);
     }
-  }, [cidadeSelecionada, selecionado, setSelecionado, onChange]);
+  }, [cidadeSelecionada, ufSelecionado]);
 
   const handleChangeEstado = (uf: string) => {
-    setUfSelecionado(uf);
-    const estado = estados.find((e) => e.value === uf);
-    const cidadeDefault = estado?.default ?? '';
+    const estado = estados.find((e) => e.value.trim() === uf);
+    const cidadeDefault = estado?.default?.trim() ?? '';
 
-    setCidadeSelecionada(cidadeDefault);
     setSelecionado({
       ...selecionado,
-      estado: uf,
+      pais: selecionado.pais || 'BR',
+      estado: uf.trim(),
       cidade: cidadeDefault,
     });
 
-    onChange(cidadeDefault); // já atualiza externamente
+    if (cidadeDefault) {
+      onChange(cidadeDefault);
+    }
+  };
+
+  const handleChangeCidade = (cidadeId: string) => {
+    setSelecionado({
+      ...selecionado,
+      cidade: cidadeId.trim(),
+    });
+
+    onChange(cidadeId.trim());
   };
 
   return (
@@ -67,8 +85,8 @@ export default function ComboBoxLocalidades({
           >
             <option value="">UF</option>
             {estados.map((estado) => (
-              <option key={estado.value} value={estado.value}>
-                {estado.label}
+              <option key={estado.value.trim()} value={estado.value.trim()}>
+                {estado.label.trim()}
               </option>
             ))}
           </select>
@@ -81,7 +99,7 @@ export default function ComboBoxLocalidades({
           <select
             id="select-cidade"
             value={cidadeSelecionada}
-            onChange={(e) => setCidadeSelecionada(e.target.value)}
+            onChange={(e) => handleChangeCidade(e.target.value)}
             disabled={!ufSelecionado}
             className="border p-2 rounded w-full"
           >
