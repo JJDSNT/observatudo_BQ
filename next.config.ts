@@ -5,9 +5,13 @@ const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
-  extendDefaultRuntimeCaching: true,
+  extendDefaultRuntimeCaching: false, // ⛔ evita _ref
   workboxOptions: {
     runtimeCaching: [
+      {
+        urlPattern: /^\/_next\/image\?.*$/,
+        handler: "NetworkOnly", // ✅ evita erro 400
+      },
       {
         urlPattern: /^https:\/\/lh3\.googleusercontent\.com\/.*$/,
         handler: "StaleWhileRevalidate",
@@ -15,7 +19,7 @@ const withPWA = withPWAInit({
           cacheName: "google-avatars-cache",
           expiration: {
             maxEntries: 50,
-            maxAgeSeconds: 7 * 24 * 60 * 60, // 7 dias
+            maxAgeSeconds: 7 * 24 * 60 * 60,
           },
           cacheableResponse: {
             statuses: [0, 200],
