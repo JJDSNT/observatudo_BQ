@@ -33,5 +33,6 @@ export default function Home() {
       {error && <p className="text-red-500">❌ Erro: {error}</p>}
       {indicadores && !loading && !error && <Dashboard payload={indicadores} />}
     </section>
+    
   );
 }

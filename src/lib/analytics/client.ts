@@ -1,3 +1,4 @@
+// src/lib/analytics/client.ts
 import { BigQuery } from "@google-cloud/bigquery";
 
 export interface BigQueryConfig {

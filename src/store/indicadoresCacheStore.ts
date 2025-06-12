@@ -1,4 +1,4 @@
-// src/store/indicadoresCacheStore.ts
+//src/store/indicadoresCacheStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { IndicadoresPayload } from '@/types';
@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 
 interface IndicadoresStore {
   indicadoresPorLocalidade: Record<string, IndicadoresPayload>;
-  setPayload: (payload: IndicadoresPayload) => void;
+  setPayload: (key: string, payload: IndicadoresPayload) => void;
   getPayload: (key?: string) => IndicadoresPayload | undefined;
   clearPayload: (key?: string) => void;
 }
@@ -35,12 +35,7 @@ export const useIndicadoresStore = create<IndicadoresStore>()(
     (set, get) => ({
       indicadoresPorLocalidade: {},
 
-      setPayload: (payload) => {
-        const userId = useAuthStore.getState().user?.uid;
-        const { pais, estado, cidade } = payload.localidade;
-        if (!userId || !pais || !estado || !cidade) return;
-
-        const key = generateIndicadoresKey(userId, pais, estado, cidade);
+      setPayload: (key, payload) => {
         set((state) => ({
           indicadoresPorLocalidade: {
             ...state.indicadoresPorLocalidade,
@@ -69,7 +64,7 @@ export const useIndicadoresStore = create<IndicadoresStore>()(
     }),
     {
       name: 'indicadores-store',
-      version: 1,
+      version: 2,
     }
   )
 );

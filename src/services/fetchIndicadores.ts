@@ -1,6 +1,7 @@
-// src/services/fetchIndicadores.ts
-import { getLocalidadeFullPorSubeixos } from "@/services/indicadores";
-import { useIndicadoresStore } from "@/store/indicadoresCacheStore";
+//src/services/fetchIndicadores.ts
+
+import { useIndicadoresStore, generateIndicadoresKey } from "@/store/indicadoresCacheStore";
+import { useAuthStore } from "@/store/authStore";
 import type {
   Categoria,
   Indicador,
@@ -9,7 +10,7 @@ import type {
   Localidade,
 } from "@/types";
 
-// 🏷️ Tipos para dados brutos da API
+// Tipos auxiliares para sanitização
 interface RawSeriePonto {
   data?: unknown;
   valor?: unknown;
@@ -31,7 +32,7 @@ interface RawSubeixoResultado {
   indicadores?: unknown;
 }
 
-// 🧼 Sanitiza um indicador bruto garantindo os tipos corretos
+// Sanitização
 function sanitizeIndicador(raw: RawIndicador): Indicador {
   return {
     id: String(raw.id),
@@ -50,7 +51,6 @@ function sanitizeIndicador(raw: RawIndicador): Indicador {
   };
 }
 
-// 🧼 Sanitiza um subeixo completo com seus indicadores
 function sanitizeSubeixoResultado(raw: RawSubeixoResultado): SubeixoResultado {
   return {
     id: String(raw.id),
@@ -62,56 +62,75 @@ function sanitizeSubeixoResultado(raw: RawSubeixoResultado): SubeixoResultado {
 }
 
 /**
- * 🔄 Busca e armazena os indicadores para a localidade e categoria selecionadas.
+ * 🔄 Busca e armazena os indicadores para TODAS as categorias do usuário
  */
 export async function fetchIndicadoresParaSelecionado(
   localidade: Localidade,
-  categoriaId: number,
-  categoria: Categoria
+  categorias: Categoria[]
 ): Promise<IndicadoresPayload> {
   const store = useIndicadoresStore.getState();
+  const userId = useAuthStore.getState().user?.uid || "usuario";
+  const key = generateIndicadoresKey(userId, localidade.pais, localidade.estado, localidade.cidade);
 
-  const resposta = await getLocalidadeFullPorSubeixos(
-    localidade.cidade,
-    categoria.subeixos
+  // 🔧 Enviando apenas os subeixos (como esperado pelo backend)
+  const subeixosParaEnviar = categorias.flatMap((c) => c.subeixos);
+
+  const res = await fetch(
+    `/api/indicadores/localidade/${localidade.cidade}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subeixos: subeixosParaEnviar }),
+    }
   );
 
-  const subeixos = Array.isArray(resposta?.municipio?.subeixos)
-    ? resposta.municipio.subeixos.map(sanitizeSubeixoResultado)
-    : [];
+  if (!res.ok) {
+    throw new Error(`Erro ao buscar indicadores: HTTP ${res.status}`);
+  }
+
+  const json = await res.json();
 
   const payload: IndicadoresPayload = {
     localidade,
     atualizadoEm: new Date().toISOString(),
     niveis: {
-      pais: [
-        {
-          id: categoria.id,
-          cor: categoria.cor,
-          icone: categoria.icone,
-          subeixos: [], // TODO: preencher quando disponível
-        },
-      ],
-      estado: [
-        {
-          id: categoria.id,
-          cor: categoria.cor,
-          icone: categoria.icone,
-          subeixos: [], // TODO: preencher quando disponível
-        },
-      ],
-      municipio: [
-        {
-          id: categoria.id,
-          cor: categoria.cor,
-          icone: categoria.icone,
-          subeixos,
-        },
-      ],
+      pais: [],
+      estado: [],
+      municipio: [],
     },
   };
 
-  store.setPayload(payload);
+  for (const categoria of categorias) {
+    const rawSubeixos: RawSubeixoResultado[] = Array.isArray(json?.municipio?.subeixos)
+      ? (json.municipio.subeixos as RawSubeixoResultado[]).filter(
+          (s) => categoria.subeixos.some((c) => c.id === s.id)
+        )
+      : [];
 
+    const subeixos = rawSubeixos.map(sanitizeSubeixoResultado);
+
+    payload.niveis.municipio.push({
+      id: categoria.id,
+      cor: categoria.cor,
+      icone: categoria.icone,
+      subeixos,
+    });
+
+    payload.niveis.estado.push({
+      id: categoria.id,
+      cor: categoria.cor,
+      icone: categoria.icone,
+      subeixos: [],
+    });
+
+    payload.niveis.pais.push({
+      id: categoria.id,
+      cor: categoria.cor,
+      icone: categoria.icone,
+      subeixos: [],
+    });
+  }
+
+  store.setPayload(key, payload);
   return payload;
 }

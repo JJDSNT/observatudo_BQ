@@ -10,7 +10,11 @@ interface PreferencesStore {
   debug: DebugConfig;
   categoriasIndicadores: Categoria[];
 
-  setLocalidade: (loc: { pais: string; estado: string; cidade: string }) => void;
+  setLocalidade: (loc: {
+    pais: string;
+    estado: string;
+    cidade: string;
+  }) => void;
 
   setTema: (tema: "claro" | "escuro" | "auto") => void;
   setSelecionado: (s: Partial<Selecionado>) => void;
@@ -96,7 +100,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
       },
 
       initializeDefaultsIfNeeded: () => {
-        const { categoriasIndicadores } = get();
+        const { categoriasIndicadores, selecionado } = get();
 
         if (
           !Array.isArray(categoriasIndicadores) ||
@@ -108,6 +112,25 @@ export const usePreferencesStore = create<PreferencesStore>()(
           console.log(
             "✅ categoriasIndicadores já estavam carregadas no Zustand."
           );
+        }
+
+        // Verifica e preenche valores padrão para seleção
+        if (
+          !selecionado?.cidade ||
+          !selecionado?.estado ||
+          !selecionado?.pais
+        ) {
+          console.warn(
+            "⚠️ Nenhuma localidade selecionada. Usando padrão: BR > BA > 2927408"
+          );
+          set({
+            selecionado: {
+              pais: "BR",
+              estado: "BA",
+              cidade: "2927408",
+              categoriaId: CATEGORIAS_DEFAULT[0].id,
+            },
+          });
         }
       },
     }),

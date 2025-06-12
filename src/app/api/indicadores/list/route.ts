@@ -1,3 +1,4 @@
+//src/app/api/indicadores/list/route.ts
 import { listarIndicadores } from '@/lib/analytics/indicadores';
 import { NextResponse } from 'next/server';
 

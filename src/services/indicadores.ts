@@ -1,11 +1,16 @@
-
 // src/services/indicadores.ts
-import { IndicadorCivico } from "../lib/analytics/models/indicadorCivico";
+
+/**
+ * ⚠️ Este módulo é de uso estritamente server-side.
+ * Ele acessa diretamente o BigQuery via lib/analytics e deve ser usado apenas em rotas de API.
+ */
+
+import { IndicadorCivico } from "@/lib/analytics/models/indicadorCivico";
 import {
   getInfoMunicipio,
   getEstadoDoMunicipio,
   getInfoPais,
-} from "../lib/analytics/localidadeUtils";
+} from "@/lib/analytics/localidadeUtils";
 
 export async function getIndicadoresPorRegiao(
   categoria: string,
@@ -16,8 +21,10 @@ export async function getIndicadoresPorRegiao(
   return await query.execute();
 }
 
-
-// Função principal - busca indicadores por subeixos para município, estado e país
+/**
+ * 🔒 Server-only: deve ser usado apenas por rotas de API.
+ * Retorna os indicadores estruturados para município, estado e país.
+ */
 export async function getLocalidadeFullPorSubeixos(
   municipioId: string,
   subeixos: { id: string; nome: string; indicadores: string[] }[]
@@ -36,9 +43,7 @@ export async function getLocalidadeFullPorSubeixos(
   const paisInfo = getInfoPais();
 
   if (!municipioInfo || !estadoInfo) {
-    throw new Error(
-      `Município ou estado não encontrado para ID: ${municipioId}`
-    );
+    throw new Error(`Município ou estado não encontrado para ID: ${municipioId}`);
   }
 
   const fetchIndicadoresPorLocalidade = async (localidadeId: string) => {
@@ -87,12 +92,11 @@ export async function getLocalidadeFullPorSubeixos(
     );
   };
 
-  const [municipioSubeixos, estadoSubeixos, paisSubeixos] =
-    await Promise.all([
-      fetchIndicadoresPorLocalidade(municipioId),
-      fetchIndicadoresPorLocalidade(estadoInfo.id),
-      fetchIndicadoresPorLocalidade(paisInfo.id),
-    ]);
+  const [municipioSubeixos, estadoSubeixos, paisSubeixos] = await Promise.all([
+    fetchIndicadoresPorLocalidade(municipioId),
+    fetchIndicadoresPorLocalidade(estadoInfo.id),
+    fetchIndicadoresPorLocalidade(paisInfo.id),
+  ]);
 
   return {
     municipio: {

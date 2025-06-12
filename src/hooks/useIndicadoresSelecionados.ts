@@ -5,60 +5,63 @@ import { useEffect, useState } from "react";
 import { usePreferencesStore } from "@/store/preferencesStore";
 import { useIndicadoresStore } from "@/store/indicadoresCacheStore";
 import { fetchIndicadoresParaSelecionado } from "@/services/fetchIndicadores";
-import type {
-  IndicadoresPayload,
-  Categoria
-} from "@/types";
+import type { IndicadoresPayload } from "@/types";
 
 export function useIndicadoresSelecionados(fetchIfMissing = false) {
   const selecionado = usePreferencesStore((s) => s.selecionado);
   const categorias = usePreferencesStore((s) => s.categoriasIndicadores);
+  const userId = "usuario"; // 🔐 Substituir futuramente por ID real
 
   const { getPayload, setPayload } = useIndicadoresStore();
 
-  const { pais, estado, cidade, categoriaId } = selecionado ?? {};
-
-  const categoria: Categoria | undefined = categorias?.find(
-    (c) => c.id === categoriaId
-  );
-
-  const payload: IndicadoresPayload | undefined = getPayload();
+  const { pais, estado, cidade } = selecionado ?? {};
+  const cacheKey = `${userId}::${pais}::${estado}::${cidade}`;
+  const payload: IndicadoresPayload | undefined = getPayload(cacheKey);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (
-      !fetchIfMissing ||
-      !pais ||
-      !estado ||
-      !cidade ||
-      categoriaId === undefined ||
-      !categoria
-    )
-      return;
+    console.groupCollapsed("🧩 useIndicadoresSelecionados");
+    console.log("🔍 fetchIfMissing:", fetchIfMissing);
+    console.log("🌍 Localidade:", { pais, estado, cidade });
+    console.log("🗝️ cacheKey:", cacheKey);
+    console.log("📦 payload existente:", payload);
+    console.log("📚 categorias:", categorias?.length);
 
-    const jaTem = getPayload();
-    if (jaTem) return;
+    if (!fetchIfMissing || !pais || !estado || !cidade || !categorias?.length) {
+      console.log("🚫 Condições não atendidas para buscar indicadores");
+      console.groupEnd();
+      return;
+    }
+
+    if (payload) {
+      console.log("✅ Já há payload em cache. Nenhuma requisição necessária.");
+      console.groupEnd();
+      return;
+    }
 
     const fetch = async () => {
       setLoading(true);
       setError(null);
+      console.log("📡 Buscando indicadores para TODAS as categorias...");
       try {
         const dados = await fetchIndicadoresParaSelecionado(
           { pais, estado, cidade },
-          categoriaId,
-          categoria
+          categorias
         );
-        setPayload(dados);
+        console.log("✅ Indicadores recebidos:", dados);
+        setPayload(cacheKey, dados);
       } catch (err: unknown) {
-        setError(
+        const msg =
           err instanceof Error
             ? err.message
-            : "Erro desconhecido ao buscar indicadores"
-        );
+            : "Erro desconhecido ao buscar indicadores";
+        console.error("❌ Erro ao buscar indicadores:", msg);
+        setError(msg);
       } finally {
         setLoading(false);
+        console.groupEnd();
       }
     };
 
@@ -68,13 +71,13 @@ export function useIndicadoresSelecionados(fetchIfMissing = false) {
     pais,
     estado,
     cidade,
-    categoriaId,
-    categoria,
+    categorias,
+    payload,
+    cacheKey,
     getPayload,
     setPayload,
   ]);
 
-  // NOVO: retorno direto do payload
   return {
     indicadores: payload,
     loading,
