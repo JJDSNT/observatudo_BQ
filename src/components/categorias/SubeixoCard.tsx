@@ -5,7 +5,6 @@ import { X, Loader2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 
 interface SubeixoCardProps {
-  readonly id?: string; // necessário para edição
   readonly nome: string;
   readonly indicadores: string[];
   readonly getNome: (id: string) => string;
@@ -16,7 +15,6 @@ interface SubeixoCardProps {
 }
 
 export function SubeixoCard({
-  id,
   nome,
   indicadores,
   getNome,
