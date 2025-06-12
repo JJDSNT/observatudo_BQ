@@ -7,6 +7,7 @@ import CategoriaSelector from "@/components/CategoriaSelector";
 import { useIndicadoresSelecionados } from "@/hooks/useIndicadoresSelecionados";
 import { useCategorias } from "@/store/hooks/useCategorias";
 import { usePreferencesStore } from "@/store/preferencesStore";
+import SelectorStatus from "@/components/SelectorStatus";
 
 export default function Home() {
   const initializeDefaultsIfNeeded = usePreferencesStore((s) => s.initializeDefaultsIfNeeded);
@@ -21,6 +22,7 @@ export default function Home() {
 
   return (
     <section className="space-y-6">
+      <SelectorStatus />
       <ComboBoxLocalidades onChange={() => {}} />
 
       {eixos.length > 0 ? (
