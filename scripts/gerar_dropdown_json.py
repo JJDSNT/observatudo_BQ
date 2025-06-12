@@ -61,8 +61,8 @@ for uf in sorted(estados.keys()):
     ]
 
     estado_objs.append({
-        "label": uf,
-        "value": uf,
+        "label": uf.strip(),
+        "value": uf.strip(),
         "default": estado["capital_id"],
         "children": cidades_formatadas
     })
