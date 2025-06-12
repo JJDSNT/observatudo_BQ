@@ -1,14 +1,12 @@
-
-import { metadata } from "./metadata";
+//src/app/layout.tsx
 import { viewport } from "./viewport";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
-import AppShell from "@/app/appshell";
 import Navbar from "@/components/Navbar";
 import { ThemeApplier } from '@/components/Theme/ThemeApplier';
-
-export { metadata, viewport };
+import { metadata } from "./metadata";
+export { viewport, metadata };
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,9 +40,9 @@ export default function RootLayout({
         <header className="px-6 py-4 border-b border-gray-300/40 dark:border-gray-700/50">
           <Navbar />
         </header>
-        <AppShell>
+
           <main className="max-w-4xl mx-auto px-4 pt-8">{children}</main>
-        </AppShell>
+
       </body>
     </html>
   );
