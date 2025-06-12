@@ -1,3 +1,4 @@
+// next.config.js
 import withPWAInit from "@ducanh2912/next-pwa";
 import type { NextConfig } from "next";
 
@@ -5,12 +6,17 @@ const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
-  extendDefaultRuntimeCaching: false, // ⛔ evita _ref
+  extendDefaultRuntimeCaching: false,
   workboxOptions: {
     runtimeCaching: [
+      // ✅ PATCH: impede que a home venha do cache
+      {
+        urlPattern: /^\/$/,
+        handler: "NetworkOnly",
+      },
       {
         urlPattern: /^\/_next\/image\?.*$/,
-        handler: "NetworkOnly", // ✅ evita erro 400
+        handler: "NetworkOnly",
       },
       {
         urlPattern: /^https:\/\/lh3\.googleusercontent\.com\/.*$/,
