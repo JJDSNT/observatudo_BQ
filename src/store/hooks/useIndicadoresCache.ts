@@ -19,7 +19,7 @@ export function useIndicadoresCache() {
   const payload = key ? store.getPayload(key) : undefined;
 
   const set = (payload: IndicadoresPayload) => {
-    if (key) store.setPayload(payload);
+    if (key) store.setPayload(key, payload);
   };
 
   const clear = () => {
