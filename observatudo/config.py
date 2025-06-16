@@ -11,6 +11,8 @@ DADOS_DIR = "dados/cidades-sustentaveis"
 CACHE_DIR = os.path.join(DADOS_DIR, "cache")
 MAPA_EIXOS_PATH = os.path.join(CACHE_DIR, "eixos_llm.json")
 INVALIDOS_PATH = os.path.join(CACHE_DIR, "classificacoes_invalidas.csv")
+MAPA_DIRECIONALIDADE_PATH = os.path.join(CACHE_DIR, "direcionalidade_capag.json")
+
 
 # === Ollama (LLM Local) ===
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")

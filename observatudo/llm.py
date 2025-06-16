@@ -85,7 +85,7 @@ def classificar_eixo(texto: str) -> str:
         return "Indefinido"
 
 
-def classificar_direcionalidade(texto: str) -> str:
+def inferir_direcionalidade(texto: str) -> str:
     """
     Usa LLM local para inferir a direcionalidade de um indicador.
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             "Acesso à internet nas escolas dos ensinos fundamental e médio"
         )
         eixo = classificar_eixo(exemplo)
-        direcionalidade = classificar_direcionalidade(exemplo)
+        direcionalidade = inferir_direcionalidade(exemplo)
         print("\n📌 Exemplo de classificação:")
         print(f"  Indicador: {exemplo}")
         print(f"  → Eixo IA: {eixo}")

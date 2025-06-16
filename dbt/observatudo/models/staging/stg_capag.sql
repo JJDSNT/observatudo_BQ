@@ -1,14 +1,43 @@
 -- models/staging/stg_capag.sql
-{{ config(materialized='table') }}
 
-SELECT
+{{ config(
+    materialized='table'
+) }}
+
+with origem as (
+  select
+    indicador_id,
+    localidade_id,
+    ano,
+    valor,
+    justificativa,
+    data_insercao,
+    data_referencia,
+    fonte,
+    url_fonte,
+    metodologia_calculo,
+    data_coleta,
+    confiabilidade,
+    usuario_insercao,
+    processo_etl,
+    versao_metodologia,
+    flags,
+    metadados,
+    direcionalidade,
+    nota,
+    esfera_poder
+  from {{ source('dados', 'raw_capag') }}
+  where indicador_id is not null
+)
+
+select
   indicador_id,
-  CAST(localidade_id AS STRING) AS localidade_id,
+  localidade_id,
   ano,
   valor,
   justificativa,
   data_insercao,
-  SAFE.PARSE_DATE('%Y-%m-%d', data_referencia) AS data_referencia,
+  data_referencia,
   fonte,
   url_fonte,
   metodologia_calculo,
@@ -18,6 +47,8 @@ SELECT
   processo_etl,
   versao_metodologia,
   flags,
-  TO_JSON_STRING(metadados) AS metadados
-FROM `observatudo-infra.dados.raw_capag`
-WHERE valor IS NOT NULL
+  metadados,
+  direcionalidade,
+  nota,
+  esfera_poder
+from origem

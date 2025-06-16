@@ -62,14 +62,12 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     agora = datetime.now(timezone.utc)
     for _, row in df.iterrows():
         for indicador, valor, nota in [
-            ("CAPAG - Endividamento", row.valor_endividamento,
-             row.nota_endividamento),
-            ("CAPAG - Poupança Corrente", row.valor_poupanca,
-             row.nota_poupanca),
-            ("CAPAG - Liquidez", row.valor_liquidez,
-             row.nota_liquidez),
+            ("CAPAG - Endividamento", row.valor_endividamento, row.nota_endividamento),
+            ("CAPAG - Poupança Corrente", row.valor_poupanca, row.nota_poupanca),
+            ("CAPAG - Liquidez", row.valor_liquidez, row.nota_liquidez),
             ("CAPAG - Nota Final", None, row.nota_final)
         ]:
+            esfera = "estadual" if row.tipo_localidade == "estado" else "municipal"
             registros.append({
                 "indicador_id": indicador,
                 "localidade_id": row.localidade_id,
@@ -87,16 +85,16 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
                 "processo_etl": "preprocess_capag",
                 "versao_metodologia": None,
                 "flags": None,
+                "nota": nota,
+                "esfera_poder": esfera,
                 "metadados": {
                     "nota": nota,
                     "frequencia": "anual",
-                    "esferaDePoder": (
-                        "estadual" if row.tipo_localidade == "estado"
-                        else "municipal"
-                    )
+                    "esferaDePoder": esfera
                 }
             })
     return pd.DataFrame(registros)
+
 
 
 def inferir_direcionalidade_capag(df: pd.DataFrame) -> pd.DataFrame:

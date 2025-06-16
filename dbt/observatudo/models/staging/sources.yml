@@ -2,7 +2,8 @@ version: 2
 
 sources:
   - name: dados
-    database: observatudo-infra        # ou deixe em branco se não usar múltiplos projetos
+    database: observatudo-infra
     schema: dados
     tables:
       - name: raw_cidades_sustentaveis
+      - name: raw_capag

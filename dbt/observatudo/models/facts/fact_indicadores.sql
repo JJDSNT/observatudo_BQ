@@ -14,7 +14,7 @@ with fonte as (
         ano,
         valor,
         justificativa,
-        data_processamento as data_insercao,
+        CAST(data_processamento AS TIMESTAMP) as data_insercao,
         case
           when ano is not null and ano > 0 then DATE(ano, 1, 1)
           else null
@@ -28,13 +28,16 @@ with fonte as (
         'dbt_etl' as processo_etl,
         null as versao_metodologia,
         null as flags,
-        null as metadados
+        null as metadados,
+        null as direcionalidade,
+        null as esfera_poder,
+        null as nota
     from {{ ref('stg_cidades_sustentaveis') }}
     where valor is not null
- 
+
     UNION ALL
 
-    -- CAPAG
+    -- CAPAG (componentes)
     select
         indicador_id,
         localidade_id,
@@ -52,8 +55,37 @@ with fonte as (
         processo_etl,
         versao_metodologia,
         flags,
-        metadados
+        metadados,
+        direcionalidade,
+        esfera_poder,
+        nota
     from {{ ref('stg_capag') }}
+
+    UNION ALL
+
+    -- CAPAG (agregado)
+    select
+        indicador_id,
+        localidade_id,
+        ano,
+        valor,
+        null as justificativa,
+        CAST(data_referencia AS TIMESTAMP) as data_insercao,
+        data_referencia,
+        fonte,
+        null as url_fonte,
+        null as metodologia_calculo,
+        null as data_coleta,
+        null as confiabilidade,
+        null as usuario_insercao,
+        'dbt_etl' as processo_etl,
+        null as versao_metodologia,
+        null as flags,
+        null as metadados,
+        direcionalidade,
+        esfera_poder,
+        nota
+    from {{ ref('int_capag') }}
 )
 
 select * from fonte
