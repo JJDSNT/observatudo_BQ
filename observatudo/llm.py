@@ -85,14 +85,69 @@ def classificar_eixo(texto: str) -> str:
         return "Indefinido"
 
 
+def classificar_direcionalidade(texto: str) -> str:
+    """
+    Usa LLM local para inferir a direcionalidade de um indicador.
+
+    Pode responder:
+    - quanto maior, melhor
+    - quanto menor, melhor
+    - indiferente
+    - a > b > c
+    """
+    prompt = (
+        "A seguir está a descrição de um indicador público. "
+        "Classifique a direcionalidade esperada do indicador, escolhendo apenas uma das opções:\n"
+        "- quanto maior, melhor\n"
+        "- quanto menor, melhor\n"
+        "- indiferente\n"
+        "- a > b > c\n\n"
+        f"Indicador:\n{texto}\n\n"
+        "Resposta:"
+    )
+
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False,
+    }
+
+    try:
+        start = perf_counter()
+        r = requests.post(
+            f"{OLLAMA_URL}/api/generate", json=payload, timeout=LLM_TIMEOUT
+        )
+        r.raise_for_status()
+        duration = perf_counter() - start
+
+        resposta = r.json().get("response", "").strip().lower()
+        logger.debug(f"⏱️ LLM respondeu em {duration:.2f}s: '{resposta}'")
+
+        if "maior" in resposta:
+            return "quanto maior, melhor"
+        if "menor" in resposta:
+            return "quanto menor, melhor"
+        if "indiferente" in resposta:
+            return "indiferente"
+        if ">" in resposta or "a" in resposta:
+            return "a > b > c"
+
+        return "indiferente"
+    except Exception as e:
+        logger.warning(f"⚠️ Erro ao classificar direcionalidade com LLM: {e}")
+        return "indiferente"
+
+
 if __name__ == "__main__":
     if check_server():
         exemplo = (
             "Acesso à internet nas escolas dos ensinos fundamental e médio"
         )
         eixo = classificar_eixo(exemplo)
+        direcionalidade = classificar_direcionalidade(exemplo)
         print("\n📌 Exemplo de classificação:")
         print(f"  Indicador: {exemplo}")
         print(f"  → Eixo IA: {eixo}")
+        print(f"  → Direcionalidade IA: {direcionalidade}")
     else:
         print("⚠️ Corrija a conexão com o servidor Ollama antes de continuar.")

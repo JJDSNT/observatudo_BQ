@@ -31,6 +31,29 @@ with fonte as (
         null as metadados
     from {{ ref('stg_cidades_sustentaveis') }}
     where valor is not null
+ 
+    UNION ALL
+
+    -- CAPAG
+    select
+        indicador_id,
+        localidade_id,
+        ano,
+        valor,
+        justificativa,
+        data_insercao,
+        data_referencia,
+        fonte,
+        url_fonte,
+        metodologia_calculo,
+        data_coleta,
+        confiabilidade,
+        usuario_insercao,
+        processo_etl,
+        versao_metodologia,
+        flags,
+        metadados
+    from {{ ref('stg_capag') }}
 )
 
 select * from fonte
