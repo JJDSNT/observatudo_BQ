@@ -28,6 +28,7 @@ export class QueryBuilder {
   private joins: string[] = [];
   private limitValue: number = 1000;
   private orderByFields: { field: string; direction: "ASC" | "DESC" }[] = [];
+  private orFiltersRaw: string[] = [];
 
   constructor(sourceTable: string, alias?: string) {
     this.sourceTable = sourceTable;
@@ -69,6 +70,11 @@ export class QueryBuilder {
 
   orderBy(field: string, direction: "ASC" | "DESC" = "ASC") {
     this.orderByFields.push({ field, direction });
+    return this;
+  }
+
+  orWhereRaw(condition: string) {
+    this.orFiltersRaw.push(condition);
     return this;
   }
 
@@ -145,9 +151,7 @@ export class QueryBuilder {
   }
 
   private _buildWhereClause(): string {
-    if (this.filters.length === 0) return "";
-
-    const conditions = this.filters.map((filter) => {
+    const andConditions = this.filters.map((filter) => {
       const { dimension, operator, values } = filter;
       const dimensionObj = this.dimensions.find((d) => d.name === dimension);
       const dimensionSql = dimensionObj ? dimensionObj.sql : dimension;
@@ -172,7 +176,15 @@ export class QueryBuilder {
       }
     });
 
-    return `WHERE ${conditions.join(" AND ")}`;
+    const allConditions = [...andConditions];
+
+    if (this.orFiltersRaw.length > 0) {
+      allConditions.push(`(${this.orFiltersRaw.join(" OR ")})`);
+    }
+
+    return allConditions.length > 0
+      ? `WHERE ${allConditions.join(" AND ")}`
+      : "";
   }
 
   async execute<T = Record<string, unknown>>(): Promise<T[]> {

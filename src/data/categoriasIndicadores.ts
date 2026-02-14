@@ -85,7 +85,7 @@ export const CATEGORIAS_DEFAULT: Categoria[] = [
       {
         id: 'financas',
         nome: 'Finanças',
-        indicadores: ['144', '4030', '3946','CAPAG - Endividamento'],
+        indicadores: ['144', '4030', '3946','capag'],
       },
     ],
   },

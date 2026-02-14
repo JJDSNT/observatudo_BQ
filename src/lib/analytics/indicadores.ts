@@ -15,24 +15,21 @@ export async function listarIndicadores(): Promise<Indicador[]> {
 }
 
 export async function buscarIndicadores(query: string): Promise<Indicador[]> {
+  const lowerQuery = query.toLowerCase();
   const qb = new QueryBuilder("dim_indicadores")
     .addDimension({ name: "id", sql: "indicador_id", type: "string" })
     .addDimension({ name: "nome", sql: "nome", type: "string" })
     .addDimension({ name: "descricao", sql: "descricao", type: "string" })
-    .filter({
-      dimension: "nome",
-      operator: "CONTAINS",
-      values: [query.toLowerCase()],
-    })
-    .filter({
-      dimension: "descricao",
-      operator: "CONTAINS",
-      values: [query.toLowerCase()],
-    })
+    .orWhereRaw(`
+      LOWER(nome) LIKE '%${lowerQuery}%'
+      OR LOWER(descricao) LIKE '%${lowerQuery}%'
+      OR LOWER(indicador_id) = '${lowerQuery}'
+    `)
     .limit(20);
 
   return qb.execute<Indicador>();
 }
+
 
 export async function nomesIndicadores(ids: string[]): Promise<Indicador[]> {
   const qb = new QueryBuilder("dim_indicadores", "i")
