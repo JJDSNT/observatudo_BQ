@@ -279,12 +279,13 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   (`data/cidades-sustentaveis`, `data/ibge`, `data/tesouro-nacional` — ~98MB,
   25 arquivos), gerando `.dvc` + `data/.gitignore`. `package.json` ganhou
   `dvc:status`/`dvc:pull`/`dvc:push`. Validado: `dvc status` ("up to date"),
-  `dvc doctor` (remote `gs` reconhecido). `dvc push` real **não executado**
-  — mesmas credenciais OAuth expiradas que bloquearam `terraform plan` na
-  Fase 3 (`gcsfs`/ADC, mesmo erro `RefreshError: Reauthentication is
-  needed`); requer `gcloud auth application-default login` antes do
-  primeiro push real. Fora do escopo desta fase (não decidido, ver
-  `docs/external/dvc.md`): migrar `transformers/*.py` para parar de chamar
+  `dvc doctor` (remote `gs` reconhecido), e **`dvc push` real executado em
+  2026-06-19** após reautenticação (`gcloud auth application-default
+  login`) — 28 arquivos enviados a `gs://observatudo-infra-www-data/
+  dvc-store`, confirmado via `dvc status -c` ("in sync") e listagem direta
+  do bucket via `google.cloud.storage`. Fora do escopo desta fase (não
+  decidido, ver `docs/external/dvc.md`): migrar `transformers/*.py` para
+  parar de chamar
   `upload_to_bucket` manualmente e passar a depender de `dvc add`/`dvc
   push`; isso fica como ponto aberto, não como TODO da fase.
 
@@ -300,11 +301,8 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   "reprocessar esta fonte") dependem de necessidade real ainda não
   surgida.
 - Aplicar de fato o Terraform da Fase 3 (`terraform plan`/`apply` em
-  `infra/`) — bloqueado por credenciais OAuth expiradas do backend remoto
-  (`gcloud auth application-default login`), não por decisão de design.
-- Rodar o primeiro `dvc push` real (Fase 4) — mesmo bloqueio de
-  credenciais OAuth acima; os `.dvc` já estão no Git, mas o conteúdo ainda
-  não foi enviado ao bucket remoto.
+  `infra/`) — credenciais reautenticadas em 2026-06-19, `terraform plan`
+  ainda não foi rodado/revisado (ver progresso da Fase 3 atualizado).
 - Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
   `upload_to_bucket` manual — não decidido se compensa (ver
   `docs/external/dvc.md`, "Pontos abertos").

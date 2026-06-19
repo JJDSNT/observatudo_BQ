@@ -2,10 +2,9 @@
 
 > Status: implementado (Fase 4, `refactor/04-dvc-init`). `dvc init --subdir`
 > dentro de `apps/datawarehouse`, remote GCS configurado, datasets atuais
-> migrados (`dvc add`). `dvc push` real para o bucket **não foi executado**
-> — credenciais OAuth do ambiente estavam expiradas (mesmo bloqueio da Fase
-> 3, ver `AI_context/REFACTOR_CONTEXT.md`); requer
-> `gcloud auth application-default login` antes do primeiro push real.
+> migrados (`dvc add`) e enviados ao bucket (`dvc push` real executado em
+> 2026-06-19, 28 arquivos, confirmado via `dvc status -c` e listagem direta
+> do bucket).
 
 ## Por que DVC
 
@@ -64,9 +63,6 @@ que já existe via Terraform (`infra/storage.tf`,
   `scripts/preprocess_*.py` — não é necessário para o MVP de versionamento,
   mas é um próximo passo natural depois que o `dvc add`/`dvc push` básico
   estiver funcionando.
-- `dvc push` real para o bucket ainda não foi executado (credenciais OAuth
-  expiradas no ambiente em que a Fase 4 foi implementada) — primeira
-  execução real fica pendente de `gcloud auth application-default login`.
 
 ## Referências
 
