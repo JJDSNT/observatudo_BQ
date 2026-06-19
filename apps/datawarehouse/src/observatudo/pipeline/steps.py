@@ -37,12 +37,20 @@ STEPS: list[Step] = [
         dataset="silver",
         table="capag_agregado",
     ),
+    # Materializado como TABLE (não VIEW): a SA www_app só tem IAM em
+    # `gold`, não em `silver`. Uma VIEW que lê `silver.*` falharia com
+    # "Access Denied" para quem só pode ler `gold` (BigQuery resolve
+    # views com a permissão de quem consulta, não de quem criou — a
+    # menos que a view seja registrada como "authorized view" em
+    # `silver`, o que adicionaria complexidade sem necessidade real
+    # aqui). O pipeline já recria isso a cada execução via
+    # `CREATE OR REPLACE`, então materializar como tabela não perde
+    # frescor nenhum.
     Step(
         name="gold.dim_indicadores",
         sql_file="gold/dim_indicadores.sql",
         dataset="gold",
         table="dim_indicadores",
-        materialization="view",
     ),
     Step(
         name="gold.fact_indicadores",
