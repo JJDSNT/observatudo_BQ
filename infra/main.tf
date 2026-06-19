@@ -1,6 +1,11 @@
 provider "google" {
   project = var.project_id
   region  = var.region
+  # Evita que o provider injete a label goog-terraform-provisioned
+  # automaticamente: para google_cloud_run_domain_mapping isso força
+  # replace (destroy+create) em vez de update in-place, o que recriaria
+  # o domain mapping (e o certificado SSL) sem necessidade real.
+  add_terraform_attribution_label = false
 }
 
 resource "google_cloud_run_service" "www_observatudo" {
