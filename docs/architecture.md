@@ -54,41 +54,81 @@ duplicação real de código TS aparecer entre `frontend` e `api`.
 Substitui o que hoje está espalhado em `observatudo/`, `scripts/`, `dados/` e
 `dbt/`. Responsável por:
 
-- **Ingestão/transformação em Python (uv)** (ex.: `transformers/capag.py`,
+- **Ingestão em Python (uv)** (ex.: `transformers/capag.py`,
   `transformers/cidades_sustentaveis.py`) — mantido, é o que já funciona bem.
+  Carrega os arquivos de origem (rastreados pelo DVC) direto no dataset
+  `raw`.
 - **Versionamento de datasets com DVC** (ver
   [`docs/external/dvc.md`](./external/dvc.md)), escopado dentro deste app
   (`.dvc/` vive em `apps/datawarehouse`, não na raiz) — substitui os uploads
   manuais feitos hoje em `observatudo/io_utils.py::upload_to_bucket`.
-- **Modelagem do BigQuery em dois datasets** (ver racional abaixo), com as
-  tabelas que hoje são geradas por dbt escritas como SQL simples + script
-  Python de apply, **sem dbt**.
+- **Pipeline de transformação `raw` → `silver` → `gold`** (ver racional
+  abaixo), com as tabelas que hoje são geradas por dbt escritas como SQL
+  simples (`sql/silver/`, `sql/gold/`) + um runner Python que as executa em
+  ordem — **sem dbt**.
 - **API de metadados do DW** (`src/observatudo/api/`, FastAPI) — placeholder
-  desde já, ver "Limites do Cube.js" abaixo.
+  desde já, ver "Limites do Cube.js" abaixo. Vai expor o que o pipeline
+  grava no dataset `ops` a cada execução.
 
-#### Dois datasets BigQuery: `core` e `ops`
+#### Quatro datasets BigQuery: `raw`, `silver`, `gold`, `ops`
 
-O dataset atual (`dados`, ver `infra/bigquery.tf`) é dividido em dois, porque
-servem a propósitos diferentes:
+O dataset atual (`dados`, ver `infra/bigquery.tf`) é dividido em quatro —
+um por camada — porque cada um tem consumidor e fronteira de acesso
+diferentes:
 
-- **`core`** (nome provisório) — dados analíticos de produto: `dim_indicadores`,
-  `fact_indicadores`, `dim_localidades`. É o que o frontend mostra; é o que o
-  Cube.js expõe como cubos/medidas/dimensões.
-- **`ops`** — metadados *sobre o próprio DW*: execução de pipelines,
-  freshness por fonte, linhagem, resultados de validação de qualidade. É
-  observabilidade do pipeline, não dado de produto. Misturar os dois no
-  mesmo dataset poluiria o catálogo semântico que o Cube.js expõe ao
+- **`raw`** — landing zone: tabelas carregadas direto dos arquivos de
+  origem (já rastreados pelo DVC), sem transformação. Ex.: `raw_capag`,
+  `raw_cidades_sustentaveis`. Equivalente ao "bronze" do medallion
+  architecture.
+- **`silver`** — limpeza/cast/agregação. Ex.: `capag`,
+  `cidades_sustentaveis` (cast de tipos), `capag_agregado` (agrega os 4
+  componentes do CAPAG num indicador só). Não é exposto a nada fora do
+  pipeline — é staging interno.
+- **`gold`** — modelo dimensional final: `dim_indicadores`,
+  `fact_indicadores`, `dim_localidades`. É o que o frontend mostra hoje e o
+  que o Cube.js expõe como cubos/medidas/dimensões. **Único dataset com
+  acesso concedido ao Cube.js** (IAM em `infra/bigquery.tf`/`iam.tf`) — ele
+  nunca vê `raw`/`silver`.
+- **`ops`** — metadados *sobre o próprio pipeline e os dados*: execução de
+  cada etapa (`pipeline_runs`), freshness por tabela/fonte
+  (`dataset_freshness`), resultados de validação de qualidade
+  (`data_quality_checks`). Não é dado de produto, é observabilidade —
+  separar evita poluir o catálogo semântico que o Cube.js expõe ao
   frontend (não se quer um cubo `pipeline_run_log` ao lado de
   `fact_indicadores`).
+
+A separação física em datasets (em vez de só prefixo de nome de tabela
+dentro de um dataset só) existe para que a fronteira `gold` ↔ resto seja
+garantida por **IAM real**, não por convenção: a service account do
+Cube.js só recebe `roles/bigquery.dataViewer` em `gold`.
 
 `ops` **não** é exposto via Cube.js — tem API própria (ver seção 3.1), para
 não misturar "registro/status de pipeline" com o modelo dimensional do
 Cube, pensado para medidas agregáveis.
 
+#### Mecanismo do pipeline (substituto do `dbt run`)
+
+Cada etapa `silver`/`gold` é um arquivo `.sql` plano (sem Jinja/`ref()`) em
+`apps/datawarehouse/sql/{silver,gold}/`, com nomes de tabela totalmente
+qualificados. Um runner Python (`src/observatudo/pipeline/`) lê os arquivos
+na ordem certa (a cadeia é pequena e linear — não precisa de um
+orquestrador de DAG), envolve o `SELECT` num `CREATE OR REPLACE
+TABLE/VIEW ... AS (<sql>)` (com `PARTITION BY`/`CLUSTER BY` quando
+configurado, equivalente ao `config()` do dbt) e executa via
+`bigquery.Client().query(...)`. A cada etapa, grava o resultado
+(sucesso/erro, linhas processadas, duração) em `ops.pipeline_runs`. Ver a
+árvore completa em
+[`docs/monorepo-structure.md`](./monorepo-structure.md).
+
+Trade-off aceito: perdemos os testes automáticos do dbt (`unique`/`not_null`
+em `dim_indicadores`) e a doc de linhagem gerada automaticamente. Dado o
+tamanho atual do projeto (5 modelos), isso é proporcional — pode ser
+reintroduzido como asserções Python simples no runner se algum dia doer.
+
 ### 3. Camada de API analítica — `apps/api` (Cube.js)
 
 O objetivo é parar de expor BigQuery cru para o frontend e ter uma camada
-semântica (medidas, dimensões, joins) reutilizável sobre o dataset `core`.
+semântica (medidas, dimensões, joins) reutilizável sobre o dataset `gold`.
 O candidato natural, já citado na visão futura do README original, é o
 **Cube.js**, e ele já entra como app real no monorepo (schema dos cubos
 versionado), não como placeholder — só a **decisão de deploy** (self-hosted
@@ -131,14 +171,14 @@ o serviço correspondente (ex.: Cloud Run).
 | Turborepo para orquestração | Com 3 apps poliglotas compartilhando os mesmos nomes de script, Turborepo dá cache e grafo de tarefas executando os próprios scripts de `package.json` (agnóstico de linguagem), o que paga a complexidade extra dado que lint/test do Python e build do Next são as tarefas mais lentas do repo. |
 | Abandonar dbt | Hoje o dbt só materializa alguns `dim_*`/`fact_*` simples; a camada de transformação real já vive em Python (`observatudo/transformers`). Manter dbt em paralelo é overhead de ferramenta sem ganho proporcional no estágio atual do projeto. |
 | Adotar DVC para datasets, escopado em `apps/datawarehouse` | Os arquivos de dados (`dados/*.csv`, exports intermediários) precisam ser versionados e auditáveis sem inchar o Git. DVC trackeia os ponteiros no Git e mantém o conteúdo em um bucket GCS (remote). Escopar `.dvc/` dentro do app (não na raiz) mantém a mesma fronteira de contenção usada para o Python. |
-| Dois datasets BigQuery: `core` (analítico) e `ops` (metadados do DW) | Dados de produto (indicadores) e observabilidade do pipeline têm consumidores e ciclos de vida diferentes; misturá-los no mesmo dataset poluiria o catálogo semântico exposto pelo Cube.js. |
-| Cube.js como `apps/api`, scaffold real (não placeholder) | Evita reimplementar manualmente SQL/agregações em cada rota Next.js; dá um modelo semântico (medidas/dimensões) reutilizável. Como Cube.js (JS) e o DW (Python) só se relacionam via contrato de dados (tabelas do dataset `core`), o schema dos cubos não depende da decisão de deploy ainda aberta — por isso já pode existir como app real. |
+| Quatro datasets BigQuery: `raw`, `silver`, `gold`, `ops` | Cada camada do medallion architecture (raw/silver/gold) tem consumidor e ciclo de vida diferente; `ops` (observabilidade) é ortogonal às camadas. Datasets separados (em vez de prefixo de nome de tabela) tornam a fronteira `gold` ↔ resto garantida por IAM, não por convenção. |
+| Cube.js como `apps/api`, scaffold real (não placeholder), acesso só a `gold` | Evita reimplementar manualmente SQL/agregações em cada rota Next.js; dá um modelo semântico (medidas/dimensões) reutilizável. Como Cube.js (JS) e o DW (Python) só se relacionam via contrato de dados (tabelas do dataset `gold`), o schema dos cubos não depende da decisão de deploy ainda aberta — por isso já pode existir como app real. |
 | `ops` ganha API própria (FastAPI, dentro do `datawarehouse`) em vez de cubos no Cube.js | Cube.js é somente-leitura e dimensional por design; metadado de pipeline é mais registro/status do que medida agregável. Manter leitura (hoje) e ação (futuro) numa única superfície evita fragmentar metadados do DW entre dois sistemas. Entra já como placeholder real, não só ideia. |
 
 ## O que este documento **não** decide
 
-- Nome final do dataset `core` (e confirmação de que `ops` fica só com
-  metadados do pipeline).
+- Nomes finais exatos das tabelas em `silver`/`gold` (mantive próximos dos
+  nomes dbt atuais, sem o prefixo `stg_`/`int_`, mas isso é só convenção).
 - Se o Cube.js será self-hosted (Cloud Run/Docker) ou Cube Cloud.
 - Conteúdo real da API de metadados do `ops` (seção 3.1) além do
   placeholder — e quando ela ganha endpoints de ação/mutação.

@@ -1,7 +1,7 @@
 # External: Cube.js como camada de API do Data Warehouse
 
 > Status: **escopo e local no monorepo decididos** (`apps/api`, schema
-> versionado, escopo = somente leitura sobre o dataset `core`). O que falta
+> versionado, escopo = somente leitura sobre o dataset `gold`). O que falta
 > decidir é só o **alvo de deploy** (self-hosted vs. Cube Cloud) e detalhes
 > de autenticação/protocolo — ver "Pontos abertos" abaixo.
 
@@ -22,9 +22,11 @@ BigQuery.
 
 Cube.js é uma camada **analítica e somente-leitura**. Ele cobre bem:
 
-- Consultas de medidas/dimensões sobre o dataset `core` (`dim_indicadores`,
+- Consultas de medidas/dimensões sobre o dataset `gold` (`dim_indicadores`,
   `fact_indicadores`, `dim_localidades`) — o caso de uso principal, e o que
-  substitui as rotas atuais em `src/app/api/indicadores/*`.
+  substitui as rotas atuais em `src/app/api/indicadores/*`. A service
+  account do Cube.js só tem IAM de leitura em `gold` (nunca em
+  `raw`/`silver`/`ops`) — ver `docs/architecture.md` seção 2.
 
 O dataset `ops` (metadados do próprio DW) **não** é exposto via Cube.js —
 decisão fechada, ver `docs/architecture.md` seção 3.1. Ele tem API própria
@@ -50,9 +52,9 @@ Cube.js **não cobre** (e não deve ser forçado a cobrir):
 ```
 apps/api/
 ├── package.json
-├── cube.js          # config de conexão com o BigQuery (dataset core)
+├── cube.js          # config de conexão com o BigQuery (dataset gold)
 ├── model/
-│   ├── cubes/        # 1 cubo por dim_*/fact_* do dataset core
+│   ├── cubes/        # 1 cubo por dim_*/fact_* do dataset gold
 │   └── views/        # views compostas para o frontend consumir
 ├── Dockerfile         # caminho self-hosted
 └── .env.example
@@ -60,7 +62,7 @@ apps/api/
 
 Por que já é um app real e não um placeholder: Cube.js (JS) e o DW (Python)
 não compartilham código — só um **contrato de dados** (as tabelas que
-`apps/datawarehouse` materializa no dataset `core`). O schema dos cubos
+`apps/datawarehouse` materializa no dataset `gold`). O schema dos cubos
 depende desse contrato, não da decisão de deploy. Por isso o schema pode (e
 deve) ser versionado e evoluído desde já, mesmo com o deploy ainda indefinido.
 

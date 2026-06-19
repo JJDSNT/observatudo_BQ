@@ -43,13 +43,19 @@ descrição completa. Resumo:
   mínimo para ser orquestrável pelo workspace pnpm/Turborepo).
 - `apps/api` (Cube.js) — app real desde já (schema versionado), só o deploy
   final (self-hosted vs. Cube Cloud) está em aberto.
-- Dois datasets BigQuery: `core` (analítico, nome provisório) e `ops`
-  (metadados/observabilidade do próprio DW), substituindo o atual `dados`.
+- **Quatro datasets BigQuery, um por camada do medallion architecture**:
+  `raw` (landing, sem transformação), `silver` (limpeza/cast/agregação),
+  `gold` (modelo dimensional final — `dim_indicadores`, `fact_indicadores`,
+  `dim_localidades`; único dataset que o Cube.js acessa) e `ops`
+  (metadados/observabilidade do próprio pipeline e dos dados — ortogonal às
+  camadas). Substituem o atual dataset único `dados`. Ver
+  `docs/architecture.md` seção 2 para o racional completo.
 - Datasets de dados versionados via DVC, escopado dentro de
   `apps/datawarehouse` (não na raiz), conteúdo em bucket GCS, ponteiros no
   Git.
-- dbt removido; modelagem SQL feita direto (scripts Python + `.sql` simples
-  em `apps/datawarehouse/sql/`).
+- dbt removido; pipeline `raw → silver → gold` feito com SQL simples
+  (`apps/datawarehouse/sql/{silver,gold}/`) + runner Python
+  (`apps/datawarehouse/src/observatudo/pipeline/`), substituindo `dbt run`.
 - Turborepo para orquestrar `build`/`lint`/`test` entre os 3 apps.
 
 ## Decisões já fechadas (não reabrir sem motivo novo)
@@ -62,15 +68,17 @@ descrição completa. Resumo:
   racional em `docs/architecture.md`.
 - Cube.js já nasce como app real (`apps/api`, schema versionado), não como
   placeholder esperando decisão de deploy.
-- Cube.js é escopo **somente leitura/analítico** sobre o dataset `core`. O
+- Cube.js é escopo **somente leitura/analítico** sobre o dataset `gold`. O
   dataset `ops` (metadados do próprio DW) **não** é exposto via Cube.js —
   tem API própria, dedicada (FastAPI), dentro de
   `apps/datawarehouse/src/observatudo/api/`. Entra como placeholder real
   (esqueleto, escopo inicial só leitura) desde a Fase 2, não como ideia
   futura solta.
-- Dois datasets BigQuery (`core` + `ops`), não um só — para não misturar
-  dado de produto com metadado de observabilidade do pipeline no mesmo
-  catálogo semântico.
+- **Datasets separados por camada (`raw`/`silver`/`gold`/`ops`), não
+  prefixo de nome de tabela dentro de um dataset só** — para que a
+  fronteira de acesso do Cube.js (só `gold`) seja garantida por IAM real,
+  não por convenção. Isso funde o que antes eram "Fase 3 (remover dbt)" e
+  "Fase 5 (reorganizar BigQuery)" numa fase só (ver roadmap).
 - DVC inicializado dentro de `apps/datawarehouse` (não na raiz do monorepo).
 
 ## Por que essas mudanças (resumo — detalhes em `docs/architecture.md`)
@@ -87,47 +95,58 @@ descrição completa. Resumo:
   rastreada com o que efetivamente está no bucket GCS. DVC formaliza isso.
 - **Cube.js**: parar de expor BigQuery cru ao frontend, com um modelo
   semântico reutilizável — mas só para o que é, de fato, consulta analítica.
-- **Dataset `ops` separado**: reservar espaço para observabilidade do
-  próprio DW (execução de pipeline, freshness, linhagem) sem acoplar isso ao
-  modelo de dados que o frontend consome.
+- **Datasets `raw`/`silver`/`gold`/`ops` separados**: cada camada do
+  medallion architecture tem consumidor e ciclo de vida diferente; `ops`
+  (observabilidade do pipeline) é ortogonal e não deve poluir o catálogo
+  semântico que o Cube.js expõe. Separação física (não só convenção de
+  nome) garante a fronteira de acesso do Cube.js via IAM.
 
 ## Roadmap (fases — cada fase deve virar 1+ issues, não uma issue só)
 
-1. **Setup do monorepo pnpm** — criar `pnpm-workspace.yaml` + `turbo.json` +
-   `package.json` raiz, mover o app Next.js para `apps/frontend` sem mudar
-   comportamento, garantir que `pnpm install` + `pnpm --filter frontend dev`
-   funcionam.
-2. **Criar `apps/datawarehouse`** — mover `observatudo/`, `scripts/`,
-   `dados/` → `data/` para dentro do novo app; converter `requirements.txt`
-   em `pyproject.toml`/`uv.lock` (uv); criar o `package.json` wrapper de
-   scripts; criar o placeholder de `src/observatudo/api/` (FastAPI, só
-   esqueleto + health-check, sem lógica do `ops` ainda).
-3. **Remover dbt** — migrar a lógica de `dbt/observatudo/models/*` para
-   `apps/datawarehouse/sql/{staging,intermediate,dims,facts}/*.sql`,
-   depreciar e então apagar a pasta `dbt/`.
+1. ✅ **Setup do monorepo pnpm** — `pnpm-workspace.yaml` + `turbo.json` +
+   `package.json` raiz, Next.js movido para `apps/frontend`.
+2. ✅ **Criar `apps/datawarehouse`** — `observatudo/`, `scripts/`, `dados/` →
+   `data/` movidos; `requirements.txt` → `pyproject.toml`/`uv.lock` (uv);
+   `package.json` wrapper; placeholder de `src/observatudo/api/` (FastAPI).
+3. **Camadas BigQuery (`raw`/`silver`/`gold`/`ops`) + remover dbt** — fase
+   única (funde o que antes eram fases 3 e 5 separadas, ver "Decisões já
+   fechadas"). Inclui:
+   - Criar os datasets `raw`, `silver`, `gold`, `ops` no Terraform
+     (`infra/bigquery.tf`), com IAM: Cube.js (futuro) só lê `gold`; a
+     service account do pipeline lê/escreve nos quatro.
+   - Migrar `raw_capag`/`raw_cidades_sustentaveis` para o dataset `raw`
+     (mesmas tabelas, sem mudança de schema).
+   - Migrar a lógica de `dbt/observatudo/models/staging/*` e
+     `intermediate/*` para `apps/datawarehouse/sql/silver/*.sql` (sem
+     Jinja/`ref()`), materializando no dataset `silver`.
+   - Migrar `dbt/observatudo/models/dims/*` e `facts/*` para
+     `apps/datawarehouse/sql/gold/*.sql`, materializando no dataset `gold`.
+     `dim_localidades` (hoje carregada direto pelo Python, sem dbt) passa a
+     ser carregada direto em `gold.dim_localidades`.
+   - Criar `apps/datawarehouse/src/observatudo/pipeline/` (`steps.py`,
+     `runner.py`, `ops_logger.py`) e `scripts/run_pipeline.py` — o
+     substituto do `dbt run`. Cada execução grava em `ops.pipeline_runs`.
+   - Depreciar e então apagar a pasta `dbt/` e o `.venv` órfão da raiz.
 4. **Inicializar DVC dentro de `apps/datawarehouse`** — `dvc init` no app
    (não na raiz), configurar remote GCS (reaproveitando ou criando bucket,
    ver `docs/external/dvc.md`), `dvc add` nos datasets atuais, atualizar
-   `.gitignore`.
-5. **Reorganizar BigQuery em dois datasets** — criar `core` e `ops` no
-   Terraform (`infra/bigquery.tf`), migrar tabelas existentes do dataset
-   `dados` para `core`; `ops` começa vazio/mínimo (sem migração de dado
-   legado).
-6. **Scaffold de `apps/api` (Cube.js)** — criar o app com schema dos cubos
-   mapeando o dataset `core`, mesmo sem a decisão de deploy fechada (issue
-   separada para isso). Não inclui ainda migrar o frontend para consumi-lo.
-7. **Decidir deploy do Cube.js e migrar o frontend rota a rota** — fechar
+   `.gitignore`. Pode rodar em paralelo à Fase 3.
+5. **Scaffold de `apps/api` (Cube.js)** — criar o app com schema dos cubos
+   mapeando o dataset `gold`, mesmo sem a decisão de deploy fechada (issue
+   separada). Não inclui ainda migrar o frontend para consumi-lo. Depende
+   da Fase 3 (precisa do `gold` materializado e estável).
+6. **Decidir deploy do Cube.js e migrar o frontend rota a rota** — fechar
    self-hosted vs. Cube Cloud + autenticação (`docs/external/cubejs.md`),
    então substituir `src/app/api/indicadores/*` pelo consumo via Cube.js,
-   um indicador por vez.
-8. **Limpeza** — remover código/infra órfã do estado anterior (rotas de API
+   um indicador por vez. Depende da Fase 5.
+7. **Limpeza** — remover código/infra órfã do estado anterior (rotas de API
    substituídas, dataset `dados` antigo, etc.).
 
-Dependência principal: 3 depende de 2; 6 depende de 5; 7 depende de 6.
-4 pode rodar em paralelo a 2/3. O conteúdo real da API de metadados do `ops`
-(além do placeholder criado na Fase 2 — ver `docs/architecture.md`, seção
-3.1) **não é uma fase deste roadmap** — só entra quando o dataset `ops`
-existir e houver endpoints concretos a implementar.
+O conteúdo real da API de metadados do `ops` (além do placeholder criado na
+Fase 2 — ver `docs/architecture.md`, seção 3.1) **não é uma fase deste
+roadmap** — só entra quando houver endpoints concretos a implementar
+(ela já vai ter dado real pra expor a partir da Fase 3, via
+`ops.pipeline_runs`).
 
 ## Progresso
 
@@ -194,6 +213,16 @@ existir e houver endpoints concretos a implementar.
   - `dbt/` e o `.venv` antigo da raiz ficaram intocados (escopo da Fase 3) —
     o `.venv` da raiz está órfão (sem `requirements.txt` pra regenerá-lo)
     mas funcional até a Fase 3 remover o dbt de fato.
+- **Design da Fase 3 fechado em 2026-06-19** (ainda não implementado):
+  trocamos o desenho de "dois datasets" (`core`+`ops`) por **quatro
+  datasets em camadas** (`raw`/`silver`/`gold`/`ops`), depois de mapear
+  exatamente o que cada modelo dbt atual faz (`stg_capag`,
+  `stg_cidades_sustentaveis` = silver; `int_capag` = silver agregado;
+  `dim_indicadores`/`fact_indicadores` = gold). Renomeado `core` → `gold`
+  em toda a documentação. Isso fundiu as antigas Fase 3 (remover dbt) e
+  Fase 5 (reorganizar datasets) numa fase só, porque na prática eram a
+  mesma mudança. Ver `docs/architecture.md` seção 2 e
+  `docs/monorepo-structure.md` (seção "`sql/` + `pipeline/`").
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -201,9 +230,17 @@ existir e houver endpoints concretos a implementar.
   consumo no frontend — ver `docs/external/cubejs.md`.
 - DVC: bucket dedicado vs. reaproveitar `data_bucket` existente — ver
   `docs/external/dvc.md`.
-- Nome final do dataset `core` (provisório) e confirmação de que `ops` fica
-  só com metadados de pipeline.
+- Nomes finais exatos das tabelas em `silver`/`gold` (provisoriamente sem
+  prefixo `stg_`/`int_`, só convenção — ver tabela de mapeamento em
+  `docs/monorepo-structure.md`).
+- Schema exato de `ops.pipeline_runs`/`ops.dataset_freshness`/
+  `ops.data_quality_checks` (colunas, granularidade) — a existência dessas
+  tabelas está decidida, o schema fino não.
 - Endpoints concretos da API de metadados do `ops` (o placeholder/esqueleto
-  já está decidido; o conteúdo real depende do dataset `ops` existir).
+  já está decidido; o conteúdo real depende das tabelas de `ops` existirem).
+- Bucket do remote do DVC reaproveitado vs. dedicado — dado que agora
+  `raw` é um dataset BigQuery próprio, vale reavaliar se o remote do DVC
+  deveria ser um bucket dedicado a "fonte bruta versionada", separado do
+  que os pipelines escrevem como output.
 - Destino de `packages/` compartilhados (se vier a existir) entre frontend e
   API.
