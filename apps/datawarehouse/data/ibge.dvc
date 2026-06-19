@@ -1,0 +1,6 @@
+outs:
+- md5: 6de1278ba36f6efbd31b768e266f4ff0.dir
+  size: 390670
+  nfiles: 3
+  hash: md5
+  path: ibge
