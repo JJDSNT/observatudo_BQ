@@ -1,0 +1,9 @@
+{
+  "name": "datawarehouse",
+  "private": true,
+  "scripts": {
+    "lint": "uv run ruff check .",
+    "format": "uv run ruff format .",
+    "serve": "uv run fastapi run src/observatudo/api/main.py"
+  }
+}

@@ -85,6 +85,9 @@ dbt/profiles.yml
 __pycache__/
 *.pyc
 *.pyo
+.ruff_cache/
+.pytest_cache/
+uv-cache/
 
 # =====================
 # arquivos sensíveis (mais seletivos)
