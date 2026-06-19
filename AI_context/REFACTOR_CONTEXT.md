@@ -233,10 +233,10 @@ roadmap** — só entra quando houver endpoints concretos a implementar
     quatro datasets + `bigquery.jobUser`. `infra/variables.tf`
     (`bigquery_dataset_id` default `"dados"` → `"gold"`) e
     `infra/outputs.tf` (`dbt_sa_email` → `pipeline_sa_email`) ajustados.
-    `terraform validate` passa; `terraform plan`/`apply` **não foram
-    executados** (credenciais do backend remoto expiradas — requer
-    `gcloud auth application-default login` antes de aplicar; é
-    infraestrutura de produção, não roda sem confirmação explícita).
+    `terraform validate` passa; `terraform plan`/`apply` na época
+    bloqueados por credenciais do backend remoto expiradas — aplicado de
+    fato só depois, junto da recuperação do state (ver entrada
+    "Incidente" abaixo).
   - Modelos dbt migrados para SQL plano em
     `apps/datawarehouse/sql/{silver,gold}/*.sql` (sem Jinja/`ref()`/`config()`),
     lendo de `raw.*`/`silver.*` com nomes totalmente qualificados.
