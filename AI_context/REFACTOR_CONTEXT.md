@@ -133,8 +133,27 @@ existir e houver endpoints concretos a implementar.
 
 <!-- Atualize esta seção conforme fases avançam. Formato: Fase N — status — data — observação. -->
 
-- Nenhuma fase iniciada ainda. Plano de estrutura de pastas e decisões de
-  arquitetura fechados em 2026-06-19 (ver `docs/monorepo-structure.md`).
+- Plano de estrutura de pastas e decisões de arquitetura fechados em
+  2026-06-19 (ver `docs/monorepo-structure.md`).
+- **Fase 1 concluída em 2026-06-19** (branch `refactor/01-pnpm-monorepo-setup`):
+  `pnpm-workspace.yaml` + `turbo.json` + `package.json` raiz criados; Next.js
+  movido para `apps/frontend` (`git mv`, histórico preservado); `yarn.lock`
+  removido, substituído por `pnpm-lock.yaml`. Validado de ponta a ponta:
+  `pnpm install`, `pnpm --filter frontend build`, `pnpm --filter frontend
+  dev` (HTTP 200) e build/run via Docker (HTTP 200). Achados durante a
+  migração:
+  - `next.config.ts` ganhou `output: "standalone"` — necessário pro Docker
+    funcionar bem dentro do monorepo pnpm (evita lidar com symlinks do
+    pnpm store na imagem final).
+  - `Dockerfile` movido para `apps/frontend/Dockerfile`, reescrito para
+    pnpm + build context na raiz (`docker build -f apps/frontend/Dockerfile .`);
+    `.github/workflows/build-and-deploy.yml` atualizado de acordo.
+  - `@dnd-kit/utilities` era uma dependência fantasma (usada no código,
+    nunca declarada no `package.json` — funcionava por hoisting frouxo do
+    yarn). O pnpm não permite isso; adicionada como dependência direta.
+  - `.gitignore` generalizado para padrões de monorepo (`node_modules`,
+    `.next/`, etc. sem âncora `/` na raiz) e novo padrão `fallback-*.js`
+    (artefato do `next-pwa` que ainda não estava coberto).
 
 ## Decisões abertas (bloqueiam issues downstream)
 
