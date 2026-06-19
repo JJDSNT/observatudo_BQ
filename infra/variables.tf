@@ -16,8 +16,8 @@ variable "image_url" {
 
 variable "bigquery_dataset_id" {
   type        = string
-  default     = "dados"
-  description = "Nome do dataset BigQuery usado pelo app"
+  default     = "gold"
+  description = "Dataset BigQuery usado pelo frontend (camada gold)"
 }
 
 variable "state_label" {

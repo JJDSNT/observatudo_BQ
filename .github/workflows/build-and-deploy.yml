@@ -65,4 +65,4 @@ jobs:
             --project $PROJECT_ID \
             --allow-unauthenticated \
             --service-account sa-observatudo-www-app@observatudo-infra.iam.gserviceaccount.com \
-            --set-env-vars BIGQUERY_PROJECT_ID=observatudo-infra,BIGQUERY_DATASET_ID=dados
+            --set-env-vars BIGQUERY_PROJECT_ID=observatudo-infra,BIGQUERY_DATASET_ID=gold

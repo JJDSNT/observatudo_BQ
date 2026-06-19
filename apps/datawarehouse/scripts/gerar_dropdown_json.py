@@ -5,7 +5,7 @@ from collections import defaultdict
 
 # === CONFIG ===
 PROJETO = "observatudo-infra"
-DATASET = "dados"
+DATASET = "gold"
 TABELA = "dim_localidades"
 DESTINO_JSON = "../frontend/src/data/localidades_dropdown.json"
 

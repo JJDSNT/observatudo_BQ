@@ -1,11 +1,7 @@
-{{ config(
-    materialized='table',
-    partition_by={
-        "field": "data_referencia",
-        "data_type": "date"
-    },
-    cluster_by=["indicador_id", "localidade_id"]
-) }}
+-- sql/gold/fact_indicadores.sql
+-- Equivalente a dbt/observatudo/models/facts/fact_indicadores.sql (sem dbt).
+-- Particionamento/cluster são configurados pelo runner (ver pipeline/steps.py),
+-- não aqui — este arquivo é só o SELECT.
 
 with fonte as (
     select
@@ -25,14 +21,14 @@ with fonte as (
         null as data_coleta,
         null as confiabilidade,
         null as usuario_insercao,
-        'dbt_etl' as processo_etl,
+        'pipeline_etl' as processo_etl,
         null as versao_metodologia,
         null as flags,
         null as metadados,
         null as direcionalidade,
         null as esfera_poder,
         null as nota
-    from {{ ref('stg_cidades_sustentaveis') }}
+    from `silver.cidades_sustentaveis`
     where valor is not null
 
     UNION ALL
@@ -59,7 +55,7 @@ with fonte as (
         direcionalidade,
         esfera_poder,
         nota
-    from {{ ref('stg_capag') }}
+    from `silver.capag`
 
     UNION ALL
 
@@ -78,14 +74,14 @@ with fonte as (
         null as data_coleta,
         null as confiabilidade,
         null as usuario_insercao,
-        'dbt_etl' as processo_etl,
+        'pipeline_etl' as processo_etl,
         null as versao_metodologia,
         null as flags,
         null as metadados,
         direcionalidade,
         esfera_poder,
         nota
-    from {{ ref('int_capag') }}
+    from `silver.capag_agregado`
 )
 
 select * from fonte

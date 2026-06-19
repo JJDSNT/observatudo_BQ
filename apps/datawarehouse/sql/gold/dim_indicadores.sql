@@ -1,8 +1,5 @@
--- models/dims/dim_indicadores.sql
-
-{{ config(
-    materialized='view'
-) }}
+-- sql/gold/dim_indicadores.sql
+-- Equivalente a dbt/observatudo/models/dims/dim_indicadores.sql (sem dbt).
 
 with source as (
 
@@ -17,7 +14,7 @@ with source as (
       meta_ods,
       numero_ods,
       nome_ods
-  from {{ ref('stg_cidades_sustentaveis') }}
+  from `silver.cidades_sustentaveis`
 
   union all
 
@@ -32,7 +29,7 @@ with source as (
       null as meta_ods,
       null as numero_ods,
       null as nome_ods
-  from {{ ref('int_capag') }}
+  from `silver.capag_agregado`
 )
 
 select

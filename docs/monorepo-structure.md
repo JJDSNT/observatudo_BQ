@@ -247,13 +247,13 @@ packages:
 | `requirements.txt` | `apps/datawarehouse/pyproject.toml` + `uv.lock` | ✅ Fase 2 |
 | `civ/`, `dw/` (pastas vazias na raiz) | removidas — eram rascunho | ✅ Fase 2 |
 | — | `apps/datawarehouse/src/observatudo/api/` — placeholder FastAPI do `ops` | ✅ Fase 2 |
-| dataset `dados.raw_capag`, `dados.raw_cidades_sustentaveis` | dataset `raw` (mesmas tabelas, sem transformação) | pendente |
-| `dbt/observatudo/models/staging/*` | `apps/datawarehouse/sql/silver/*.sql` (sem Jinja/`ref()`), materializado no dataset `silver` | pendente |
-| `dbt/observatudo/models/intermediate/*` | `apps/datawarehouse/sql/silver/*.sql`, dataset `silver` | pendente |
-| `dbt/observatudo/models/dims/*`, `facts/*` | `apps/datawarehouse/sql/gold/*.sql`, dataset `gold` | pendente |
-| `dados.dim_localidades` (já carregada direto pelo Python, sem dbt) | dataset `gold` (`gold.dim_localidades`) | pendente |
-| `dbt/` (restante: `macros/`, `snapshots/`, `tests/`, `target/`, configs) | removido | pendente |
-| — | dataset `ops` (`pipeline_runs`, `dataset_freshness`, `data_quality_checks`) | pendente |
+| dataset `dados.raw_capag`, `dados.raw_cidades_sustentaveis` | dataset `raw` (mesmas tabelas, sem transformação) | ✅ Fase 3 |
+| `dbt/observatudo/models/staging/*` | `apps/datawarehouse/sql/silver/*.sql` (sem Jinja/`ref()`), materializado no dataset `silver` | ✅ Fase 3 |
+| `dbt/observatudo/models/intermediate/*` | `apps/datawarehouse/sql/silver/*.sql`, dataset `silver` | ✅ Fase 3 |
+| `dbt/observatudo/models/dims/*`, `facts/*` | `apps/datawarehouse/sql/gold/*.sql`, dataset `gold` | ✅ Fase 3 |
+| `dados.dim_localidades` (já carregada direto pelo Python, sem dbt) | dataset `gold` (`gold.dim_localidades`) | ✅ Fase 3 |
+| `dbt/` (restante: `macros/`, `snapshots/`, `tests/`, `target/`, configs) | removido | ✅ Fase 3 |
+| — | dataset `ops` (`pipeline_runs` ✅ Fase 3; `dataset_freshness`/`data_quality_checks` ainda não existem) | parcial |
 | `infra/` | inalterado, permanece na raiz | — |
 | `docs/`, `AI_context/` | inalterado, permanecem na raiz | — |
 | — | `apps/api/` — novo, Cube.js, acesso só a `gold` | pendente |

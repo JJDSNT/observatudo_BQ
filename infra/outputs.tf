@@ -7,8 +7,8 @@ output "www_app_sa_email" {
   value = google_service_account.www_app.email
 }
 
-output "dbt_sa_email" {
-  value = google_service_account.dbt.email
+output "pipeline_sa_email" {
+  value = google_service_account.pipeline.email
 }
 
 output "firestore_database_name" {

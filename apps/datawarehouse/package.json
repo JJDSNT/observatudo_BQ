@@ -4,6 +4,8 @@
   "scripts": {
     "lint": "uv run ruff check .",
     "format": "uv run ruff format .",
-    "serve": "uv run fastapi run src/observatudo/api/main.py"
+    "test": "uv run pytest",
+    "serve": "uv run fastapi run src/observatudo/api/main.py",
+    "pipeline": "uv run python scripts/run_pipeline.py"
   }
 }
