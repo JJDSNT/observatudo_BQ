@@ -127,10 +127,10 @@ descrição completa. Resumo:
      `runner.py`, `ops_logger.py`) e `scripts/run_pipeline.py` — o
      substituto do `dbt run`. Cada execução grava em `ops.pipeline_runs`.
    - Depreciar e então apagar a pasta `dbt/` e o `.venv` órfão da raiz.
-4. **Inicializar DVC dentro de `apps/datawarehouse`** — `dvc init` no app
+4. ✅ **Inicializar DVC dentro de `apps/datawarehouse`** — `dvc init` no app
    (não na raiz), configurar remote GCS (reaproveitando ou criando bucket,
    ver `docs/external/dvc.md`), `dvc add` nos datasets atuais, atualizar
-   `.gitignore`. Pode rodar em paralelo à Fase 3.
+   `.gitignore`.
 5. **Scaffold de `apps/api` (Cube.js)** — criar o app com schema dos cubos
    mapeando o dataset `gold`, mesmo sem a decisão de deploy fechada (issue
    separada). Não inclui ainda migrar o frontend para consumi-lo. Depende
@@ -269,13 +269,29 @@ roadmap** — só entra quando houver endpoints concretos a implementar
       (mencionava dbt como "visão futura" e tinha checklist histórico
       incoerente com o estado real) — reescrito do zero para refletir a
       estrutura monorepo + camadas BigQuery atuais.
+- **Fase 4 concluída em 2026-06-19** (branch `refactor/04-dvc-init`):
+  `dvc init --subdir` dentro de `apps/datawarehouse`; remote `gcs`
+  configurado em `gs://observatudo-infra-www-data/dvc-store` — **bucket
+  único reaproveitado** (decisão fechada: simplicidade operacional para o
+  tamanho atual do projeto, prefixo de path `dvc-store/` já separa
+  logicamente do que os transformers escrevem hoje em `indicadores/...`).
+  `git rm -r --cached` + `dvc add` nos três domínios de dados
+  (`data/cidades-sustentaveis`, `data/ibge`, `data/tesouro-nacional` — ~98MB,
+  25 arquivos), gerando `.dvc` + `data/.gitignore`. `package.json` ganhou
+  `dvc:status`/`dvc:pull`/`dvc:push`. Validado: `dvc status` ("up to date"),
+  `dvc doctor` (remote `gs` reconhecido). `dvc push` real **não executado**
+  — mesmas credenciais OAuth expiradas que bloquearam `terraform plan` na
+  Fase 3 (`gcsfs`/ADC, mesmo erro `RefreshError: Reauthentication is
+  needed`); requer `gcloud auth application-default login` antes do
+  primeiro push real. Fora do escopo desta fase (não decidido, ver
+  `docs/external/dvc.md`): migrar `transformers/*.py` para parar de chamar
+  `upload_to_bucket` manualmente e passar a depender de `dvc add`/`dvc
+  push`; isso fica como ponto aberto, não como TODO da fase.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
 - Deploy do Cube.js: self-hosted vs. Cube Cloud, autenticação, protocolo de
   consumo no frontend — ver `docs/external/cubejs.md`.
-- DVC: bucket dedicado vs. reaproveitar `data_bucket` existente — ver
-  `docs/external/dvc.md`.
 - Schema de `ops.dataset_freshness`/`ops.data_quality_checks` (colunas,
   granularidade) — `ops.pipeline_runs` já está implementada e em uso desde
   a Fase 3; essas duas ainda não existem.
@@ -286,9 +302,11 @@ roadmap** — só entra quando houver endpoints concretos a implementar
 - Aplicar de fato o Terraform da Fase 3 (`terraform plan`/`apply` em
   `infra/`) — bloqueado por credenciais OAuth expiradas do backend remoto
   (`gcloud auth application-default login`), não por decisão de design.
-- Bucket do remote do DVC reaproveitado vs. dedicado — dado que agora
-  `raw` é um dataset BigQuery próprio, vale reavaliar se o remote do DVC
-  deveria ser um bucket dedicado a "fonte bruta versionada", separado do
-  que os pipelines escrevem como output.
+- Rodar o primeiro `dvc push` real (Fase 4) — mesmo bloqueio de
+  credenciais OAuth acima; os `.dvc` já estão no Git, mas o conteúdo ainda
+  não foi enviado ao bucket remoto.
+- Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
+  `upload_to_bucket` manual — não decidido se compensa (ver
+  `docs/external/dvc.md`, "Pontos abertos").
 - Destino de `packages/` compartilhados (se vier a existir) entre frontend e
   API.
