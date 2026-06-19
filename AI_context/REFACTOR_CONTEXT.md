@@ -269,6 +269,48 @@ roadmap** — só entra quando houver endpoints concretos a implementar
       (mencionava dbt como "visão futura" e tinha checklist histórico
       incoerente com o estado real) — reescrito do zero para refletir a
       estrutura monorepo + camadas BigQuery atuais.
+- **Incidente: state do Terraform apagado, recuperado em 2026-06-19**
+  (branch `fix/terraform-state-recovery`). Ao tentar aplicar de fato o
+  Terraform da Fase 3 (bloqueado desde então por credenciais expiradas),
+  descobrimos que `gs://tfstate-observatudo/apps/observatudo-www-app/
+  default.tfstate` estava vazio (`serial: 1`, `resources: []`), apesar de
+  toda a infra real (Cloud Run, DNS, Firestore, bucket, SA `www_app`)
+  existir de fato no GCP. Causa raiz: o bucket `tfstate-observatudo`
+  (criado pelo repo `manage-dns`, `infra-base/bucket.tf`) tinha uma
+  `lifecycle_rule { action { type = "Delete" } condition { age = 365 } }`
+  e versionamento desligado — apagou silenciosamente, sem rastro em
+  Cloud Audit Logs (Data Access logging não habilitado), o state de
+  **três** prefixes diferentes que compartilhavam o mesmo bucket:
+  `infra-base`, `zones/observatudo.com.br` (ambos do `manage-dns`) e
+  `apps/observatudo-www-app` (este repo). Resolução:
+  1. Removida a `lifecycle_rule` do bucket (sem versioning — decisão:
+     custo de reter versões antigas não compensa) — corrigido em
+     [manage-dns#1](https://github.com/JJDSNT/manage-dns/pull/1).
+  2. Os três states foram reconstruídos via `terraform import` de cada
+     recurso confirmado como existente de verdade via API do GCP
+     (BigQuery, Cloud Run, DNS, IAM, Firestore, Storage) antes de
+     importar — nenhum recurso real foi tocado nesse processo.
+  3. Descoberto de quebra: o provider `google` injeta por padrão a label
+     `goog-terraform-provisioned`, e `google_cloud_run_domain_mapping`
+     não aceita atualizar isso in-place — forçaria destroy+recreate dos
+     domain mappings (e do certificado SSL). Corrigido com
+     `add_terraform_attribution_label = false` no provider
+     (`infra/main.tf`).
+  4. Com o state correto, a Fase 3 finalmente foi aplicada de verdade:
+     `terraform apply` criou os 4 datasets BigQuery + 2 tabelas + SA
+     `pipeline` + 5 IAM bindings (13 add / 4 change cosmético / 0
+     destroy).
+  - Achado relevante: o Cloud Run já estava servindo a revisão mais
+    recente (deploy via `github-actions-deploy`) com
+    `BIGQUERY_DATASET_ID=gold` configurado, mas o dataset `gold` não
+    existia ainda — o site em produção provavelmente estava com erro
+    nas páginas dependentes de BigQuery até este apply.
+  - Pendência: os datasets novos (`raw`/`silver`/`gold`/`ops`) existem
+    mas estão **vazios** — falta rodar a ingestão (`preprocess_*.py`) e
+    o pipeline (`scripts/run_pipeline.py`) para popular dados reais.
+  - SA antiga `sa-observatudo-dbt` ficou órfã no GCP (não está em
+    nenhum `.tf` mais, desde que a Fase 3 renomeou para `pipeline`) —
+    não foi tocada/destruída automaticamente; limpeza manual futura.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -283,9 +325,15 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   /pipelines/` (já implementado na Fase 3) — ações/mutações (ex.:
   "reprocessar esta fonte") dependem de necessidade real ainda não
   surgida.
-- Aplicar de fato o Terraform da Fase 3 (`terraform plan`/`apply` em
-  `infra/`) — bloqueado por credenciais OAuth expiradas do backend remoto
-  (`gcloud auth application-default login`), não por decisão de design.
+- Repopular dados reais nas camadas `raw`/`silver`/`gold` — os datasets
+  existem desde o incidente de recuperação do state (ver Progresso), mas
+  estão vazios. Falta rodar `preprocess_capag.py`/
+  `preprocess_cidades_sustentaveis.py` (carregam `raw`) e
+  `scripts/run_pipeline.py` (popula `silver`/`gold`), além de
+  `carregar_localidades_ibge.py` (`gold.dim_localidades`).
+- Limpar a SA órfã `sa-observatudo-dbt` no GCP (não gerenciada por
+  nenhum `.tf` desde a Fase 3) — decisão: deletar manualmente ou deixar
+  até confirmar que a SA `pipeline` está 100% funcional.
 - Bucket do remote do DVC reaproveitado vs. dedicado — dado que agora
   `raw` é um dataset BigQuery próprio, vale reavaliar se o remote do DVC
   deveria ser um bucket dedicado a "fonte bruta versionada", separado do
