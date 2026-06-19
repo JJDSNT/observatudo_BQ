@@ -108,7 +108,7 @@ descrição completa. Resumo:
 2. ✅ **Criar `apps/datawarehouse`** — `observatudo/`, `scripts/`, `dados/` →
    `data/` movidos; `requirements.txt` → `pyproject.toml`/`uv.lock` (uv);
    `package.json` wrapper; placeholder de `src/observatudo/api/` (FastAPI).
-3. **Camadas BigQuery (`raw`/`silver`/`gold`/`ops`) + remover dbt** — fase
+3. ✅ **Camadas BigQuery (`raw`/`silver`/`gold`/`ops`) + remover dbt** — fase
    única (funde o que antes eram fases 3 e 5 separadas, ver "Decisões já
    fechadas"). Inclui:
    - Criar os datasets `raw`, `silver`, `gold`, `ops` no Terraform
@@ -213,16 +213,62 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   - `dbt/` e o `.venv` antigo da raiz ficaram intocados (escopo da Fase 3) —
     o `.venv` da raiz está órfão (sem `requirements.txt` pra regenerá-lo)
     mas funcional até a Fase 3 remover o dbt de fato.
-- **Design da Fase 3 fechado em 2026-06-19** (ainda não implementado):
-  trocamos o desenho de "dois datasets" (`core`+`ops`) por **quatro
-  datasets em camadas** (`raw`/`silver`/`gold`/`ops`), depois de mapear
-  exatamente o que cada modelo dbt atual faz (`stg_capag`,
-  `stg_cidades_sustentaveis` = silver; `int_capag` = silver agregado;
-  `dim_indicadores`/`fact_indicadores` = gold). Renomeado `core` → `gold`
-  em toda a documentação. Isso fundiu as antigas Fase 3 (remover dbt) e
-  Fase 5 (reorganizar datasets) numa fase só, porque na prática eram a
-  mesma mudança. Ver `docs/architecture.md` seção 2 e
-  `docs/monorepo-structure.md` (seção "`sql/` + `pipeline/`").
+- **Design da Fase 3 fechado em 2026-06-19**: trocamos o desenho de "dois
+  datasets" (`core`+`ops`) por **quatro datasets em camadas**
+  (`raw`/`silver`/`gold`/`ops`), depois de mapear exatamente o que cada
+  modelo dbt atual faz (`stg_capag`, `stg_cidades_sustentaveis` = silver;
+  `int_capag` = silver agregado; `dim_indicadores`/`fact_indicadores` =
+  gold). Renomeado `core` → `gold` em toda a documentação. Isso fundiu as
+  antigas Fase 3 (remover dbt) e Fase 5 (reorganizar datasets) numa fase
+  só, porque na prática eram a mesma mudança. Ver `docs/architecture.md`
+  seção 2 e `docs/monorepo-structure.md` (seção "`sql/` + `pipeline/`").
+- **Fase 3 concluída em 2026-06-19** (branch
+  `refactor/03-bigquery-layers-remove-dbt`):
+  - `infra/bigquery.tf` reescrito: datasets `raw`/`silver`/`gold`/`ops`
+    criados; `dim_localidades` movida para `gold`; tabela `ops.pipeline_runs`
+    criada com schema (run_id, pipeline_step, status, started_at,
+    finished_at, rows_affected, error_message).
+  - `infra/iam.tf` reescrito: `www_app` só lê `gold`; SA `dbt` substituída
+    por SA `pipeline` (`sa-observatudo-pipeline`) com `dataEditor` nos
+    quatro datasets + `bigquery.jobUser`. `infra/variables.tf`
+    (`bigquery_dataset_id` default `"dados"` → `"gold"`) e
+    `infra/outputs.tf` (`dbt_sa_email` → `pipeline_sa_email`) ajustados.
+    `terraform validate` passa; `terraform plan`/`apply` **não foram
+    executados** (credenciais do backend remoto expiradas — requer
+    `gcloud auth application-default login` antes de aplicar; é
+    infraestrutura de produção, não roda sem confirmação explícita).
+  - Modelos dbt migrados para SQL plano em
+    `apps/datawarehouse/sql/{silver,gold}/*.sql` (sem Jinja/`ref()`/`config()`),
+    lendo de `raw.*`/`silver.*` com nomes totalmente qualificados.
+  - `apps/datawarehouse/src/observatudo/pipeline/` criado: `steps.py`
+    (catálogo declarativo das etapas), `runner.py` (monta o DDL `CREATE OR
+    REPLACE TABLE/VIEW ... AS (<sql>)`, executa via
+    `bigquery.Client().query()`, registra cada execução), `ops_logger.py`
+    (grava em `ops.pipeline_runs` via `insert_rows_json`).
+    `scripts/run_pipeline.py` é o novo entrypoint (substitui `dbt run`),
+    com `--only {silver,gold}`.
+  - `GET /pipelines/` (antes 501) implementado de fato, lendo
+    `ops.pipeline_runs`.
+  - Tabelas `raw_capag`/`raw_cidades_sustentaveis` apontadas para o
+    dataset `raw` (`transformers/capag.py`, `transformers/
+    cidades_sustentaveis.py`); `dim_localidades` apontada para `gold`
+    (`scripts/carregar_localidades_ibge.py`, `scripts/
+    gerar_dropdown_json.py`).
+  - `dbt/` (18 arquivos rastreados) e o `.venv` órfão da raiz removidos.
+  - `.github/workflows/build-and-deploy.yml`: env var de deploy
+    `BIGQUERY_DATASET_ID` atualizada de `dados` para `gold`.
+  - Validado: `uv run pytest` (3 testes do runner, `build_ddl` para os
+    casos table/view/partition+cluster), `uv run ruff check .` limpo,
+    `terraform validate` ok. Achados:
+    - O comentário em `sql/gold/fact_indicadores.sql` documenta que
+      `PARTITION BY`/`CLUSTER BY` agora vivem no runner Python (via
+      `Step.partition_by`/`cluster_by`), não no SQL — equivalente ao
+      `config()` do dbt, mas explícito no catálogo de steps em vez de
+      embutido no arquivo `.sql`.
+    - `README.md` raiz estava desatualizado desde antes da Fase 1
+      (mencionava dbt como "visão futura" e tinha checklist histórico
+      incoerente com o estado real) — reescrito do zero para refletir a
+      estrutura monorepo + camadas BigQuery atuais.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -230,14 +276,16 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   consumo no frontend — ver `docs/external/cubejs.md`.
 - DVC: bucket dedicado vs. reaproveitar `data_bucket` existente — ver
   `docs/external/dvc.md`.
-- Nomes finais exatos das tabelas em `silver`/`gold` (provisoriamente sem
-  prefixo `stg_`/`int_`, só convenção — ver tabela de mapeamento em
-  `docs/monorepo-structure.md`).
-- Schema exato de `ops.pipeline_runs`/`ops.dataset_freshness`/
-  `ops.data_quality_checks` (colunas, granularidade) — a existência dessas
-  tabelas está decidida, o schema fino não.
-- Endpoints concretos da API de metadados do `ops` (o placeholder/esqueleto
-  já está decidido; o conteúdo real depende das tabelas de `ops` existirem).
+- Schema de `ops.dataset_freshness`/`ops.data_quality_checks` (colunas,
+  granularidade) — `ops.pipeline_runs` já está implementada e em uso desde
+  a Fase 3; essas duas ainda não existem.
+- Endpoints concretos da API de metadados do `ops` além de `GET
+  /pipelines/` (já implementado na Fase 3) — ações/mutações (ex.:
+  "reprocessar esta fonte") dependem de necessidade real ainda não
+  surgida.
+- Aplicar de fato o Terraform da Fase 3 (`terraform plan`/`apply` em
+  `infra/`) — bloqueado por credenciais OAuth expiradas do backend remoto
+  (`gcloud auth application-default login`), não por decisão de design.
 - Bucket do remote do DVC reaproveitado vs. dedicado — dado que agora
   `raw` é um dataset BigQuery próprio, vale reavaliar se o remote do DVC
   deveria ser um bucket dedicado a "fonte bruta versionada", separado do

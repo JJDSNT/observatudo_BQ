@@ -1,10 +1,5 @@
-with source as (
-
-    select
-        *
-    from {{ source('dados', 'raw_cidades_sustentaveis') }}
-
-)
+-- sql/silver/cidades_sustentaveis.sql
+-- Equivalente a dbt/observatudo/models/staging/stg_cidades_sustentaveis.sql (sem dbt).
 
 select
     cast(codigo_ibge as string)            as codigo_ibge,
@@ -25,5 +20,5 @@ select
     cast(eixo_ia as string)                as eixo_ia,
     cast(data_processamento as timestamp)  as data_processamento,
     'cidades_sustentaveis'                 as fonte
-from source
+from `raw.raw_cidades_sustentaveis`
 where indicador_id is not null

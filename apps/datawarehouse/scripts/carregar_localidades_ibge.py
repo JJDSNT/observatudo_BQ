@@ -5,7 +5,7 @@ import os
 
 # === CONFIG ===
 PROJETO = "observatudo-infra"
-DATASET = "dados"
+DATASET = "gold"
 TABELA = "dim_localidades"
 CAMINHO_DADOS = "data/ibge/localidades/"
 CAMPO_CAPITAL = "é_capital"

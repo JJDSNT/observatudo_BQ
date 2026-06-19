@@ -161,7 +161,7 @@ def main():
     logger.info("📥 Upload para BigQuery...")
     upload_csv_to_bigquery(
         csv_path=str(output_path),
-        table_id="observatudo-infra.dados.raw_capag"
+        table_id="observatudo-infra.raw.raw_capag"
     )
 
     logger.info("✅ Finalizado com sucesso!")

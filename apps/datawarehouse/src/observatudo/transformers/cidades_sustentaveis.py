@@ -179,7 +179,7 @@ def main():
     # Upload para o BigQuery (raw)
     upload_csv_to_bigquery(
         csv_path=os.path.join(config.DADOS_DIR, "indicadores_padronizados.csv"),
-        table_id="observatudo-infra.dados.raw_cidades_sustentaveis"
+        table_id="observatudo-infra.raw.raw_cidades_sustentaveis"
     )
 
 if __name__ == "__main__":

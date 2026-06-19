@@ -1,84 +1,68 @@
 # 📊 Observatudo – Indicadores Cívicos
 
-Plataforma fullstack para ingestão, organização e visualização de indicadores cívicos (como saúde, educação, governança).  
-Monorepo **pnpm** combinando frontend em **Next.js**, backend analítico com **BigQuery** e pipelines em **Python (uv) + Terraform**.
+Plataforma fullstack para ingestão, organização e visualização de indicadores cívicos (saúde, educação, governança, finanças municipais).
 
-> Em migração para essa estrutura de monorepo — contexto completo em
-> [`AI_context/REFACTOR_CONTEXT.md`](./AI_context/REFACTOR_CONTEXT.md) e
-> arquitetura alvo em [`docs/architecture.md`](./docs/architecture.md).
+Monorepo **pnpm** orquestrado por **Turborepo**, combinando frontend em **Next.js**, pipelines de dados em **Python (uv)** sobre **BigQuery**, e infraestrutura como código em **Terraform**.
+
+> Em refatoração ativa rumo a essa estrutura. Contexto completo da migração
+> em [`AI_context/REFACTOR_CONTEXT.md`](./AI_context/REFACTOR_CONTEXT.md),
+> arquitetura alvo em [`docs/architecture.md`](./docs/architecture.md) e
+> árvore de pastas detalhada em
+> [`docs/monorepo-structure.md`](./docs/monorepo-structure.md).
 
 ---
 
-## 📁 Estrutura do Projeto
+## 📁 Estrutura do projeto
 
 ```
 observatudo-bq/
 ├── apps/
-│   ├── frontend/                  # Next.js (App Router)
+│   ├── frontend/                    # Next.js (App Router)
 │   │   ├── src/
 │   │   └── public/
-│   └── datawarehouse/              # Pipelines Python (uv) + dados + DVC
-│       ├── src/observatudo/        # Lib de ingestão/transformação
-│       ├── scripts/                # Entrypoints (preprocess, carga IBGE, etc.)
-│       └── data/                   # Datasets (cache local; versionamento via DVC)
-├── dbt/                             # Modelos de transformação (em remoção, ver AI_context)
-├── infra/                           # Infraestrutura Terraform (GCP)
-│   ├── bigquery.tf                  # Tabelas
-│   ├── storage.tf                   # Buckets
-│   ├── iam.tf                       # Permissões
+│   └── datawarehouse/                # Pipelines Python (uv) + SQL + DVC
+│       ├── src/observatudo/          # Lib de ingestão/transformação
+│       ├── src/observatudo/pipeline/ # Runner raw → silver → gold
+│       ├── src/observatudo/api/      # API de metadados do `ops` (FastAPI)
+│       ├── sql/{silver,gold}/        # Transformações SQL (sem dbt)
+│       ├── scripts/                  # Entrypoints (preprocess, carga IBGE, etc.)
+│       ├── tests/
+│       └── data/                     # Datasets (cache local; versionamento via DVC)
+├── infra/                            # Infraestrutura Terraform (GCP)
+│   ├── bigquery.tf                   # Datasets raw/silver/gold/ops + tabelas
+│   ├── iam.tf                        # Service accounts e permissões
 │   └── ...
-├── docs/                            # Arquitetura e decisões técnicas
-├── AI_context/                      # Contexto e plano da migração para a IA
+├── docs/                              # Arquitetura e decisões técnicas
+├── AI_context/                        # Contexto e plano da migração para a IA
 ├── pnpm-workspace.yaml
 └── turbo.json
 ```
 
----
-
-## ✅ Pipeline Atual
-
-### 🔧 Pré-processamento (`scripts/preprocess_cidades_sustentaveis.py`)
-- Lê CSV bruto da fonte "Cidades Sustentáveis"
-- Remove colunas irrelevantes
-- Converte `valor` para float com sanitização de dados
-- Gera CSV padronizado + envia ambos os arquivos para o GCS
-
-### 🌎 Dados de Localidade (`scripts/carregar_localidades_ibge.py`)
-- Lê dados do IBGE
-- Popula tabela `dim_localidades` no BigQuery
-- Gera arquivo `localidades_dropdown.json` usado no frontend
-
-### 📦 Infraestrutura
-- Buckets e tabelas criadas via Terraform
-- Dataset particionado e clusterizado para performance
-
-### 🧑‍💻 Frontend (Next.js)
-- `ComboBoxLocalidades.tsx` com seleção UF → cidade
-- Carregamento via `import` local (`localidades_dropdown.json`)
-- UI baseada em Tailwind CSS
+Cada app é um workspace pnpm. O `apps/datawarehouse` é Python (gerenciado
+por [`uv`](https://docs.astral.sh/uv/)), mas expõe um `package.json` mínimo
+com scripts que chamam `uv run ...` por baixo, para ser orquestrável pelo
+Turborepo junto do frontend.
 
 ---
 
-## 🧠 Visão futura
+## 🏗️ Camadas de dados (BigQuery)
 
-O Observatudo evoluirá para uma **plataforma analítica cívica** com:
+Quatro datasets, um por camada do pipeline:
 
-- 🎯 Dados versionados, auditáveis e recategorizados por IA
-- 📦 Modelo semântico padronizado com dbt
-- 📈 Visualizações com Next.js + filtros e painéis
-- 🔄 **Camada de acesso analítico inspirada na API do [Cube.js](https://cube.dev)**  
-  Um "ORM para BigQuery", permitindo explorar medidas, dimensões e filtros com facilidade e reutilização via código
-- ⚙️ GitOps com Terraform, dbt, GitHub Actions e CI/CD
+| Dataset | Papel | Exemplos |
+|---|---|---|
+| `raw` | Landing zone — carga direta dos arquivos de origem, sem transformação | `raw_capag`, `raw_cidades_sustentaveis` |
+| `silver` | Limpeza, cast de tipos, agregações intermediárias | `capag`, `cidades_sustentaveis`, `capag_agregado` |
+| `gold` | Modelo dimensional final, consumido pelo frontend | `dim_indicadores`, `fact_indicadores`, `dim_localidades` |
+| `ops` | Observabilidade do próprio pipeline (não é dado de produto) | `pipeline_runs` |
 
----
-
-## 🔁 Próximos Passos
-
-- [x] Criar modelo `stg_indicadores__cidades_sustentaveis` no dbt  
-- [x] Popular `dim_indicadores` com metadados enriquecidos  
-- [x] Popular `fact_indicadores` com valores por município  
-- [x] Estruturar camada de consulta analítica estilo Cube.js  
-- [ ] Criar visualizações dinâmicas no frontend
+A transformação `raw → silver → gold` é feita por arquivos `.sql` simples
+em `apps/datawarehouse/sql/{silver,gold}/` (sem dbt), executados em ordem
+por um runner Python
+(`apps/datawarehouse/src/observatudo/pipeline/`) que monta o DDL
+(`CREATE OR REPLACE TABLE/VIEW ...`) e registra cada execução em
+`ops.pipeline_runs`. Ver racional completo em
+[`docs/architecture.md`](./docs/architecture.md).
 
 ---
 
@@ -88,13 +72,13 @@ O Observatudo evoluirá para uma **plataforma analítica cívica** com:
 - Python 3.10+ e [uv](https://docs.astral.sh/uv/)
 - Terraform 1.6+
 - Conta Google Cloud autenticada via:
-  ```
+  ```bash
   gcloud auth application-default login
   ```
 
 ---
 
-## 🚀 Comandos Úteis
+## 🚀 Comandos úteis
 
 ```bash
 # Instalar tudo (frontend + datawarehouse) a partir da raiz
@@ -103,19 +87,41 @@ pnpm install
 # Rodar o frontend localmente
 pnpm dev:frontend
 
-# Build/lint de todos os workspaces (via Turborepo)
+# Rodar a API de metadados do datawarehouse (ops)
+pnpm dev:ops-api
+
+# Build/lint/test de todos os workspaces (via Turborepo)
 pnpm build
 pnpm lint
+pnpm test
 
-# Rodar pré-processamento (Python, dentro de apps/datawarehouse)
+# Rodar o pipeline de transformação (raw → silver → gold)
 cd apps/datawarehouse
+uv run python scripts/run_pipeline.py
+uv run python scripts/run_pipeline.py --only silver   # só uma camada
+
+# Rodar a ingestão de uma fonte específica
 uv run python scripts/preprocess_cidades_sustentaveis.py
 
-# Aplicar Terraform
+# Aplicar infraestrutura
 cd infra
 terraform init
 terraform apply
 ```
+
+---
+
+## 🧠 Visão futura
+
+- 🔄 Camada de acesso analítico via [Cube.js](https://cube.dev) sobre o
+  dataset `gold` (medidas, dimensões e filtros reutilizáveis), substituindo
+  o acesso direto do frontend ao BigQuery.
+- 🗃️ Versionamento de datasets crus com [DVC](https://dvc.org), com
+  conteúdo num bucket GCS.
+- 📈 Mais visualizações e painéis no frontend a partir do modelo `gold`.
+
+Ver roadmap detalhado em
+[`AI_context/REFACTOR_CONTEXT.md`](./AI_context/REFACTOR_CONTEXT.md).
 
 ---
 
@@ -127,7 +133,7 @@ Este projeto está sob licença MIT.
 
 ## 👨‍💻 Sobre mim
 
-Este repositório faz parte do meu portfólio pessoal.  
+Este repositório faz parte do meu portfólio pessoal.
 Sou Engenheiro de Software especialista em transformação digital, com foco em sistemas distribuídos e ênfase em plataformas e ecossistemas para a construção de organizações biônicas.
 
 🌐 Acesse: [https://jdias.observatudo.com.br](https://observatudo.com.br)
@@ -136,5 +142,5 @@ Sou Engenheiro de Software especialista em transformação digital, com foco em 
 
 ## 📬 Contato
 
-- GitHub: [@JJDSNT](https://github.com/JJDSNT)  
+- GitHub: [@JJDSNT](https://github.com/JJDSNT)
 - LinkedIn: [https://www.linkedin.com/in/jdiasneto/](https://www.linkedin.com/in/jdiasneto/)
