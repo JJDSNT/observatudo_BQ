@@ -7,7 +7,7 @@ load_dotenv()
 BUCKET_NAME = os.getenv("GCS_BUCKET", "observatudo-infra-www-data")
 
 # === Diretórios locais ===
-DADOS_DIR = "dados/cidades-sustentaveis"
+DADOS_DIR = "data/cidades-sustentaveis"
 CACHE_DIR = os.path.join(DADOS_DIR, "cache")
 MAPA_EIXOS_PATH = os.path.join(CACHE_DIR, "eixos_llm.json")
 INVALIDOS_PATH = os.path.join(CACHE_DIR, "classificacoes_invalidas.csv")

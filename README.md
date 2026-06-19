@@ -1,7 +1,11 @@
 # 📊 Observatudo – Indicadores Cívicos
 
 Plataforma fullstack para ingestão, organização e visualização de indicadores cívicos (como saúde, educação, governança).  
-Combina frontend em **Next.js**, backend analítico com **BigQuery** e pipelines com **Python + dbt + Terraform**.
+Monorepo **pnpm** combinando frontend em **Next.js**, backend analítico com **BigQuery** e pipelines em **Python (uv) + Terraform**.
+
+> Em migração para essa estrutura de monorepo — contexto completo em
+> [`AI_context/REFACTOR_CONTEXT.md`](./AI_context/REFACTOR_CONTEXT.md) e
+> arquitetura alvo em [`docs/architecture.md`](./docs/architecture.md).
 
 ---
 
@@ -9,31 +13,24 @@ Combina frontend em **Next.js**, backend analítico com **BigQuery** e pipelines
 
 ```
 observatudo-bq/
-├── dados/
-│   ├── cidades-sustentaveis/
-│   │   ├── indicadores.csv                 # Fonte bruta
-│   │   ├── indicadores_padronizados.csv    # Após pré-processamento
-│   │   └── indicadores_utf16.csv           # Original
-│   └── ibge/localidades/                   # Base de localidades (IBGE)
-├── dbt/                                     # Modelos de transformação
-├── infra/                                   # Infraestrutura Terraform (GCP)
-│   ├── bigquery.tf                          # Tabelas
-│   ├── storage.tf                           # Buckets
-│   ├── iam.tf                               # Permissões
+├── apps/
+│   ├── frontend/                  # Next.js (App Router)
+│   │   ├── src/
+│   │   └── public/
+│   └── datawarehouse/              # Pipelines Python (uv) + dados + DVC
+│       ├── src/observatudo/        # Lib de ingestão/transformação
+│       ├── scripts/                # Entrypoints (preprocess, carga IBGE, etc.)
+│       └── data/                   # Datasets (cache local; versionamento via DVC)
+├── dbt/                             # Modelos de transformação (em remoção, ver AI_context)
+├── infra/                           # Infraestrutura Terraform (GCP)
+│   ├── bigquery.tf                  # Tabelas
+│   ├── storage.tf                   # Buckets
+│   ├── iam.tf                       # Permissões
 │   └── ...
-├── scripts/
-│   ├── carregar_localidades_ibge.py         # Tabela + JSON
-│   ├── gerar_dropdown_json.py               # Dropdown de estados/cidades
-│   └── preprocess_cidades_sustentaveis.py   # Pré-processamento + upload
-├── src/
-│   ├── app/                                  # App Router (Next.js)
-│   ├── components/                           # Componentes reutilizáveis
-│   ├── data/                                 # Dados locais (ex: dropdown)
-│   ├── features/                             # Domínios do frontend
-│   ├── lib/                                  # Integrações (ex: BigQuery)
-│   ├── types/                                # Tipagens TS
-│   └── utils/                                # Funções auxiliares
-└── README.md
+├── docs/                            # Arquitetura e decisões técnicas
+├── AI_context/                      # Contexto e plano da migração para a IA
+├── pnpm-workspace.yaml
+└── turbo.json
 ```
 
 ---
@@ -87,8 +84,8 @@ O Observatudo evoluirá para uma **plataforma analítica cívica** com:
 
 ## 🛠️ Requisitos
 
-- Node.js 18+
-- Python 3.10+
+- Node.js 20+ e [pnpm](https://pnpm.io)
+- Python 3.10+ e [uv](https://docs.astral.sh/uv/)
 - Terraform 1.6+
 - Conta Google Cloud autenticada via:
   ```
@@ -100,17 +97,19 @@ O Observatudo evoluirá para uma **plataforma analítica cívica** com:
 ## 🚀 Comandos Úteis
 
 ```bash
-# Ativar ambiente virtual Python
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# Instalar tudo (frontend + datawarehouse) a partir da raiz
+pnpm install
 
-# Rodar pré-processamento
-python scripts/preprocess_cidades_sustentaveis.py
+# Rodar o frontend localmente
+pnpm dev:frontend
 
-# Rodar app Next.js localmente
-npm install
-npm run dev
+# Build/lint de todos os workspaces (via Turborepo)
+pnpm build
+pnpm lint
+
+# Rodar pré-processamento (Python, dentro de apps/datawarehouse)
+cd apps/datawarehouse
+uv run python scripts/preprocess_cidades_sustentaveis.py
 
 # Aplicar Terraform
 cd infra

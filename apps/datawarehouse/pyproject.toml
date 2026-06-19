@@ -1,0 +1,32 @@
+[project]
+name = "observatudo-datawarehouse"
+version = "0.1.0"
+description = "Ingestão, transformação e modelagem de dados do Observatudo"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.2.3",
+  "google-cloud-bigquery>=3.32.0",
+  "google-cloud-storage>=2.19.0",
+  "python-dotenv>=1.1.0",
+  "colorlog>=6.9.0",
+  "requests>=2.32.3",
+  "tqdm>=4.67.1",
+  "openpyxl>=3.1.5",
+  "python-slugify>=8.0.4",
+  "fastapi>=0.115",
+  "uvicorn>=0.34",
+]
+
+[dependency-groups]
+dev = [
+  "dvc[gs]>=3.0",
+  "ruff>=0.8",
+  "pytest>=8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/observatudo"]

@@ -154,6 +154,46 @@ existir e houver endpoints concretos a implementar.
   - `.gitignore` generalizado para padrões de monorepo (`node_modules`,
     `.next/`, etc. sem âncora `/` na raiz) e novo padrão `fallback-*.js`
     (artefato do `next-pwa` que ainda não estava coberto).
+- **Fase 2 concluída em 2026-06-19** (branch `refactor/02-datawarehouse-app`):
+  `observatudo/` → `apps/datawarehouse/src/observatudo`, `scripts/` →
+  `apps/datawarehouse/scripts`, `dados/` → `apps/datawarehouse/data` (`git
+  mv`, histórico preservado). `requirements.txt` convertido para
+  `pyproject.toml` + `uv.lock` (dependências diretas inferidas dos imports
+  reais do código, não do freeze completo — o freeze incluía toda a árvore
+  de deps do dbt). Placeholder de `src/observatudo/api/` (FastAPI) criado
+  conforme decidido em `docs/architecture.md` §3.1: `GET /health` (200) e
+  `GET /pipelines/` (501, TODO até o dataset `ops` existir). Pastas vazias
+  `civ/`/`dw/` (rascunho pré-migração, nunca rastreadas pelo git) removidas.
+  Validado: `uv sync`, leitura real dos arquivos de dados movidos (capag
+  estados/municípios, indicadores cidades-sustentáveis) com os novos paths,
+  `ruff check` limpo, API placeholder respondendo via `uvicorn`,
+  `pnpm --filter datawarehouse lint` e `pnpm lint`/`pnpm build` (turbo)
+  rodando frontend + datawarehouse juntos. Achados:
+  - Caminhos relativos hardcoded (`"dados/..."` em `config.py`, `capag.py`,
+    `carregar_localidades_ibge.py`) atualizados para `"data/..."`. Cuidado:
+    `DATASET = "dados"` nesses mesmos arquivos é o **nome do dataset
+    BigQuery**, não um path — não foi tocado (isso é escopo da Fase 5).
+  - `scripts/gerar_dropdown_json.py` escrevia em `src/data/...` assumindo
+    CWD na raiz antiga; path do output corrigido para
+    `../frontend/src/data/localidades_dropdown.json` (escopo cruzado
+    dw→frontend pré-existente, só ajustado o path, não redesenhado).
+  - `sys.path.append` manual nos scripts de entrypoint era um workaround
+    para achar o pacote `observatudo` sem instalação — ficou redundante
+    com `uv` (instala o pacote em modo editável) e foi removido.
+  - `.env.example` tinha variáveis do Python (Ollama, log level) misturadas
+    com as do frontend desde a Fase 1 — separado em
+    `apps/frontend/.env.example` (BigQuery/Firebase) e
+    `apps/datawarehouse/.env.example` (Ollama/log/bucket).
+  - `package.json` do `datawarehouse` não tem script `dev` (não há um
+    "servidor de dev" equivalente para um pipeline batch) nem `test`
+    (ainda não há testes — `uv run pytest` falha com exit 5 sem testes
+    coletados, o que quebraria `turbo run test`; reintroduzir quando
+    houver testes reais).
+  - Raiz precisou do campo `"packageManager"` no `package.json` para o
+    Turborepo resolver os workspaces pnpm.
+  - `dbt/` e o `.venv` antigo da raiz ficaram intocados (escopo da Fase 3) —
+    o `.venv` da raiz está órfão (sem `requirements.txt` pra regenerá-lo)
+    mas funcional até a Fase 3 remover o dbt de fato.
 
 ## Decisões abertas (bloqueiam issues downstream)
 

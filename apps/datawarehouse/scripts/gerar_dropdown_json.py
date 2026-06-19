@@ -7,7 +7,7 @@ from collections import defaultdict
 PROJETO = "observatudo-infra"
 DATASET = "dados"
 TABELA = "dim_localidades"
-DESTINO_JSON = "src/data/localidades_dropdown.json"
+DESTINO_JSON = "../frontend/src/data/localidades_dropdown.json"
 
 # === CLIENTE ===
 client = bigquery.Client(project=PROJETO)

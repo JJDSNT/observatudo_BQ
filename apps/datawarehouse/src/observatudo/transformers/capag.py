@@ -129,7 +129,7 @@ def inferir_direcionalidade_capag(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     logger.info("🚀 Iniciando pré-processamento CAPAG...")
-    base_path = Path("dados/tesouro-nacional/capag")
+    base_path = Path("data/tesouro-nacional/capag")
     estados_path = (
         base_path / "estados/Capag-Estados-2022-1-revisada.xlsx"
     )
