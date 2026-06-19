@@ -176,13 +176,17 @@ Isso evita reabrir a estrutura de pastas quando o deploy for decidido. A
 service account do Cube.js recebe IAM de leitura só em `gold` — nunca em
 `raw`/`silver`/`ops`.
 
-### DVC escopado em `apps/datawarehouse`, não na raiz
+### DVC escopado em `apps/datawarehouse`, não na raiz (✅ Fase 4)
 
 Mesmo princípio do Python: o DVC trackeia `data/`, que só existe dentro de
-`apps/datawarehouse`. Inicializar o DVC ali (`cd apps/datawarehouse && dvc
-init`) mantém a fronteira clara — o restante do monorepo (frontend, api) não
-tem nenhuma relação com DVC. DVC suporta normalmente ser inicializado num
-subdiretório de um repo Git maior.
+`apps/datawarehouse`. `dvc init --subdir` ali mantém a fronteira clara — o
+restante do monorepo (frontend, api) não tem nenhuma relação com DVC. DVC
+suporta normalmente ser inicializado num subdiretório de um repo Git maior.
+Remote `gcs` aponta para `gs://observatudo-infra-www-data/dvc-store`
+(bucket único já existente, reaproveitado com prefixo de path dedicado —
+ver `docs/external/dvc.md`). `dvc add` por domínio de dados
+(`cidades-sustentaveis`, `ibge`, `tesouro-nacional`); `dvc push` real ainda
+pendente (credenciais OAuth do ambiente de implementação expiradas).
 
 ### Turborepo na orquestração raiz
 
@@ -243,7 +247,7 @@ packages:
 | `src/`, `public/`, `package.json`, `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `next-env.d.ts` | `apps/frontend/` | ✅ Fase 1 |
 | `observatudo/` | `apps/datawarehouse/src/observatudo/` | ✅ Fase 2 |
 | `scripts/` | `apps/datawarehouse/scripts/` | ✅ Fase 2 |
-| `dados/` | `apps/datawarehouse/data/` (DVC ainda não inicializado) | ✅ movido / DVC pendente |
+| `dados/` | `apps/datawarehouse/data/` (DVC inicializado, `dvc push` real pendente) | ✅ Fase 2 (movido) / ✅ Fase 4 (DVC) |
 | `requirements.txt` | `apps/datawarehouse/pyproject.toml` + `uv.lock` | ✅ Fase 2 |
 | `civ/`, `dw/` (pastas vazias na raiz) | removidas — eram rascunho | ✅ Fase 2 |
 | — | `apps/datawarehouse/src/observatudo/api/` — placeholder FastAPI do `ops` | ✅ Fase 2 |
@@ -262,8 +266,8 @@ packages:
 
 - Deploy do `apps/api` (self-host/Cloud Run vs. Cube Cloud) — ver
   `docs/external/cubejs.md`.
-- Remote do DVC (bucket reaproveitado vs. dedicado) — ver
-  `docs/external/dvc.md`.
+- Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
+  `upload_to_bucket` manual — ver `docs/external/dvc.md`.
 - Conteúdo real dos cubos em `apps/api/model/` — depende do dataset `gold`
   estar materializado primeiro.
 - Conteúdo real de `src/observatudo/api/` — fica só esqueleto até o dataset

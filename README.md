@@ -103,6 +103,11 @@ uv run python scripts/run_pipeline.py --only silver   # só uma camada
 # Rodar a ingestão de uma fonte específica
 uv run python scripts/preprocess_cidades_sustentaveis.py
 
+# Sincronizar datasets versionados via DVC (remote GCS)
+cd apps/datawarehouse
+uv run dvc pull
+uv run dvc push
+
 # Aplicar infraestrutura
 cd infra
 terraform init
@@ -116,8 +121,6 @@ terraform apply
 - 🔄 Camada de acesso analítico via [Cube.js](https://cube.dev) sobre o
   dataset `gold` (medidas, dimensões e filtros reutilizáveis), substituindo
   o acesso direto do frontend ao BigQuery.
-- 🗃️ Versionamento de datasets crus com [DVC](https://dvc.org), com
-  conteúdo num bucket GCS.
 - 📈 Mais visualizações e painéis no frontend a partir do modelo `gold`.
 
 Ver roadmap detalhado em

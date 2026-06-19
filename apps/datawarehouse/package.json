@@ -6,6 +6,9 @@
     "format": "uv run ruff format .",
     "test": "uv run pytest",
     "serve": "uv run fastapi run src/observatudo/api/main.py",
-    "pipeline": "uv run python scripts/run_pipeline.py"
+    "pipeline": "uv run python scripts/run_pipeline.py",
+    "dvc:status": "uv run dvc status",
+    "dvc:pull": "uv run dvc pull",
+    "dvc:push": "uv run dvc push"
   }
 }
