@@ -1,9 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # =====================
-# dependencies
+# dependencies (monorepo: pode aparecer em qualquer workspace)
 # =====================
-/node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,18 +15,23 @@
 # =====================
 # testing
 # =====================
-/coverage
+coverage/
 
 # =====================
-# next.js
+# next.js (apps/frontend)
 # =====================
-/.next/
-/out/
+.next/
+out/
+
+# =====================
+# turborepo
+# =====================
+.turbo/
 
 # =====================
 # production
 # =====================
-/build
+build/
 
 # =====================
 # misc
@@ -99,6 +104,8 @@ dados/tmp/
 **/public/sw.js
 **/public/workbox-*.js
 **/public/worker-*.js
+**/public/fallback-*.js
 **/public/sw.js.map
 **/public/workbox-*.js.map
 **/public/worker-*.js.map
+**/public/fallback-*.js.map
