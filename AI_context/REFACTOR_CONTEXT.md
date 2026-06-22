@@ -511,6 +511,42 @@ passos antes de considerar a migração 100% encerrada:
   antes, mas mais provável agora por causa do achado de
   `localidade_id` pra estado/país).
 
+**Primeira rodada de validação visual feita em 2026-06-22** (município
+Salvador, eixo Economia & Finanças, screenshot real do usuário): situação
+melhor que antes, mas não 100% resolvida ainda.
+- A PWA (`next.config.ts`, `runtimeCaching`) cacheia `/api/indicadores/*`
+  via `StaleWhileRevalidate` (`maxAgeSeconds: 3600`) — quem já tinha o
+  site aberto via service worker continuou vendo a resposta de **antes**
+  da migração por até 1h (CAPAG ausente, datas erradas, nomes
+  "Indicador N"). Confirmado via `curl` direto que a API real já está
+  correta (CAPAG aparece com `unidade: "%"`, datas tipo `"2010"` válidas)
+  — o problema observado era cache do navegador/SW, não bug do servidor.
+  Pra testar sem esse cache: aba anônima, ou DevTools → Application →
+  Service Workers → Unregister + Clear storage.
+- Achado real e separado (não é cache, confirmado direto na API):
+  indicadores `144` e `4030` (configurados em
+  `data/categoriasIndicadores.ts`, subeixo Finanças) não têm **nenhum**
+  dado, nem no município — `serie: []` mesmo pedindo direto. Não se sabe
+  ainda se são IDs órfãos (nunca tiveram dado de origem) ou se há algum
+  problema de mapeamento; não investigado.
+
+## Ideias para o futuro (não são tarefas — anotadas para quando for retomar)
+
+- **Cards com gráfico de linha**: agora que a série histórica chega
+  completa e correta (via Cube.js, ver Fase 6), o `MetricCard` só mostra
+  as 3 últimas medidas em texto (`showHistory`/`serieRecentes`) — dá pra
+  evoluir pra um line chart de verdade exibindo a série completa.
+- **CAPAG (e outros indicadores de fonte CAPAG) não aparece em
+  estado/país no dashboard**: já documentado como decisão aberta (ver
+  "Formato de `localidade_id` inconsistente..." abaixo) — o dashboard
+  mostra os 3 níveis da federação (país/estado/município) e hoje só o
+  município tem dado real pra indicadores de CAPAG/Cidades Sustentáveis.
+- **URL com município + eixo pra compartilhamento**: hoje a seleção de
+  localidade/eixo vive só em estado client-side (`preferencesStore`),
+  sem refletir na URL — impede copiar/compartilhar um link direto pra
+  "Salvador, Economia & Finanças", por exemplo. Levaria a uma mudança de
+  roteamento (`/?municipio=2927408&eixo=economia` ou rota dinâmica).
+
 ## Decisões abertas (bloqueiam issues downstream)
 
 - **Formato de `localidade_id` inconsistente entre fontes para
