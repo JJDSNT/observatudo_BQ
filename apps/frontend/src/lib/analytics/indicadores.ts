@@ -1,5 +1,4 @@
 //src/lib/analytics/indicadores.ts
-import { QueryBuilder } from "./query";
 import { cubejsApi } from "@/lib/cubejs/client";
 import type { Indicador } from '@/types';
 
@@ -35,16 +34,21 @@ export async function buscarIndicadores(
 }
 
 
-export async function nomesIndicadores(ids: string[]): Promise<Indicador[]> {
-  const qb = new QueryBuilder("dim_indicadores", "i")
-    .addDimension({ name: "id", sql: "i.indicador_id", type: "string" })
-    .addDimension({ name: "nome", sql: "i.nome", type: "string" })
-    .filter({
-      dimension: "i.indicador_id",
-      operator: "IN",
-      values: ids,
-    });
+export async function nomesIndicadores(
+  ids: string[]
+): Promise<Pick<Indicador, "id" | "nome">[]> {
+  if (ids.length === 0) return [];
 
-  return qb.execute<Indicador>();
+  const resultSet = await cubejsApi.load({
+    dimensions: ["dim_indicadores.indicador_id", "dim_indicadores.nome"],
+    filters: [
+      { member: "dim_indicadores.indicador_id", operator: "equals", values: ids },
+    ],
+  });
+
+  return resultSet.rawData().map((row) => ({
+    id: String(row["dim_indicadores.indicador_id"]),
+    nome: String(row["dim_indicadores.nome"] ?? ""),
+  }));
 }
 

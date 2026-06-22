@@ -140,7 +140,7 @@ descrição completa. Resumo:
    pelo consumo via Cube.js, uma rota por vez, até não restar acesso
    direto ao BigQuery no frontend. Depende da Fase 5.
    - ✅ `/api/indicadores/search`
-   - `/api/indicadores/nomeados`
+   - ✅ `/api/indicadores/nomeados`
    - `/api/indicadores/localidade/[municipio_id]` (dashboard principal)
    - Remover `lib/analytics/client.ts`/`query.ts` e a dependência
      `@google-cloud/bigquery` do frontend depois das 3 rotas migradas.
@@ -414,6 +414,9 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   - `/api/indicadores/search` migrado: `buscarIndicadores()` agora
     consulta o cubo `dim_indicadores` via Cube.js (filtro `contains`
     case-insensitive em nome/descrição + `equals` em indicador_id).
+  - `/api/indicadores/nomeados` migrado: `nomesIndicadores()` consulta
+    `dim_indicadores` via Cube.js (`equals` com múltiplos valores =
+    semântica de IN). Validado contra produção.
   - Achado real durante a migração: `primary_key: true` deixa o membro
     `public: false` por padrão no Cube — `indicador_id`/`localidade_id`
     precisaram de `public: true` explícito em `apps/api/model/cubes/
