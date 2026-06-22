@@ -518,17 +518,41 @@ melhor que antes, mas não 100% resolvida ainda.
   via `StaleWhileRevalidate` (`maxAgeSeconds: 3600`) — quem já tinha o
   site aberto via service worker continuou vendo a resposta de **antes**
   da migração por até 1h (CAPAG ausente, datas erradas, nomes
-  "Indicador N"). Confirmado via `curl` direto que a API real já está
-  correta (CAPAG aparece com `unidade: "%"`, datas tipo `"2010"` válidas)
-  — o problema observado era cache do navegador/SW, não bug do servidor.
-  Pra testar sem esse cache: aba anônima, ou DevTools → Application →
-  Service Workers → Unregister + Clear storage.
+  "Indicador N"). Confirmado via `curl` direto que a API real já estava
+  correta (CAPAG aparecia com `unidade: "%"` — esse valor em si foi
+  corrigido depois, ver abaixo; datas tipo `"2010"` válidas) — o problema
+  observado era cache do navegador/SW, não bug do servidor. Pra testar
+  sem esse cache: aba anônima, ou DevTools → Application → Service
+  Workers → Unregister + Clear storage.
 - Achado real e separado (não é cache, confirmado direto na API):
   indicadores `144` e `4030` (configurados em
   `data/categoriasIndicadores.ts`, subeixo Finanças) não têm **nenhum**
   dado, nem no município — `serie: []` mesmo pedindo direto. Não se sabe
   ainda se são IDs órfãos (nunca tiveram dado de origem) ou se há algum
   problema de mapeamento; não investigado.
+
+**Correção em 2026-06-22 (achado do usuário a partir do mesmo
+screenshot)**: o "Índice CAPAG Agregado" estava sendo calculado como
+`avg(valor)` dos 3 componentes (Endividamento, Poupança Corrente,
+Liquidez) e exibido com `unidade: '%'` — **não é a nota oficial** do
+Tesouro Nacional. A nota agregada real (`CAPAG - Nota Final`) é
+categórica (A/B/C/D), `valor` é sempre `null` na origem.
+- `silver/capag_agregado.sql` reescrito: seleciona direto
+  `CAPAG - Nota Final` (confirmado 1 linha por localidade+ano, sem
+  agregação necessária) em vez de fazer média dos outros 3
+  componentes; `valor` fica `null` de propósito, `nota` carrega a
+  classificação real.
+- `dim_indicadores.sql`: `unidade` volta a `null` (era `'%'`,
+  incorreto); `descricao` corrigida.
+- `apps/api/model/views/indicadores.js`: `nota` adicionada aos membros
+  expostos de `fact_indicadores` na view (não estava lá).
+- Frontend: `ValorSerie`/`PontoSerieIndicador` ganham campo `nota`;
+  `MetricCard` mostra a nota no lugar do valor numérico quando ela
+  existe (e considera `temDados` mesmo sem `valor`, só com `nota`).
+- Validado contra produção: Salvador (`2927408`) retorna
+  `{"valor": null, "nota": "B"}` pro CAPAG — confirmado via `curl`
+  direto no Cube.js e via `/api/indicadores/localidade/2927408` local
+  apontando pra produção.
 
 ## Ideias para o futuro (não são tarefas — anotadas para quando for retomar)
 
