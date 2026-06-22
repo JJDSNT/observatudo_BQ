@@ -6,6 +6,10 @@ cube(`dim_indicadores`, {
       sql: `indicador_id`,
       type: `string`,
       primary_key: true,
+      // Primary keys ficam public:false por padrão — mas o frontend
+      // precisa filtrar/selecionar por indicador_id diretamente (busca,
+      // resolução de nomes), não só usar como chave de join interna.
+      public: true,
     },
     nome: { sql: `nome`, type: `string` },
     descricao: { sql: `descricao`, type: `string` },
