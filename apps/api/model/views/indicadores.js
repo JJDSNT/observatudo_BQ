@@ -13,6 +13,9 @@ view(`indicadores`, {
         `valor_medio`,
         `valor_minimo`,
         `valor_maximo`,
+        // Classificação categórica (ex.: nota CAPAG A/B/C/D) — alguns
+        // indicadores não têm valor numérico, só essa nota.
+        `nota`,
       ],
     },
     {
