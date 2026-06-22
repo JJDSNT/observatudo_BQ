@@ -13,7 +13,18 @@ with source as (
       formula,
       meta_ods,
       numero_ods,
-      nome_ods
+      nome_ods,
+      fonte,
+      -- Sem unidade por indicador na fonte original (nem na planilha, nem
+      -- em algum catálogo derivado) — fica null até existir referência real.
+      cast(null as string) as unidade,
+      -- Periodicidade de amostragem (não de atualização do pipeline):
+      -- verificado que (indicador_id, localidade, ano) é sempre único na
+      -- fonte (sem duplicidade dentro do mesmo ano) — ou seja, cada
+      -- indicador tem no máximo 1 observação/ano, mesmo quando a fórmula
+      -- calcula uma média mensal a partir do total anual (ex.: "consumo
+      -- per capita /12"). A granularidade real da amostra é anual.
+      'anual' as periodicidade
   from `silver.cidades_sustentaveis`
 
   union all
@@ -28,7 +39,14 @@ with source as (
       null as formula,
       null as meta_ods,
       null as numero_ods,
-      null as nome_ods
+      null as nome_ods,
+      fonte,
+      -- Média dos três componentes (Endividamento, Poupança Corrente,
+      -- Liquidez), que são razões expressas em percentual na metodologia
+      -- do Tesouro Nacional (Nota Final não entra na média: seu `valor` é
+      -- sempre null na origem).
+      '%' as unidade,
+      'anual' as periodicidade
   from `silver.capag_agregado`
 )
 
@@ -43,6 +61,9 @@ select
     any_value(formula) as formula,
     any_value(meta_ods) as meta_ods,
     any_value(numero_ods) as numero_ods,
-    any_value(nome_ods) as nome_ods
+    any_value(nome_ods) as nome_ods,
+    any_value(unidade) as unidade,
+    any_value(fonte) as fonte,
+    any_value(periodicidade) as periodicidade
 from source
 group by indicador_id
