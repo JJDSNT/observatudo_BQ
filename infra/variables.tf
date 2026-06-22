@@ -25,12 +25,6 @@ variable "cubejs_api_secret" {
   description = "CUBEJS_API_SECRET — chave usada pelo Cube.js para assinar/validar JWT de acesso à API. Nunca commitar um valor real; vem de uma var de CI (GitHub Actions secret)."
 }
 
-variable "bigquery_dataset_id" {
-  type        = string
-  default     = "gold"
-  description = "Dataset BigQuery usado pelo frontend (camada gold)"
-}
-
 variable "state_label" {
   type    = string
   default = "observatudo-www-app"

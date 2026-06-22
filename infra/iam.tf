@@ -4,19 +4,11 @@ resource "google_service_account" "www_app" {
   display_name = "Service Account para frontend/backend do Observatudo"
 }
 
-# Lê só o dataset `gold` — é o único que o frontend (e futuramente o
-# Cube.js) deve acessar. Nunca recebe acesso a raw/silver/ops.
-resource "google_bigquery_dataset_iam_member" "www_app_viewer" {
-  dataset_id = google_bigquery_dataset.gold.dataset_id
-  role       = "roles/bigquery.dataViewer"
-  member     = "serviceAccount:${google_service_account.www_app.email}"
-}
-
-resource "google_project_iam_member" "www_app_job_user" {
-  project = var.project_id
-  role    = "roles/bigquery.jobUser"
-  member  = "serviceAccount:${google_service_account.www_app.email}"
-}
+# Sem IAM de BigQuery: desde a Fase 6, o frontend não acessa o BigQuery
+# direto mais — fala com o Cube.js (que tem sua própria SA, ver
+# cubejs.tf, com leitura só em `gold`). Tinha dataViewer em `gold` +
+# bigquery.jobUser aqui antes; removido porque nenhum código do
+# frontend usa BigQuery direto mais (confirmado, zero referências).
 
 
 # === SA do pipeline de dados (substitui a antiga SA do dbt) ===
