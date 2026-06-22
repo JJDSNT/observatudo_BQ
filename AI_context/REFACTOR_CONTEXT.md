@@ -371,7 +371,12 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   (não existe em nenhuma fonte hoje); preencher exigiria curadoria manual
   ou um catálogo externo ainda não disponível.
 - Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
-  `upload_to_bucket` manual — **decisão fechada em 2026-06-22: usar DVC**;
-  implementação ainda pendente.
+  `upload_to_bucket` manual — reaberto em 2026-06-22: uma tentativa de
+  implementação (chamar `dvc add`/`dvc push` via `subprocess` de dentro do
+  transformer, a cada execução, num diretório inteiro) foi revertida por
+  parecer um fluxo estranho; falta investigar qual desenho faz sentido
+  (ex.: separar versionamento do processamento, usar `dvc.yaml`/`dvc
+  repro` em vez de chamada imperativa, ou outro motivo ainda não
+  articulado) antes de tentar de novo.
 - Destino de `packages/` compartilhados (se vier a existir) entre frontend e
   API.
