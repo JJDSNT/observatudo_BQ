@@ -347,6 +347,13 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   só para o índice CAPAG agregado (médias de razões percentuais segundo a
   metodologia do Tesouro Nacional). Pipeline gold reexecutado e validado
   via query real no BigQuery.
+- **SA órfã `sa-observatudo-dbt` excluída em 2026-06-22**: verificado via
+  API do GCP que não tinha referência em nenhum dataset BigQuery
+  (`raw`/`silver`/`gold`/`ops`) nem no bucket `*-www-data`; só restava o
+  binding de projeto `roles/bigquery.jobUser` e 2 chaves de acesso ainda
+  válidas (uma sem expiração, de 2025-05-17) — risco de credencial órfã
+  ainda funcional. Excluída a service account e removido o binding da
+  política IAM do projeto.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -363,8 +370,8 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   fica `null` até existir uma referência real de unidade por indicador
   (não existe em nenhuma fonte hoje); preencher exigiria curadoria manual
   ou um catálogo externo ainda não disponível.
-- Limpar a SA órfã `sa-observatudo-dbt` no GCP (não gerenciada por
-  nenhum `.tf` desde a Fase 3) — decisão: deletar manualmente ou deixar
-  até confirmar que a SA `pipeline` está 100% funcional.
+- Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
+  `upload_to_bucket` manual — **decisão fechada em 2026-06-22: usar DVC**;
+  implementação ainda pendente.
 - Destino de `packages/` compartilhados (se vier a existir) entre frontend e
   API.
