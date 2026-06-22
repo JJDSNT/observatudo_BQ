@@ -474,6 +474,43 @@ roadmap** — só entra quando houver endpoints concretos a implementar
     Terraform (0 add, 1 change — só os 2 env vars de BigQuery saindo do
     Cloud Run —, 2 destroy — as 2 IAM bindings).
 
+## Validação pendente: dados no frontend pós-migração (Cube.js)
+
+A Fase 6 validou a **API** ponta a ponta (`curl` direto contra produção,
+ver Progresso acima) — confirmado que as 4 rotas (`search`, `nomeados`,
+`localidade/[municipio_id]`, `healthz`) respondem 200 com dados reais do
+Cube.js. **Não validado ainda**: se a UI renderiza esses dados
+corretamente (não foi aberto navegador, só testada a API). Próximos
+passos antes de considerar a migração 100% encerrada:
+
+- [ ] `/` (Dashboard, `MetricCard`): abrir com uma localidade real (ex.:
+  São Paulo, `municipio_id=3550308`) e confirmar:
+  - Os valores de série exibidos batem com o que a API retorna (conferir
+    pelo menos 2-3 indicadores manualmente, ex.: "Mortalidade infantil"
+    e "Índice CAPAG Agregado").
+  - `unidade`/`fonte` aparecem no card onde antes ficavam vazios (ex.:
+    CAPAG Agregado deveria mostrar `%` — esses campos estavam comentados
+    no código antigo, ver Fase 6 no Progresso).
+  - Indicadores sem dado pra localidade (estado/país — ver decisão
+    aberta sobre `localidade_id` abaixo) não quebram o card: devem
+    aparecer como "sem dado"/vazio, não erro/crash.
+- [ ] `/indicadores` (`IndicadorSearch`): buscar por termos reais
+  (ex.: "mortalidade", "capag") e confirmar que a lista exibida bate com
+  o que a API retorna (nome, descrição, sem itens truncados/mal
+  formatados).
+- [ ] `/configuracoes/categorias` (`CategoriasEditor`, via
+  `useIndicadorNomes`): confirmar que os nomes resolvidos pelo Cube.js
+  aparecem certos pros indicadores já selecionados pelo usuário (esse
+  hook usa cache de 1h via SWR — testar também depois de invalidar/
+  recarregar).
+- [ ] Testar degradação: Cube.js temporariamente inacessível (ex.:
+  `CUBEJS_API_SECRET` errado, ou serviço fora do ar) e confirmar que a
+  UI mostra erro/loading de forma graciosa, sem quebrar a página
+  inteira — `useHealthCheck`/`GlobalHealthNotifier` deveriam pegar isso.
+- [ ] Conferir visualmente o caso de `serie` vazia (já era possível
+  antes, mas mais provável agora por causa do achado de
+  `localidade_id` pra estado/país).
+
 ## Decisões abertas (bloqueiam issues downstream)
 
 - **Formato de `localidade_id` inconsistente entre fontes para
