@@ -373,13 +373,38 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   `fact_indicadores` mas não têm linha em `dim_indicadores` (só o índice
   agregado `capag` tem) — aparecem como join órfão.
 
+- **Terraform do Cube.js aplicado em 2026-06-22** (`infra/cubejs.tf`):
+  SA `sa-observatudo-cubejs` (IAM `dataViewer` só em `gold` +
+  `bigquery.jobUser` + `storage.objectAdmin` no bucket `*-www-data` para o
+  `CUBEJS_DB_EXPORT_BUCKET`), serviço Cloud Run `cubejs-observatudo`
+  (`https://cubejs-observatudo-s34t5vpv5a-ue.a.run.app`, ainda com a imagem
+  placeholder pública `cubejs/cube:latest` — falta CI publicar a imagem
+  real com `model/` embutido), IAM `run.invoker` para `allUsers` (mesmo
+  padrão do frontend). `terraform plan` mostrou só os 6 recursos novos + 1
+  mudança cosmética pré-existente (label `nonce` do serviço do frontend);
+  `apply` rodou sem destruir nada.
+- **CI/CD do Cube.js criado em 2026-06-22**
+  (`.github/workflows/build-and-deploy-cubejs.yml`, espelha o do
+  frontend): build de `apps/api/Dockerfile`, push para `gcr.io/
+  observatudo-infra/observatudo-cubejs`, `gcloud run deploy` no serviço
+  `cubejs-observatudo` substituindo o placeholder `cubejs/cube:latest`
+  pela imagem real (com `model/` embutido) a cada push em `main` que
+  toque `apps/api/**`. `CUBEJS_API_SECRET` configurado como secret do
+  GitHub Actions (mesmo valor já usado no Terraform local) e passado via
+  `--set-env-vars` no deploy — não usa Secret Manager do GCP, esse
+  recurso não foi criado.
+
 ## Decisões abertas (bloqueiam issues downstream)
 
 - Autenticação e protocolo de consumo do Cube.js no frontend (deploy já
   decidido: self-hosted via Cloud Run) — ver `docs/external/cubejs.md`.
-- Provisionar em Terraform o que o deploy do Cube.js precisa (service
-  account dedicada com IAM `dataViewer` só em `gold`, serviço Cloud Run,
-  configuração do bucket de apoio) — ainda não feito.
+- **`run.invoker` do Cube.js está `allUsers`** (mesmo padrão do frontend,
+  decisão consciente de manter assim por ora em 2026-06-22) — qualquer
+  requisição chega no container (mesmo que rejeitada depois pelo
+  `CUBEJS_API_SECRET`), o que tem custo marginal de CPU/requisição por
+  tentativa não autenticada e expõe superfície a scraping/abuso. Considerar
+  restringir o invoker (ex.: só uma SA do frontend) quando a autenticação
+  service-to-service for desenhada.
 - Os 4 componentes individuais do CAPAG (`CAPAG - Endividamento`/`Poupança
   Corrente`/`Liquidez`/`Nota Final`) existem em `fact_indicadores` sem
   linha correspondente em `dim_indicadores` — decisão de como tratar isso

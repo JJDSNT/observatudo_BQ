@@ -103,12 +103,18 @@ post-installer` dentro de `node_modules/@cubejs-backend/native`) resolve.
   possibilidade de usar o bucket GCS já existente (`*-www-data`) como apoio
   (ex.: `CUBEJS_DB_EXPORT_BUCKET`, usado pelo driver BigQuery para exportar
   resultados grandes antes de paginar, e/ou storage de pre-agregações).
-  Ainda não provisionado em Terraform (service account dedicada, IAM
-  `dataViewer` só em `gold`, serviço Cloud Run) — falta decidir se isso
-  entra agora ou só quando o Cube.js for de fato exposto ao frontend.
+  **Provisionado em Terraform em 2026-06-22** (`infra/cubejs.tf`): SA
+  dedicada, IAM `dataViewer` só em `gold`, serviço Cloud Run
+  (`cubejs-observatudo`) rodando com a imagem placeholder pública
+  `cubejs/cube:latest` — falta o CI publicar a imagem real com `model/`
+  embutido.
 - **Autenticação**: como o Cube.js valida quem pode consultar o quê (hoje o
   frontend usa Firebase Auth; é preciso decidir se o Cube.js valida o token
   do Firebase ou se fica atrás de uma API própria que já faz essa validação).
+  Por ora, o `run.invoker` do Cloud Run está `allUsers` (mesmo padrão do
+  frontend) e a única barreira real é o `CUBEJS_API_SECRET` — decisão
+  consciente de manter assim por ora (2026-06-22); reconsiderar restringir
+  o invoker quando essa autenticação for desenhada de fato.
 - **Protocolo de consumo no frontend**: REST API do Cube.js vs. o pacote
   `@cubejs-client/core` (+ `@cubejs-client/react` se for usar os hooks
   React direto nos componentes, o que mudaria bastante
