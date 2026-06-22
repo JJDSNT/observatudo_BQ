@@ -36,6 +36,7 @@ for row in result:
         uf = row.sigla
         estados[uf] = {
             "nome": row.nome,
+            "localidade_id": row.localidade_id,
             "capital_id": row.capital_localidade_id,
             "cidades": []
         }
@@ -62,7 +63,9 @@ for uf in sorted(estados.keys()):
 
     estado_objs.append({
         "label": uf.strip(),
-        "value": uf.strip(),
+        # localidade_id canônico (ex.: "BR-SP"), não a sigla bruta — é o
+        # que o Cube.js espera pra filtrar/joinar com dim_localidades.
+        "value": estado["localidade_id"],
         "default": estado["capital_id"],
         "children": cidades_formatadas
     })

@@ -4,8 +4,8 @@
     "value": "BR",
     "children": [
       {
-        "label": " AC",
-        "value": " AC",
+        "label": "AC",
+        "value": "BR-AC",
         "default": "1200401",
         "children": [
           {
@@ -99,8 +99,8 @@
         ]
       },
       {
-        "label": " AL",
-        "value": " AL",
+        "label": "AL",
+        "value": "BR-AL",
         "default": "2704302",
         "children": [
           {
@@ -514,8 +514,8 @@
         ]
       },
       {
-        "label": " AM",
-        "value": " AM",
+        "label": "AM",
+        "value": "BR-AM",
         "default": "1302603",
         "children": [
           {
@@ -769,8 +769,8 @@
         ]
       },
       {
-        "label": " AP",
-        "value": " AP",
+        "label": "AP",
+        "value": "BR-AP",
         "default": "1600303",
         "children": [
           {
@@ -840,8 +840,8 @@
         ]
       },
       {
-        "label": " BA",
-        "value": " BA",
+        "label": "BA",
+        "value": "BR-BA",
         "default": "2927408",
         "children": [
           {
@@ -2515,8 +2515,8 @@
         ]
       },
       {
-        "label": " CE",
-        "value": " CE",
+        "label": "CE",
+        "value": "BR-CE",
         "default": "2304400",
         "children": [
           {
@@ -3258,8 +3258,8 @@
         ]
       },
       {
-        "label": " DF",
-        "value": " DF",
+        "label": "DF",
+        "value": "BR-DF",
         "default": "5300108",
         "children": [
           {
@@ -3269,8 +3269,8 @@
         ]
       },
       {
-        "label": " ES",
-        "value": " ES",
+        "label": "ES",
+        "value": "BR-ES",
         "default": "3205309",
         "children": [
           {
@@ -3588,8 +3588,8 @@
         ]
       },
       {
-        "label": " GO",
-        "value": " GO",
+        "label": "GO",
+        "value": "BR-GO",
         "default": "5208707",
         "children": [
           {
@@ -4579,8 +4579,8 @@
         ]
       },
       {
-        "label": " MA",
-        "value": " MA",
+        "label": "MA",
+        "value": "BR-MA",
         "default": "2111300",
         "children": [
           {
@@ -5454,8 +5454,8 @@
         ]
       },
       {
-        "label": " MG",
-        "value": " MG",
+        "label": "MG",
+        "value": "BR-MG",
         "default": "3106200",
         "children": [
           {
@@ -8873,8 +8873,8 @@
         ]
       },
       {
-        "label": " MS",
-        "value": " MS",
+        "label": "MS",
+        "value": "BR-MS",
         "default": "5002704",
         "children": [
           {
@@ -9196,8 +9196,8 @@
         ]
       },
       {
-        "label": " MT",
-        "value": " MT",
+        "label": "MT",
+        "value": "BR-MT",
         "default": "5103403",
         "children": [
           {
@@ -9767,8 +9767,8 @@
         ]
       },
       {
-        "label": " PA",
-        "value": " PA",
+        "label": "PA",
+        "value": "BR-PA",
         "default": "1501402",
         "children": [
           {
@@ -10350,8 +10350,8 @@
         ]
       },
       {
-        "label": " PB",
-        "value": " PB",
+        "label": "PB",
+        "value": "BR-PB",
         "default": "2507507",
         "children": [
           {
@@ -11249,8 +11249,8 @@
         ]
       },
       {
-        "label": " PE",
-        "value": " PE",
+        "label": "PE",
+        "value": "BR-PE",
         "default": "2611606",
         "children": [
           {
@@ -11996,8 +11996,8 @@
         ]
       },
       {
-        "label": " PI",
-        "value": " PI",
+        "label": "PI",
+        "value": "BR-PI",
         "default": "2211001",
         "children": [
           {
@@ -12899,8 +12899,8 @@
         ]
       },
       {
-        "label": " PR",
-        "value": " PR",
+        "label": "PR",
+        "value": "BR-PR",
         "default": "4106902",
         "children": [
           {
@@ -14502,8 +14502,8 @@
         ]
       },
       {
-        "label": " RJ",
-        "value": " RJ",
+        "label": "RJ",
+        "value": "BR-RJ",
         "default": "3304557",
         "children": [
           {
@@ -14877,8 +14877,8 @@
         ]
       },
       {
-        "label": " RN",
-        "value": " RN",
+        "label": "RN",
+        "value": "BR-RN",
         "default": "2408102",
         "children": [
           {
@@ -15552,8 +15552,8 @@
         ]
       },
       {
-        "label": " RO",
-        "value": " RO",
+        "label": "RO",
+        "value": "BR-RO",
         "default": "1100205",
         "children": [
           {
@@ -15767,8 +15767,8 @@
         ]
       },
       {
-        "label": " RR",
-        "value": " RR",
+        "label": "RR",
+        "value": "BR-RR",
         "default": "1400100",
         "children": [
           {
@@ -15834,8 +15834,8 @@
         ]
       },
       {
-        "label": " RS",
-        "value": " RS",
+        "label": "RS",
+        "value": "BR-RS",
         "default": "4314902",
         "children": [
           {
@@ -17829,8 +17829,8 @@
         ]
       },
       {
-        "label": " SC",
-        "value": " SC",
+        "label": "SC",
+        "value": "BR-SC",
         "default": "4205407",
         "children": [
           {
@@ -19016,8 +19016,8 @@
         ]
       },
       {
-        "label": " SE",
-        "value": " SE",
+        "label": "SE",
+        "value": "BR-SE",
         "default": "2800308",
         "children": [
           {
@@ -19323,8 +19323,8 @@
         ]
       },
       {
-        "label": " SP",
-        "value": " SP",
+        "label": "SP",
+        "value": "BR-SP",
         "default": "3550308",
         "children": [
           {
@@ -21910,8 +21910,8 @@
         ]
       },
       {
-        "label": " TO",
-        "value": " TO",
+        "label": "TO",
+        "value": "BR-TO",
         "default": "1721000",
         "children": [
           {

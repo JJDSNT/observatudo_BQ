@@ -102,34 +102,38 @@ export async function fetchIndicadoresParaSelecionado(
     },
   };
 
-  for (const categoria of categorias) {
-    const rawSubeixos: RawSubeixoResultado[] = Array.isArray(json?.municipio?.subeixos)
-      ? (json.municipio.subeixos as RawSubeixoResultado[]).filter(
+  const subeixosDoNivel = (nivel: unknown, categoria: Categoria): SubeixoResultado[] => {
+    const rawSubeixos: RawSubeixoResultado[] = Array.isArray(
+      (nivel as { subeixos?: unknown })?.subeixos
+    )
+      ? ((nivel as { subeixos: RawSubeixoResultado[] }).subeixos).filter(
           (s) => categoria.subeixos.some((c) => c.id === s.id)
         )
       : [];
 
-    const subeixos = rawSubeixos.map(sanitizeSubeixoResultado);
+    return rawSubeixos.map(sanitizeSubeixoResultado);
+  };
 
+  for (const categoria of categorias) {
     payload.niveis.municipio.push({
       id: categoria.id,
       cor: categoria.cor,
       icone: categoria.icone,
-      subeixos,
+      subeixos: subeixosDoNivel(json?.municipio, categoria),
     });
 
     payload.niveis.estado.push({
       id: categoria.id,
       cor: categoria.cor,
       icone: categoria.icone,
-      subeixos: [],
+      subeixos: subeixosDoNivel(json?.estado, categoria),
     });
 
     payload.niveis.pais.push({
       id: categoria.id,
       cor: categoria.cor,
       icone: categoria.icone,
-      subeixos: [],
+      subeixos: subeixosDoNivel(json?.pais, categoria),
     });
   }
 

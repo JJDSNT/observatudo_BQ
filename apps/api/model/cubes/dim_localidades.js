@@ -22,7 +22,11 @@ cube(`dim_localidades`, {
     latitude: { sql: `latitude`, type: `number` },
     longitude: { sql: `longitude`, type: `number` },
     populacao: { sql: `populacao`, type: `number` },
-    codigo_oficial: { sql: `codigo_oficial`, type: `string` },
+    // Código IBGE: 2 dígitos p/ estado, 7 p/ município, nulo p/ país.
+    codigo_ibge: { sql: `codigo_ibge`, type: `string` },
+    // ISO 3166-1 (país) / ISO 3166-2 (estado); nulo p/ município (sem
+    // padrão ISO nesse nível).
+    codigo_iso: { sql: `codigo_iso`, type: `string` },
     data_inclusao: { sql: `data_inclusao`, type: `time` },
   },
 });

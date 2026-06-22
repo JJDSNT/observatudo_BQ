@@ -16,7 +16,10 @@ export function getInfoMunicipio(municipioId: string): {
         id: cidade.value,
         nome: cidade.label,
         estadoId: estado.value,
-        sigla: estado.value,
+        // estado.value é o localidade_id canônico (ex.: "BR-SP"), usado
+        // pra filtrar/joinar com dim_localidades; estado.label é a
+        // sigla pura (ex.: "SP"), usada pra exibição.
+        sigla: estado.label,
         estadoNome: estado.label,
       };
     }

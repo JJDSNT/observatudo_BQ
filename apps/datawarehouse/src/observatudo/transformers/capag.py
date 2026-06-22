@@ -13,6 +13,7 @@ from observatudo.io_utils import (
 )
 from observatudo.logger import setup_logger
 from observatudo import config
+from observatudo import localidades as loc
 
 logger = setup_logger(__name__)
 
@@ -26,7 +27,7 @@ FONTE_URL = (
 def load_capag_estados(path: Path) -> pd.DataFrame:
     df = pd.read_excel(path)
     df = df.rename(columns={
-        "UF": "localidade_id",
+        "UF": "uf_bruta",
         "IND1": "valor_endividamento",
         "NOTA1": "nota_endividamento",
         "IND2": "valor_poupanca",
@@ -35,6 +36,13 @@ def load_capag_estados(path: Path) -> pd.DataFrame:
         "NOTA3": "nota_liquidez",
         "CAPAG": "nota_final"
     })
+    # A planilha do Tesouro traz linhas de rodapé (nota de rodapé, linha
+    # em branco) depois da última UF — descarta antes de resolver.
+    df = df[df["uf_bruta"].astype(str).str.strip().str.len() == 2].copy()
+    # A planilha traz só a sigla da UF — resolve pro localidade_id
+    # canônico de dim_localidades (ex.: "BR-SP"), em vez de gravar a
+    # sigla bruta direto (quebra o join com dim_localidades).
+    df["localidade_id"] = df["uf_bruta"].apply(loc.resolver_estado_por_sigla)
     df["tipo_localidade"] = "estado"
     df["ano_base"] = 2022
     return df
@@ -43,7 +51,7 @@ def load_capag_estados(path: Path) -> pd.DataFrame:
 def load_capag_municipios(path: Path) -> pd.DataFrame:
     df = pd.read_excel(path)
     df = df.rename(columns={
-        "Cod.IBGE": "localidade_id",
+        "Cod.IBGE": "codigo_ibge_bruto",
         "Indicador_1": "valor_endividamento",
         "Nota_1": "nota_endividamento",
         "Indicador_2": "valor_poupanca",
@@ -52,6 +60,9 @@ def load_capag_municipios(path: Path) -> pd.DataFrame:
         "Nota_3": "nota_liquidez",
         "CAPAG_Oficial": "nota_final"
     })
+    df["localidade_id"] = df["codigo_ibge_bruto"].apply(
+        loc.resolver_municipio_por_codigo_ibge
+    )
     df["tipo_localidade"] = "municipio"
     df["ano_base"] = 2022
     return df

@@ -17,4 +17,4 @@ select
   esfera_poder
 from `silver.capag`
 where indicador_id = 'CAPAG - Nota Final'
-and SAFE_CAST(localidade_id AS INT64) IS NOT NULL
+and localidade_id is not null

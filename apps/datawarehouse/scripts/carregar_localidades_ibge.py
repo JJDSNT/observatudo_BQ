@@ -1,7 +1,13 @@
+import sys
+from pathlib import Path
+
 import pandas as pd
 from google.cloud import bigquery
 from datetime import datetime, timezone
 import os
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from observatudo import localidades as loc  # noqa: E402
 
 # === CONFIG ===
 PROJETO = "observatudo-infra"
@@ -17,11 +23,19 @@ capitais_df = pd.read_csv(
     os.path.join(CAMINHO_DADOS, "municipios_c_capital.csv")
 )
 
+# A fonte do IBGE traz espaço em branco em `SIGLA` (ex.: " SP") — sem o
+# strip, contamina sigla/localidade_id/localidade_pai_id de toda a tabela.
+estados_df["SIGLA"] = estados_df["SIGLA"].str.strip()
+pais_df["sigla"] = pais_df["sigla"].str.strip()
+
 localidades = []
 
 AGORA_UTC = datetime.now(timezone.utc)
 
 # === PAIS ===
+# `localidade_id` é um id interno, não a chave de uma autoridade externa.
+# Para país ele coincide com o código ISO 3166-1 alpha-2 (`codigo_iso`);
+# não há código IBGE de país, por isso `codigo_ibge` fica nulo.
 for _, row in pais_df.iterrows():
     localidades.append({
         "localidade_id": row["sigla"],
@@ -35,14 +49,18 @@ for _, row in pais_df.iterrows():
         "latitude": row.get("latitude"),
         "longitude": row.get("longitude"),
         "populacao": row.get("populacao"),
-        "codigo_oficial": row["codigo"],
+        "codigo_ibge": None,
+        "codigo_iso": row["sigla"],
         "data_inclusao": AGORA_UTC,
     })
 
 # === ESTADOS ===
+# `localidade_id` (`"BR-SP"`) coincide aqui com o ISO 3166-2; o código
+# IBGE de UF (2 dígitos) fica em `codigo_ibge`, separado.
 for _, row in estados_df.iterrows():
+    localidade_id = loc.resolver_estado_por_sigla(row["SIGLA"])
     localidades.append({
-        "localidade_id": f"BR-{row['SIGLA']}",
+        "localidade_id": localidade_id,
         "nome": row["NOME"],
         "tipo": "estado",
         "localidade_pai_id": "BR",
@@ -53,20 +71,24 @@ for _, row in estados_df.iterrows():
         "latitude": None,
         "longitude": None,
         "populacao": None,
-        "codigo_oficial": row["COD"],
+        "codigo_ibge": str(row["COD"]),
+        "codigo_iso": localidade_id,
         "data_inclusao": AGORA_UTC,
     })
 
 # === CIDADES ===
+# Município não tem código ISO de subdivisão-de-subdivisão; só
+# `codigo_ibge` se aplica. `localidade_pai_id` é resolvido pelo mesmo
+# cruzamento codigo_uf -> estado usado em todo o resto do script.
 for _, row in capitais_df.iterrows():
-    estado_row = estados_df[estados_df["COD"] == row["codigo_uf"]].iloc[0]
-    estado_sigla = estado_row["SIGLA"]
-
+    codigo_ibge_municipio = loc.resolver_municipio_por_codigo_ibge(
+        row["codigo_ibge"]
+    )
     localidades.append({
-        "localidade_id": str(row["codigo_ibge"]),
+        "localidade_id": codigo_ibge_municipio,
         "nome": row["nome"],
         "tipo": "cidade",
-        "localidade_pai_id": f"BR-{estado_sigla}",
+        "localidade_pai_id": loc.resolver_estado_de_municipio(row["codigo_uf"]),
         "sigla": None,
         "regiao": None,
         CAMPO_CAPITAL: bool(row["capital"]),
@@ -74,14 +96,15 @@ for _, row in capitais_df.iterrows():
         "latitude": row["latitude"],
         "longitude": row["longitude"],
         "populacao": None,
-        "codigo_oficial": str(row["codigo_ibge"]),
+        "codigo_ibge": codigo_ibge_municipio,
+        "codigo_iso": None,
         "data_inclusao": AGORA_UTC,
     })
 
 # === PREENCHER capital_localidade_id ===
 # Para estados
 for estado_row in [item for item in localidades if item["tipo"] == "estado"]:
-    cod_estado = int(estado_row["codigo_oficial"])
+    cod_estado = int(estado_row["codigo_ibge"])
     capital = capitais_df[
         (capitais_df["codigo_uf"] == cod_estado) &
         (capitais_df["capital"] == 1)
@@ -105,7 +128,10 @@ client = bigquery.Client()
 table_ref = f"{PROJETO}.{DATASET}.{TABELA}"
 
 print(f"Enviando {len(df)} registros para {table_ref}...")
-df["codigo_oficial"] = df["codigo_oficial"].astype(str)
-job = client.load_table_from_dataframe(df, table_ref)
+job = client.load_table_from_dataframe(
+    df,
+    table_ref,
+    job_config=bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE"),
+)
 job.result()
 print("Carga de localidades concluída com sucesso.")
