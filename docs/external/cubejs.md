@@ -1,9 +1,11 @@
 # External: Cube.js como camada de API do Data Warehouse
 
-> Status: **escopo e local no monorepo decididos** (`apps/api`, schema
-> versionado, escopo = somente leitura sobre o dataset `gold`). O que falta
-> decidir é só o **alvo de deploy** (self-hosted vs. Cube Cloud) e detalhes
-> de autenticação/protocolo — ver "Pontos abertos" abaixo.
+> Status: **escopo, local no monorepo e alvo de deploy decididos**
+> (`apps/api`, schema versionado, escopo = somente leitura sobre o dataset
+> `gold`, deploy = self-hosted via Cloud Run, decidido em 2026-06-22). O que
+> falta decidir são detalhes de autenticação/protocolo e se/como usar um
+> bucket GCS de apoio (pre-agregações/export do BigQuery) — ver "Pontos
+> abertos" abaixo.
 
 ## Por que considerar o Cube.js
 
@@ -66,11 +68,44 @@ não compartilham código — só um **contrato de dados** (as tabelas que
 depende desse contrato, não da decisão de deploy. Por isso o schema pode (e
 deve) ser versionado e evoluído desde já, mesmo com o deploy ainda indefinido.
 
-## Pontos abertos (decidir em issue antes de implementar o deploy)
+## Status: scaffold implementado (2026-06-22)
 
-- **Self-hosted (Cloud Run/Docker, usando o `Dockerfile` de `apps/api`) vs.
-  Cube Cloud** — trade-off custo vs. controle/infra. Não bloqueia escrever o
-  schema dos cubos, só o deploy final.
+`apps/api` criado como app real: `package.json` (`@cubejs-backend/server` +
+`@cubejs-backend/bigquery-driver`), `cube.js` (config mínima — conexão é
+toda via env vars), `model/cubes/{dim_indicadores,dim_localidades,
+fact_indicadores}.js` (um cubo por tabela do dataset `gold`, com os joins
+`fact_indicadores` → `dim_indicadores`/`dim_localidades`), `model/views/
+indicadores.js` (view denormalizada candidata a substituir
+`src/app/api/indicadores/*`), `Dockerfile` (caminho self-hosted) e
+`.env.example`. Validado de ponta a ponta em dev local: `cubejs-dev-server`
+sobe, `/cubejs-api/v1/meta` compila os 3 cubos + a view, e uma query real
+(`fact_indicadores.count`/`valor_medio` agrupado por `dim_indicadores.nome`/
+`unidade`) retorna dados reais do BigQuery via ADC (mesma auth do resto do
+projeto). Achado durante a validação (pré-existente, não introduzido por
+este scaffold): os 4 componentes individuais do CAPAG (`CAPAG -
+Endividamento`/`Poupança Corrente`/`Liquidez`/`Nota Final`, 5598 linhas
+cada) existem em `fact_indicadores` mas não têm linha correspondente em
+`dim_indicadores` (que só tem o índice agregado `capag`) — aparece como
+join órfão (`dim_indicadores.nome = null`) em qualquer query que cruze as
+duas tabelas sem filtrar por isso; decisão de como tratar isso ainda não
+tomada.
+
+Nota de ambiente: `@cubejs-backend/native` (usado para parsing
+SQL/Jinja) baixa um binário pré-compilado no `postinstall` — se ele falhar
+silenciosamente (ex.: instalação sem rede no momento do `postinstall`), o
+servidor sobe mas todo schema falha ao compilar com "Unable to load
+@cubejs-backend/native"; rodar `pnpm install` novamente (ou `npx
+post-installer` dentro de `node_modules/@cubejs-backend/native`) resolve.
+
+## Pontos abertos
+
+- **Deploy: self-hosted via Cloud Run — decidido em 2026-06-22**, com a
+  possibilidade de usar o bucket GCS já existente (`*-www-data`) como apoio
+  (ex.: `CUBEJS_DB_EXPORT_BUCKET`, usado pelo driver BigQuery para exportar
+  resultados grandes antes de paginar, e/ou storage de pre-agregações).
+  Ainda não provisionado em Terraform (service account dedicada, IAM
+  `dataViewer` só em `gold`, serviço Cloud Run) — falta decidir se isso
+  entra agora ou só quando o Cube.js for de fato exposto ao frontend.
 - **Autenticação**: como o Cube.js valida quem pode consultar o quê (hoje o
   frontend usa Firebase Auth; é preciso decidir se o Cube.js valida o token
   do Firebase ou se fica atrás de uma API própria que já faz essa validação).
@@ -78,9 +113,10 @@ deve) ser versionado e evoluído desde já, mesmo com o deploy ainda indefinido.
   `@cubejs-client/core` (+ `@cubejs-client/react` se for usar os hooks
   React direto nos componentes, o que mudaria bastante
   `src/hooks/useIndicadores.ts` e companhia).
-- **Onde rodam as pre-agregações** (cache do Cube.js) — BigQuery tem custo por
-  query, então pre-agregações podem ser relevantes para custo, mas exigem um
-  storage próprio (Cube Store) ou usar o próprio BigQuery como destino.
+- **Pre-agregações**: BigQuery tem custo por query, então pre-agregações
+  podem ser relevantes para custo; direção decidida (usar o bucket GCS
+  existente como apoio), mas a configuração concreta (Cube Store local vs.
+  destino no próprio BigQuery vs. export bucket) ainda não foi feita.
 - **Convivência transitória**: durante a migração, as rotas atuais
   (`src/app/api/indicadores/*`) podem continuar existindo enquanto o Cube.js
   é introduzido aos poucos (ex.: um indicador por vez), para não travar o

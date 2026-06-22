@@ -1,0 +1,17 @@
+{
+  "name": "api",
+  "private": true,
+  "scripts": {
+    "dev": "cubejs-dev-server",
+    "start": "cubejs-server",
+    "build": "echo \"apps/api: nada para compilar (Cube.js roda direto do model/)\"",
+    "lint": "eslint cube.js model"
+  },
+  "dependencies": {
+    "@cubejs-backend/server": "^1.6.60",
+    "@cubejs-backend/bigquery-driver": "^1.6.60"
+  },
+  "devDependencies": {
+    "eslint": "^9.18.0"
+  }
+}
