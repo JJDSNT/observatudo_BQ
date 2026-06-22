@@ -6,6 +6,9 @@ import type { Localidade } from '@/types';
 export interface ValorSerie {
   data: string; // "2022-01-01" ou apenas ano, se preferir
   valor: number | null;
+  // Classificação categórica (ex.: nota CAPAG "A"/"B"/"C"/"D") — alguns
+  // indicadores não têm valor numérico, só essa nota.
+  nota?: string | null;
 }
 
 export interface Indicador {

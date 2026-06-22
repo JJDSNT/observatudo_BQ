@@ -14,6 +14,7 @@ import type {
 interface RawSeriePonto {
   data?: unknown;
   valor?: unknown;
+  nota?: unknown;
 }
 
 interface RawIndicador {
@@ -46,6 +47,7 @@ function sanitizeIndicador(raw: RawIndicador): Indicador {
       ? raw.serie.map((p: RawSeriePonto) => ({
           data: typeof p?.data === "string" ? p.data : "",
           valor: typeof p?.valor === "number" ? p.valor : null,
+          nota: typeof p?.nota === "string" ? p.nota : null,
         }))
       : [],
   };

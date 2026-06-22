@@ -10,6 +10,8 @@ export interface PontoSerieIndicador {
   fonte: string;
   data: string;
   valor: number | null;
+  // Classificação categórica (ex.: nota CAPAG) — ver ValorSerie.nota.
+  nota: string | null;
 }
 
 export class IndicadorCivico {
@@ -36,6 +38,7 @@ export class IndicadorCivico {
         "indicadores.fonte",
         "indicadores.dim_localidades_localidade_id",
         "indicadores.ano",
+        "indicadores.nota",
       ],
       measures: ["indicadores.valor_medio"],
       filters: [
@@ -79,6 +82,8 @@ export class IndicadorCivico {
         row["indicadores.valor_medio"] != null
           ? Number(row["indicadores.valor_medio"])
           : null,
+      nota:
+        row["indicadores.nota"] != null ? String(row["indicadores.nota"]) : null,
     }));
   }
 }

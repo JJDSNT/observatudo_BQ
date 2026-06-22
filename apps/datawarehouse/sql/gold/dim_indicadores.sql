@@ -33,7 +33,7 @@ with source as (
   select
       indicador_id,
       'Índice CAPAG Agregado' as nome,
-      'Nota média de sustentabilidade fiscal com base nos três componentes: Endividamento, Poupança Corrente e Liquidez.' as descricao,
+      'Nota oficial de Capacidade de Pagamento (CAPAG) do Tesouro Nacional — classificação A/B/C/D combinando os três componentes (Endividamento, Poupança Corrente e Liquidez). Ver coluna `nota` em fact_indicadores; `valor` não se aplica (classificação categórica, não numérica).' as descricao,
       null as eixo,
       'Finanças' as eixo_ia,
       null as formula,
@@ -41,11 +41,8 @@ with source as (
       null as numero_ods,
       null as nome_ods,
       fonte,
-      -- Média dos três componentes (Endividamento, Poupança Corrente,
-      -- Liquidez), que são razões expressas em percentual na metodologia
-      -- do Tesouro Nacional (Nota Final não entra na média: seu `valor` é
-      -- sempre null na origem).
-      '%' as unidade,
+      -- Classificação categórica (A/B/C/D), não tem unidade numérica.
+      cast(null as string) as unidade,
       'anual' as periodicidade
   from `silver.capag_agregado`
 )

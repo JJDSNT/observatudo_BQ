@@ -68,7 +68,7 @@ export async function getLocalidadeFullPorSubeixos(
           nome: primeiro?.indicadorNome ?? `Indicador ${indicadorId}`,
           unidade: primeiro?.unidade ?? "",
           fonte: primeiro?.fonte ?? "",
-          serie: serie.map((p) => ({ data: p.data, valor: p.valor })),
+          serie: serie.map((p) => ({ data: p.data, valor: p.valor, nota: p.nota })),
         };
       }),
     }));

@@ -21,7 +21,12 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   onClick,
 }) => {
   const dados = useMemo(() => {
-    const serie = indicador.serie.filter(p => p.valor !== null && p.valor !== undefined);
+    // Alguns indicadores (ex.: nota CAPAG) só têm classificação
+    // categórica (`nota`), sem valor numérico — também contam como
+    // "tem dado".
+    const serie = indicador.serie.filter(
+      p => (p.valor !== null && p.valor !== undefined) || (p.nota != null && p.nota !== "")
+    );
     const ultimaMedida = serie.at(-1);
     const penultimaMedida = serie.at(-2);
     const serieRecentes = serie.slice(-5);
@@ -133,8 +138,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             {showTrend && getTrendIcon()}
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900">
-                {formatarValor(dados.ultimaMedida?.valor)}
-                {indicador.unidade && (
+                {dados.ultimaMedida?.nota ?? formatarValor(dados.ultimaMedida?.valor)}
+                {!dados.ultimaMedida?.nota && indicador.unidade && (
                   <span className="text-xs ml-1 text-gray-500 font-normal">
                     {indicador.unidade}
                   </span>
@@ -175,8 +180,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         {/* Valor principal */}
         <div className="text-right ml-4">
           <div className="text-2xl font-bold text-gray-900 mb-1">
-            {formatarValor(dados.ultimaMedida?.valor)}
-            {indicador.unidade && (
+            {dados.ultimaMedida?.nota ?? formatarValor(dados.ultimaMedida?.valor)}
+            {!dados.ultimaMedida?.nota && indicador.unidade && (
               <span className="text-sm ml-2 text-gray-600 font-normal">
                 {indicador.unidade}
               </span>
@@ -216,7 +221,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
               >
                 <span className="text-gray-600">{formatarData(ponto.data)}</span>
                 <span className="font-medium text-gray-900">
-                  {formatarValor(ponto.valor)}
+                  {ponto.nota ?? formatarValor(ponto.valor)}
                 </span>
               </div>
             ))}
