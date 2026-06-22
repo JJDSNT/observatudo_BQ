@@ -1,0 +1,69 @@
+name: Build and Deploy do Cube.js para Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/build-and-deploy-cubejs.yml"
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: observatudo-infra
+  SERVICE_NAME: cubejs-observatudo
+  REGION: us-east1
+  IMAGE_NAME: gcr.io/observatudo-infra/observatudo-cubejs
+
+jobs:
+  build:
+    name: Build da imagem Docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Autenticar no GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar Docker com credenciais GCP
+        run: gcloud auth configure-docker
+
+      - name: Build da imagem Docker
+        run: |
+          docker build \
+            -f apps/api/Dockerfile \
+            -t $IMAGE_NAME \
+            apps/api
+
+      - name: Push da imagem para Container Registry
+        run: docker push $IMAGE_NAME
+
+  deploy:
+    name: Deploy para Cloud Run
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Autenticar no GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Deploy no Cloud Run
+        # CUBEJS_API_SECRET vem direto do secret do GitHub Actions (mesmo
+        # valor já configurado no Terraform via terraform.tfvars local,
+        # não commitado) — não usa Secret Manager do GCP, não criamos
+        # esse recurso ainda.
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image $IMAGE_NAME \
+            --region $REGION \
+            --platform managed \
+            --project $PROJECT_ID \
+            --allow-unauthenticated \
+            --service-account sa-observatudo-cubejs@observatudo-infra.iam.gserviceaccount.com \
+            --set-env-vars NODE_ENV=production,CUBEJS_DB_TYPE=bigquery,CUBEJS_DB_BQ_PROJECT_ID=observatudo-infra,CUBEJS_DB_EXPORT_BUCKET=observatudo-infra-www-data,CUBEJS_API_SECRET=${{ secrets.CUBEJS_API_SECRET }}

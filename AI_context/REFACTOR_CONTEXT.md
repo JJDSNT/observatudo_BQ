@@ -383,6 +383,16 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   padrão do frontend). `terraform plan` mostrou só os 6 recursos novos + 1
   mudança cosmética pré-existente (label `nonce` do serviço do frontend);
   `apply` rodou sem destruir nada.
+- **CI/CD do Cube.js criado em 2026-06-22**
+  (`.github/workflows/build-and-deploy-cubejs.yml`, espelha o do
+  frontend): build de `apps/api/Dockerfile`, push para `gcr.io/
+  observatudo-infra/observatudo-cubejs`, `gcloud run deploy` no serviço
+  `cubejs-observatudo` substituindo o placeholder `cubejs/cube:latest`
+  pela imagem real (com `model/` embutido) a cada push em `main` que
+  toque `apps/api/**`. `CUBEJS_API_SECRET` configurado como secret do
+  GitHub Actions (mesmo valor já usado no Terraform local) e passado via
+  `--set-env-vars` no deploy — não usa Secret Manager do GCP, esse
+  recurso não foi criado.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -395,9 +405,6 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   tentativa não autenticada e expõe superfície a scraping/abuso. Considerar
   restringir o invoker (ex.: só uma SA do frontend) quando a autenticação
   service-to-service for desenhada.
-- CI/CD do Cube.js (build de `apps/api/Dockerfile`, push, `gcloud run
-  deploy --image` substituindo o placeholder `cubejs/cube:latest`) — ainda
-  não criado.
 - Os 4 componentes individuais do CAPAG (`CAPAG - Endividamento`/`Poupança
   Corrente`/`Liquidez`/`Nota Final`) existem em `fact_indicadores` sem
   linha correspondente em `dim_indicadores` — decisão de como tratar isso
