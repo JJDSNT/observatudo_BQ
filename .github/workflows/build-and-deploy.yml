@@ -68,4 +68,4 @@ jobs:
             --project $PROJECT_ID \
             --allow-unauthenticated \
             --service-account sa-observatudo-www-app@observatudo-infra.iam.gserviceaccount.com \
-            --set-env-vars BIGQUERY_PROJECT_ID=observatudo-infra,BIGQUERY_DATASET_ID=gold,CUBEJS_API_URL=$CUBEJS_API_URL,CUBEJS_API_SECRET=${{ secrets.CUBEJS_API_SECRET }}
+            --set-env-vars CUBEJS_API_URL=$CUBEJS_API_URL,CUBEJS_API_SECRET=${{ secrets.CUBEJS_API_SECRET }}

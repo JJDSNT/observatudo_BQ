@@ -135,15 +135,20 @@ descrição completa. Resumo:
    mapeando o dataset `gold`. Não inclui ainda migrar o frontend para
    consumi-lo. Depende da Fase 3 (precisa do `gold` materializado e
    estável).
-6. 🔄 **Migrar o frontend rota a rota** — protocolo fechado (proxy
-   server-side, ver Progresso); substituir `src/app/api/indicadores/*`
-   pelo consumo via Cube.js, uma rota por vez, até não restar acesso
-   direto ao BigQuery no frontend. Depende da Fase 5.
+6. ✅ **Migrar o frontend rota a rota** — protocolo fechado (proxy
+   server-side); substituídas as 3 rotas que tinham consumidor real,
+   removido acesso direto ao BigQuery por completo (código, dependência
+   e IAM). Depende da Fase 5.
    - ✅ `/api/indicadores/search`
    - ✅ `/api/indicadores/nomeados`
-   - `/api/indicadores/localidade/[municipio_id]` (dashboard principal)
-   - Remover `lib/analytics/client.ts`/`query.ts` e a dependência
-     `@google-cloud/bigquery` do frontend depois das 3 rotas migradas.
+   - ✅ `/api/indicadores/localidade/[municipio_id]` (dashboard
+     principal) — reescrita como 1 consulta em lote ao Cube.js (era 1
+     consulta por indicador x localidade no BigQuery direto).
+   - ✅ Removidos `lib/analytics/{client,query,runQuery}.ts`, a
+     dependência `@google-cloud/bigquery`, `/api/healthz` migrado pra
+     checar o Cube.js em vez do BigQuery, e o IAM de BigQuery da SA do
+     frontend revogado em produção (`dataViewer` em `gold` +
+     `bigquery.jobUser` — nenhum código mais usava).
 7. **Limpeza** — remover código/infra órfã do estado anterior (rotas de API
    substituídas, dataset `dados` antigo, etc.).
 
@@ -431,9 +436,54 @@ roadmap** — só entra quando houver endpoints concretos a implementar
     público (`cubejs/cube:latest`) que, se aplicado depois do CI já ter
     publicado a imagem real, reverteria o deploy — default removido
     (var agora obrigatória, mesmo padrão de `var.image_url`).
+  - `/api/indicadores/localidade/[municipio_id]` migrado (a rota do
+    dashboard principal): `IndicadorCivico.serieHistoricaBatch()`
+    substitui `serieHistorica()` — antes era **1 consulta por indicador
+    x localidade** ao BigQuery (N×3 round-trips por carga de página);
+    agora é **1 única consulta** ao Cube.js pra todos os indicadores e
+    as 3 localidades (município/estado/país) de uma vez, agrupada no
+    código depois. Aproveitando a API mais rica do Cube.js: a série
+    agora vem com `unidade`/`fonte` reais (estavam comentados no código
+    antigo porque `dim_indicadores` não tinha essas colunas antes da
+    Fase 3/PR #15 desta mesma sessão).
+    - Achado real: incluir uma dimensão `time` (`data_referencia`)
+      direto em `dimensions` (em vez de `timeDimensions`) quebra o
+      driver BigQuery do Cube com `Could not cast literal "UTC" to
+      type TIME`. Usado `ano` (number) em vez disso — também mais
+      correto, já que a granularidade real dos dados é sempre anual
+      (verificado na Fase de `dim_indicadores`).
+    - Achado pré-existente (não introduzido aqui, não corrigido):
+      `estadoInfo.id` (formato `" SP"`, da fonte `localidades_dropdown
+      .json`) não bate com `dim_localidades.localidade_id` pra estados
+      (formato `"BR-SP"`), nem com o `localidade_id` que o CAPAG grava
+      em `fact_indicadores` pra estados (`"SP"`, sem prefixo). Resultado:
+      a série histórica em nível de estado/país vem vazia pra indicadores
+      de CAPAG/Cidades Sustentáveis — mesma limitação que já existia com
+      BigQuery direto (chave de join nunca bateu), só ficou visível
+      agora. Decisão de como normalizar os formatos de `localidade_id`
+      entre fontes ainda não tomada.
+  - Removido por completo o acesso direto ao BigQuery do frontend:
+    `lib/analytics/{client,query,runQuery}.ts` apagados (zero
+    consumidor real depois da migração das 3 rotas), dependência
+    `@google-cloud/bigquery` removida do `package.json`. `/api/healthz`
+    (que fazia um `dryRun` direto no BigQuery, fora do padrão de
+    `client.ts`) migrado pra checar `${CUBEJS_API_URL}/readyz` — é a
+    dependência real do frontend agora. IAM da SA `sa-observatudo-www-app`
+    revogado em produção (`dataViewer` em `gold` + `bigquery.jobUser`):
+    confirmado via grep que nenhum código mais usa, aplicado via
+    Terraform (0 add, 1 change — só os 2 env vars de BigQuery saindo do
+    Cloud Run —, 2 destroy — as 2 IAM bindings).
 
 ## Decisões abertas (bloqueiam issues downstream)
 
+- **Formato de `localidade_id` inconsistente entre fontes para
+  estados/país** — `dim_localidades` usa `"BR-SP"`; o CAPAG grava
+  `"SP"` em `fact_indicadores`; `localidades_dropdown.json` (usado pelo
+  frontend) usa `" SP"` (com espaço). Resultado: série histórica em
+  nível de estado/país vem vazia para indicadores de CAPAG/Cidades
+  Sustentáveis (chave de join nunca bate) — pré-existente, só ficou
+  visível na migração pro Cube.js. Decisão de como normalizar ainda não
+  tomada (pipeline Python? `localidades_dropdown.json`? as duas?).
 - **`run.invoker` do Cube.js está `allUsers`** (mesmo padrão do frontend,
   decisão consciente de manter assim por ora em 2026-06-22) — qualquer
   requisição chega no container (mesmo que rejeitada depois pelo

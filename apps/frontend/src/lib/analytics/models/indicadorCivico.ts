@@ -1,68 +1,84 @@
 // lib/analytics/models/indicadorCivico.ts
 
-import { QueryBuilder } from "../query";
+import { cubejsApi } from "@/lib/cubejs/client";
+
+export interface PontoSerieIndicador {
+  indicadorId: string;
+  localidadeId: string;
+  indicadorNome: string;
+  unidade: string;
+  fonte: string;
+  data: string;
+  valor: number | null;
+}
 
 export class IndicadorCivico {
-  static serieHistorica(
-    indicadorId: string,
-    localIds: string[],
-    //anos: number = 5
-  ) {
-    //const currentYear = new Date().getFullYear();
-    //const startYear = currentYear - anos + 1;
-    const startYear = 2000;
+  /**
+   * Busca a série histórica de vários indicadores em várias localidades
+   * numa única consulta ao Cube.js (em vez de uma consulta por
+   * indicador x localidade, como era com o BigQuery direto).
+   */
+  static async serieHistoricaBatch(
+    indicadorIds: string[],
+    localidadeIds: string[]
+  ): Promise<PontoSerieIndicador[]> {
+    if (indicadorIds.length === 0 || localidadeIds.length === 0) {
+      return [];
+    }
 
-    const query = new QueryBuilder("fact_indicadores", "f")
-      .addDimension({
-        name: "data",
-        sql: "f.data_referencia",
-        type: "date",
-      })
-      .addDimension({
-        name: "localNome",
-        sql: "l.nome",
-        type: "string",
-      })
-      .addDimension({
-        name: "indicadorNome",
-        sql: "i.nome",
-        type: "string",
-      })
-      /*.addDimension({
-        name: "unidade",
-        sql: "i.unidade",
-        type: "string",
-      })
-      .addDimension({
-        name: "fonte",
-        sql: "i.fonte",
-        type: "string",
-      })*/
-      .addMeasure({
-        name: "valor",
-        sql: "f.valor",
-        type: "avg",
-      })
-      .join("dim_localidades", "l", "f.localidade_id = l.localidade_id")
-      .join("dim_indicadores", "i", "f.indicador_id = i.indicador_id")
-      .filter({
-        dimension: "f.indicador_id",
-        operator: "=",
-        values: [indicadorId],
-      })
-      .filter({
-        dimension: "f.localidade_id",
-        operator: "IN",
-        values: localIds,
-      })
-      .filter({
-        dimension: "EXTRACT(YEAR FROM f.data_referencia)",
-        operator: ">=",
-        values: [startYear],
-      })
-      .orderBy("f.data_referencia", "ASC")
-      .orderBy("l.nome", "ASC");
+    const anoMinimo = 2000;
 
-    return query;
+    const resultSet = await cubejsApi.load({
+      dimensions: [
+        "indicadores.indicador_id",
+        "indicadores.nome",
+        "indicadores.unidade",
+        "indicadores.fonte",
+        "indicadores.dim_localidades_localidade_id",
+        "indicadores.ano",
+      ],
+      measures: ["indicadores.valor_medio"],
+      filters: [
+        {
+          member: "indicadores.indicador_id",
+          operator: "equals",
+          values: indicadorIds,
+        },
+        {
+          member: "indicadores.dim_localidades_localidade_id",
+          operator: "equals",
+          values: localidadeIds,
+        },
+        {
+          member: "indicadores.ano",
+          operator: "gte",
+          values: [String(anoMinimo)],
+        },
+      ],
+      order: { "indicadores.ano": "asc" },
+    });
+
+    return resultSet.rawData().map((row) => ({
+      indicadorId: String(row["indicadores.indicador_id"]),
+      localidadeId: String(row["indicadores.dim_localidades_localidade_id"]),
+      indicadorNome: String(row["indicadores.nome"] ?? ""),
+      unidade:
+        row["indicadores.unidade"] != null
+          ? String(row["indicadores.unidade"])
+          : "",
+      fonte:
+        row["indicadores.fonte"] != null ? String(row["indicadores.fonte"]) : "",
+      // Granularidade real dos dados é sempre anual (verificado
+      // estruturalmente — ver dim_indicadores.sql); usar `ano` em vez de
+      // `data_referencia` evita um bug do driver BigQuery do Cube ao
+      // incluir dimensão `time` direto em `dimensions` (tenta um cast
+      // de timezone inválido pra coluna DATE: "Could not cast literal
+      // 'UTC' to type TIME").
+      data: String(row["indicadores.ano"]),
+      valor:
+        row["indicadores.valor_medio"] != null
+          ? Number(row["indicadores.valor_medio"])
+          : null,
+    }));
   }
 }

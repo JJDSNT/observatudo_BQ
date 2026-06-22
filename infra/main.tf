@@ -33,16 +33,6 @@ resource "google_cloud_run_service" "www_observatudo" {
           container_port = 8080
         }
 
-        env {
-          name  = "BIGQUERY_PROJECT_ID"
-          value = var.project_id
-        }
-
-        env {
-          name  = "BIGQUERY_DATASET_ID"
-          value = var.bigquery_dataset_id
-        }
-
         # Cube.js (apps/api) — uso server-side só nas rotas de API, ver
         # apps/frontend/src/lib/cubejs/client.ts. URL real do serviço
         # (não hardcoded) para não desincronizar se o Cloud Run do

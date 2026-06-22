@@ -5,7 +5,10 @@
  * Ele acessa diretamente o BigQuery via lib/analytics e deve ser usado apenas em rotas de API.
  */
 
-import { IndicadorCivico } from "@/lib/analytics/models/indicadorCivico";
+import {
+  IndicadorCivico,
+  type PontoSerieIndicador,
+} from "@/lib/analytics/models/indicadorCivico";
 import {
   getInfoMunicipio,
   getEstadoDoMunicipio,
@@ -20,13 +23,6 @@ export async function getLocalidadeFullPorSubeixos(
   municipioId: string,
   subeixos: { id: string; nome: string; indicadores: string[] }[]
 ) {
-  console.group("📥 getLocalidadeFullPorSubeixos");
-  console.log("🔢 Subeixos recebidos:", subeixos);
-  subeixos.forEach((s) => {
-    console.log(`- ${s.nome} (${s.id}):`, s.indicadores);
-  });
-  console.groupEnd();
-
   const municipioInfo = getInfoMunicipio(municipioId);
   const estadoInfo = municipioInfo
     ? getEstadoDoMunicipio(municipioId)
@@ -37,76 +33,64 @@ export async function getLocalidadeFullPorSubeixos(
     throw new Error(`Município ou estado não encontrado para ID: ${municipioId}`);
   }
 
-  const fetchIndicadoresPorLocalidade = async (localidadeId: string) => {
-    return await Promise.all(
-      subeixos.map(async (subeixo) => {
-        const indicadores = await Promise.all(
-          subeixo.indicadores.map(async (indicadorId) => {
-            try {
-              const data = await IndicadorCivico.serieHistorica(
-                indicadorId,
-                [localidadeId]
-              ).execute();
+  const localidadeIds = [municipioId, estadoInfo.id, paisInfo.id];
+  const indicadorIds = Array.from(
+    new Set(subeixos.flatMap((s) => s.indicadores))
+  );
 
-              return {
-                id: indicadorId,
-                nome: data[0]?.indicadorNome ?? `Indicador ${indicadorId}`,
-                unidade: data[0]?.unidade ?? "",
-                fonte: data[0]?.fonte ?? "",
-                serie: data.map((d) => ({
-                  data: d.data,
-                  valor: d.valor,
-                })),
-              };
-            } catch (error) {
-              console.error(
-                `❌ Erro ao buscar indicador ${indicadorId} para localidade ${localidadeId}:`,
-                error
-              );
-              return {
-                id: indicadorId,
-                nome: `Indicador ${indicadorId}`,
-                unidade: "",
-                fonte: "",
-                serie: [],
-              };
-            }
-          })
-        );
+  // Uma única consulta ao Cube.js pra todos os indicadores x localidades
+  // dessa página, em vez de uma consulta por indicador (era o que o
+  // BigQuery direto fazia antes).
+  const pontos = await IndicadorCivico.serieHistoricaBatch(
+    indicadorIds,
+    localidadeIds
+  );
+
+  const porIndicadorELocalidade = new Map<string, PontoSerieIndicador[]>();
+  for (const ponto of pontos) {
+    const chave = `${ponto.indicadorId}::${ponto.localidadeId}`;
+    const serie = porIndicadorELocalidade.get(chave) ?? [];
+    serie.push(ponto);
+    porIndicadorELocalidade.set(chave, serie);
+  }
+
+  const montarSubeixos = (localidadeId: string) =>
+    subeixos.map((subeixo) => ({
+      id: subeixo.id,
+      nome: subeixo.nome,
+      indicadores: subeixo.indicadores.map((indicadorId) => {
+        const serie =
+          porIndicadorELocalidade.get(`${indicadorId}::${localidadeId}`) ?? [];
+        const primeiro = serie[0];
 
         return {
-          id: subeixo.id,
-          nome: subeixo.nome,
-          indicadores,
+          id: indicadorId,
+          nome: primeiro?.indicadorNome ?? `Indicador ${indicadorId}`,
+          unidade: primeiro?.unidade ?? "",
+          fonte: primeiro?.fonte ?? "",
+          serie: serie.map((p) => ({ data: p.data, valor: p.valor })),
         };
-      })
-    );
-  };
-
-  const [municipioSubeixos, estadoSubeixos, paisSubeixos] = await Promise.all([
-    fetchIndicadoresPorLocalidade(municipioId),
-    fetchIndicadoresPorLocalidade(estadoInfo.id),
-    fetchIndicadoresPorLocalidade(paisInfo.id),
-  ]);
+      }),
+    }));
 
   return {
     municipio: {
       id: municipioInfo.id,
       nome: municipioInfo.nome,
       uf: estadoInfo.sigla,
-      subeixos: municipioSubeixos,
+      subeixos: montarSubeixos(municipioId),
     },
     estado: {
       id: estadoInfo.id,
       nome: estadoInfo.nome,
       sigla: estadoInfo.sigla,
-      subeixos: estadoSubeixos,
+      subeixos: montarSubeixos(estadoInfo.id),
     },
     pais: {
       id: paisInfo.id,
       nome: paisInfo.nome,
       sigla: paisInfo.sigla,
-      subeixos: paisSubeixos,
+      subeixos: montarSubeixos(paisInfo.id),
     },
   };
 }

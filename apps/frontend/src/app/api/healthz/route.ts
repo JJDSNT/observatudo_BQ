@@ -1,27 +1,27 @@
 // src/app/api/healthz/route.ts
 import { NextResponse } from 'next/server';
-import { BigQuery } from '@google-cloud/bigquery';
-
-const bigquery = new BigQuery();
 
 export async function GET() {
   const inicio = Date.now();
 
   const result = {
     status: 'ok' as 'ok' | 'error',
-    bigquery: 'pending',
+    cubejs: 'pending',
     latencyMs: 0,
     timestamp: new Date().toISOString(),
   };
 
   try {
-    await bigquery.createQueryJob({
-      query: 'SELECT 1',
-      dryRun: true,
-    });
-    result.bigquery = 'connected';
+    const apiUrl = process.env.CUBEJS_API_URL ?? '';
+    const res = await fetch(`${apiUrl}/readyz`, { cache: 'no-store' });
+    if (res.ok) {
+      result.cubejs = 'connected';
+    } else {
+      result.cubejs = 'connection failed';
+      result.status = 'error';
+    }
   } catch {
-    result.bigquery = 'connection failed';
+    result.cubejs = 'connection failed';
     result.status = 'error';
   }
 
