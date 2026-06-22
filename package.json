@@ -5,6 +5,7 @@
   "scripts": {
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:ops-api": "pnpm --filter datawarehouse serve",
+    "dev:api": "pnpm --filter api dev",
     "lint": "turbo run lint",
     "build": "turbo run build",
     "test": "turbo run test"

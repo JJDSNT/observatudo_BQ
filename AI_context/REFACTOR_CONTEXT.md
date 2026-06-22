@@ -41,8 +41,9 @@ descrição completa. Resumo:
 - `apps/frontend` (Next.js, migrado para pnpm).
 - `apps/datawarehouse` (Python via `uv`, embrulhado num `package.json`
   mínimo para ser orquestrável pelo workspace pnpm/Turborepo).
-- `apps/api` (Cube.js) — app real desde já (schema versionado), só o deploy
-  final (self-hosted vs. Cube Cloud) está em aberto.
+- `apps/api` (Cube.js) — app real (schema versionado), scaffold concluído na
+  Fase 5; deploy decidido (self-hosted via Cloud Run) na Fase 5, ainda não
+  provisionado em Terraform.
 - **Quatro datasets BigQuery, um por camada do medallion architecture**:
   `raw` (landing, sem transformação), `silver` (limpeza/cast/agregação),
   `gold` (modelo dimensional final — `dim_indicadores`, `fact_indicadores`,
@@ -131,14 +132,15 @@ descrição completa. Resumo:
    (não na raiz), configurar remote GCS (reaproveitando ou criando bucket,
    ver `docs/external/dvc.md`), `dvc add` nos datasets atuais, atualizar
    `.gitignore`.
-5. **Scaffold de `apps/api` (Cube.js)** — criar o app com schema dos cubos
-   mapeando o dataset `gold`, mesmo sem a decisão de deploy fechada (issue
-   separada). Não inclui ainda migrar o frontend para consumi-lo. Depende
-   da Fase 3 (precisa do `gold` materializado e estável).
-6. **Decidir deploy do Cube.js e migrar o frontend rota a rota** — fechar
-   self-hosted vs. Cube Cloud + autenticação (`docs/external/cubejs.md`),
-   então substituir `src/app/api/indicadores/*` pelo consumo via Cube.js,
-   um indicador por vez. Depende da Fase 5.
+5. ✅ **Scaffold de `apps/api` (Cube.js)** — criar o app com schema dos cubos
+   mapeando o dataset `gold`. Não inclui ainda migrar o frontend para
+   consumi-lo. Depende da Fase 3 (precisa do `gold` materializado e
+   estável).
+6. **Migrar o frontend rota a rota** — fechar autenticação/protocolo
+   (`docs/external/cubejs.md`, "Pontos abertos"; deploy self-hosted via
+   Cloud Run já decidido na Fase 5), então substituir
+   `src/app/api/indicadores/*` pelo consumo via Cube.js, um indicador por
+   vez. Depende da Fase 5.
 7. **Limpeza** — remover código/infra órfã do estado anterior (rotas de API
    substituídas, dataset `dados` antigo, etc.).
 
@@ -354,11 +356,34 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   válidas (uma sem expiração, de 2025-05-17) — risco de credencial órfã
   ainda funcional. Excluída a service account e removido o binding da
   política IAM do projeto.
+- **Fase 5 concluída em 2026-06-22** (branch `feat/cubejs-api-scaffold`):
+  `apps/api` criado como app real — `package.json` (`@cubejs-backend/
+  server` + `@cubejs-backend/bigquery-driver`), `cube.js`, `model/cubes/
+  {dim_indicadores,dim_localidades,fact_indicadores}.js` (joins
+  `fact_indicadores` → `dim_indicadores`/`dim_localidades`), `model/views/
+  indicadores.js` (view denormalizada candidata a substituir
+  `src/app/api/indicadores/*`), `Dockerfile`, `.env.example`. Validado de
+  ponta a ponta: `cubejs-dev-server` local, `/cubejs-api/v1/meta` compila
+  os 3 cubos + view, query real (`count`/`valor_medio` por `nome`/
+  `unidade`) retorna dados reais do BigQuery via ADC. Decisão de deploy
+  tomada na mesma data: **self-hosted via Cloud Run**, com possibilidade de
+  usar o bucket GCS existente como apoio (export/pre-agregação) — ver
+  `docs/external/cubejs.md`. Achado durante a validação (pré-existente, não
+  introduzido aqui): os 4 componentes individuais do CAPAG existem em
+  `fact_indicadores` mas não têm linha em `dim_indicadores` (só o índice
+  agregado `capag` tem) — aparecem como join órfão.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
-- Deploy do Cube.js: self-hosted vs. Cube Cloud, autenticação, protocolo de
-  consumo no frontend — ver `docs/external/cubejs.md`.
+- Autenticação e protocolo de consumo do Cube.js no frontend (deploy já
+  decidido: self-hosted via Cloud Run) — ver `docs/external/cubejs.md`.
+- Provisionar em Terraform o que o deploy do Cube.js precisa (service
+  account dedicada com IAM `dataViewer` só em `gold`, serviço Cloud Run,
+  configuração do bucket de apoio) — ainda não feito.
+- Os 4 componentes individuais do CAPAG (`CAPAG - Endividamento`/`Poupança
+  Corrente`/`Liquidez`/`Nota Final`) existem em `fact_indicadores` sem
+  linha correspondente em `dim_indicadores` — decisão de como tratar isso
+  ainda não tomada.
 - Schema de `ops.dataset_freshness`/`ops.data_quality_checks` (colunas,
   granularidade) — `ops.pipeline_runs` já está implementada e em uso desde
   a Fase 3; essas duas ainda não existem.
