@@ -41,9 +41,8 @@ descrição completa. Resumo:
 - `apps/frontend` (Next.js, migrado para pnpm).
 - `apps/datawarehouse` (Python via `uv`, embrulhado num `package.json`
   mínimo para ser orquestrável pelo workspace pnpm/Turborepo).
-- `apps/api` (Cube.js) — app real (schema versionado), scaffold concluído na
-  Fase 5; deploy decidido (self-hosted via Cloud Run) na Fase 5, ainda não
-  provisionado em Terraform.
+- `apps/api` (Cube.js) — app real (schema versionado), scaffold concluído e
+  deployado (self-hosted via Cloud Run) na Fase 5, com CI/CD próprio.
 - **Quatro datasets BigQuery, um por camada do medallion architecture**:
   `raw` (landing, sem transformação), `silver` (limpeza/cast/agregação),
   `gold` (modelo dimensional final — `dim_indicadores`, `fact_indicadores`,

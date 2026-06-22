@@ -20,14 +20,17 @@ observatudo-bq/
 │   ├── frontend/                    # Next.js (App Router)
 │   │   ├── src/
 │   │   └── public/
-│   └── datawarehouse/                # Pipelines Python (uv) + SQL + DVC
-│       ├── src/observatudo/          # Lib de ingestão/transformação
-│       ├── src/observatudo/pipeline/ # Runner raw → silver → gold
-│       ├── src/observatudo/api/      # API de metadados do `ops` (FastAPI)
-│       ├── sql/{silver,gold}/        # Transformações SQL (sem dbt)
-│       ├── scripts/                  # Entrypoints (preprocess, carga IBGE, etc.)
-│       ├── tests/
-│       └── data/                     # Datasets (cache local; versionamento via DVC)
+│   ├── datawarehouse/                # Pipelines Python (uv) + SQL + DVC
+│   │   ├── src/observatudo/          # Lib de ingestão/transformação
+│   │   ├── src/observatudo/pipeline/ # Runner raw → silver → gold
+│   │   ├── src/observatudo/api/      # API de metadados do `ops` (FastAPI)
+│   │   ├── sql/{silver,gold}/        # Transformações SQL (sem dbt)
+│   │   ├── scripts/                  # Entrypoints (preprocess, carga IBGE, etc.)
+│   │   ├── tests/
+│   │   └── data/                     # Datasets (cache local; versionamento via DVC)
+│   └── api/                          # Cube.js — camada analítica sobre `gold`
+│       ├── model/{cubes,views}/      # 1 cubo por dim_*/fact_*, views compostas
+│       └── cube.js                   # Config de conexão BigQuery (IAM read-only em `gold`)
 ├── infra/                            # Infraestrutura Terraform (GCP)
 │   ├── bigquery.tf                   # Datasets raw/silver/gold/ops + tabelas
 │   ├── iam.tf                        # Service accounts e permissões
@@ -90,6 +93,9 @@ pnpm dev:frontend
 # Rodar a API de metadados do datawarehouse (ops)
 pnpm dev:ops-api
 
+# Rodar o Cube.js localmente (sobre o dataset gold, via ADC)
+pnpm dev:api
+
 # Build/lint/test de todos os workspaces (via Turborepo)
 pnpm build
 pnpm lint
@@ -118,9 +124,9 @@ terraform apply
 
 ## 🧠 Visão futura
 
-- 🔄 Camada de acesso analítico via [Cube.js](https://cube.dev) sobre o
-  dataset `gold` (medidas, dimensões e filtros reutilizáveis), substituindo
-  o acesso direto do frontend ao BigQuery.
+- 🔄 Migrar o frontend (`src/app/api/indicadores/*`) para consumir o
+  [Cube.js](https://cube.dev) (já deployado, ver `apps/api`) em vez de
+  acessar o BigQuery direto — rota a rota, um indicador por vez.
 - 📈 Mais visualizações e painéis no frontend a partir do modelo `gold`.
 
 Ver roadmap detalhado em

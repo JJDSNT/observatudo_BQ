@@ -65,8 +65,8 @@ apps/api/
 Por que já é um app real e não um placeholder: Cube.js (JS) e o DW (Python)
 não compartilham código — só um **contrato de dados** (as tabelas que
 `apps/datawarehouse` materializa no dataset `gold`). O schema dos cubos
-depende desse contrato, não da decisão de deploy. Por isso o schema pode (e
-deve) ser versionado e evoluído desde já, mesmo com o deploy ainda indefinido.
+depende desse contrato, não da decisão de deploy — que, aliás, já foi
+tomada e aplicada (ver "Status" abaixo).
 
 ## Status: scaffold implementado (2026-06-22)
 
@@ -108,15 +108,16 @@ múltiplas instâncias ou pre-agregações pesadas.
 
 ## Pontos abertos
 
-- **Deploy: self-hosted via Cloud Run — decidido em 2026-06-22**, com a
-  possibilidade de usar o bucket GCS já existente (`*-www-data`) como apoio
-  (ex.: `CUBEJS_DB_EXPORT_BUCKET`, usado pelo driver BigQuery para exportar
-  resultados grandes antes de paginar, e/ou storage de pre-agregações).
-  **Provisionado em Terraform em 2026-06-22** (`infra/cubejs.tf`): SA
-  dedicada, IAM `dataViewer` só em `gold`, serviço Cloud Run
-  (`cubejs-observatudo`) rodando com a imagem placeholder pública
-  `cubejs/cube:latest` — falta o CI publicar a imagem real com `model/`
-  embutido.
+- **Deploy: self-hosted via Cloud Run — decidido, provisionado e em
+  produção (2026-06-22)**. `infra/cubejs.tf`: SA dedicada, IAM
+  `dataViewer` só em `gold`, `storage.objectAdmin` no bucket `*-www-data`
+  (apoio a `CUBEJS_DB_EXPORT_BUCKET`), serviço Cloud Run
+  `cubejs-observatudo`. CI/CD (`.github/workflows/
+  build-and-deploy-cubejs.yml`) publica a imagem real (com `model/`
+  embutido) a cada push em `apps/api/**` — validado servindo dados reais
+  via `/cubejs-api/v1/load` em produção. Pre-agregação/export bucket: IAM
+  pronta, mas a configuração concreta de uso ainda não foi feita (ver
+  bullet "Pre-agregações" abaixo).
 - **Autenticação**: como o Cube.js valida quem pode consultar o quê (hoje o
   frontend usa Firebase Auth; é preciso decidir se o Cube.js valida o token
   do Firebase ou se fica atrás de uma API própria que já faz essa validação).

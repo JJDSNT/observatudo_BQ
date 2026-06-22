@@ -60,7 +60,7 @@ observatudo-bq/
 │       ├── model/
 │       │   ├── cubes/                 # 1 cubo por fact/dim do dataset `gold`
 │       │   └── views/                 # views compostas p/ o frontend consumir
-│       ├── Dockerfile                 # caminho self-hosted (deploy ainda em aberto)
+│       ├── Dockerfile                 # caminho self-hosted (deploy: Cloud Run, em produção)
 │       └── .env.example
 │
 ├── infra/                             # Terraform — inalterado, fora dos workspaces
@@ -164,16 +164,17 @@ Perda assumida: testes automáticos do dbt (`unique`/`not_null` em
 ao tamanho atual do projeto (5 modelos) — pode voltar como asserção Python
 simples no `runner.py` se algum dia doer.
 
-### `apps/api` (Cube.js) é scaffold real, não placeholder
+### `apps/api` (Cube.js) é scaffold real, não placeholder (✅ Fase 5)
 
 Como você apontou: Cube.js é JS e o DW é Python — não há import de código
 entre eles, só um **contrato de dados** (as tabelas que `apps/datawarehouse`
-materializa no dataset `gold` do BigQuery). Por isso `apps/api` já nasce
-como um projeto Cube.js funcional (schema dos cubos mapeando
-`dim_*`/`fact_*` de `gold`), mesmo com a decisão de **deploy** (self-host
-vs. Cube Cloud) ainda aberta — o schema em si não depende dessa decisão.
-Isso evita reabrir a estrutura de pastas quando o deploy for decidido. A
-service account do Cube.js recebe IAM de leitura só em `gold` — nunca em
+materializa no dataset `gold` do BigQuery). Por isso `apps/api` nasceu como
+um projeto Cube.js funcional (schema dos cubos mapeando `dim_*`/`fact_*` de
+`gold`) antes mesmo da decisão de **deploy** estar fechada — o schema em si
+não dependia dela. Deploy decidido e aplicado na própria Fase 5:
+self-hosted via Cloud Run (`infra/cubejs.tf` + `.github/workflows/
+build-and-deploy-cubejs.yml`), validado servindo dados reais em produção.
+A service account do Cube.js recebe IAM de leitura só em `gold` — nunca em
 `raw`/`silver`/`ops`.
 
 ### DVC escopado em `apps/datawarehouse`, não na raiz (✅ Fase 4)
@@ -185,8 +186,8 @@ suporta normalmente ser inicializado num subdiretório de um repo Git maior.
 Remote `gcs` aponta para `gs://observatudo-infra-www-data/dvc-store`
 (bucket único já existente, reaproveitado com prefixo de path dedicado —
 ver `docs/external/dvc.md`). `dvc add` por domínio de dados
-(`cidades-sustentaveis`, `ibge`, `tesouro-nacional`); `dvc push` real ainda
-pendente (credenciais OAuth do ambiente de implementação expiradas).
+(`cidades-sustentaveis`, `ibge`, `tesouro-nacional`); `dvc push` real já
+executado (28 arquivos enviados, confirmado via `dvc status -c`).
 
 ### Turborepo na orquestração raiz
 
@@ -247,7 +248,7 @@ packages:
 | `src/`, `public/`, `package.json`, `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `next-env.d.ts` | `apps/frontend/` | ✅ Fase 1 |
 | `observatudo/` | `apps/datawarehouse/src/observatudo/` | ✅ Fase 2 |
 | `scripts/` | `apps/datawarehouse/scripts/` | ✅ Fase 2 |
-| `dados/` | `apps/datawarehouse/data/` (DVC inicializado, `dvc push` real pendente) | ✅ Fase 2 (movido) / ✅ Fase 4 (DVC) |
+| `dados/` | `apps/datawarehouse/data/` (DVC inicializado, `dvc push` real executado) | ✅ Fase 2 (movido) / ✅ Fase 4 (DVC) |
 | `requirements.txt` | `apps/datawarehouse/pyproject.toml` + `uv.lock` | ✅ Fase 2 |
 | `civ/`, `dw/` (pastas vazias na raiz) | removidas — eram rascunho | ✅ Fase 2 |
 | — | `apps/datawarehouse/src/observatudo/api/` — placeholder FastAPI do `ops` | ✅ Fase 2 |
@@ -260,16 +261,14 @@ packages:
 | — | dataset `ops` (`pipeline_runs` ✅ Fase 3; `dataset_freshness`/`data_quality_checks` ainda não existem) | parcial |
 | `infra/` | inalterado, permanece na raiz | — |
 | `docs/`, `AI_context/` | inalterado, permanecem na raiz | — |
-| — | `apps/api/` — novo, Cube.js, acesso só a `gold` | pendente |
+| — | `apps/api/` — Cube.js, acesso só a `gold`, deployado via Cloud Run | ✅ Fase 5 |
 
 ## Coisas que este desenho deliberadamente não resolve agora
 
-- Deploy do `apps/api` (self-host/Cloud Run vs. Cube Cloud) — ver
-  `docs/external/cubejs.md`.
 - Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
   `upload_to_bucket` manual — ver `docs/external/dvc.md`.
-- Conteúdo real dos cubos em `apps/api/model/` — depende do dataset `gold`
-  estar materializado primeiro.
+- Autenticação/protocolo de consumo do Cube.js no frontend — ver
+  `docs/external/cubejs.md`.
 - Conteúdo real de `src/observatudo/api/` — fica só esqueleto até o dataset
   `ops` existir; quando crescer para mutações, vira issue própria.
 - `packages/` compartilhados — só se/quando a duplicação aparecer.
