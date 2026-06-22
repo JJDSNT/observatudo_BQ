@@ -97,6 +97,15 @@ servidor sobe mas todo schema falha ao compilar com "Unable to load
 @cubejs-backend/native"; rodar `pnpm install` novamente (ou `npx
 post-installer` dentro de `node_modules/@cubejs-backend/native`) resolve.
 
+Achado em produção (2026-06-22): com `NODE_ENV=production`, o Cube exige
+por padrão um cluster externo de Cube Store (`CUBEJS_CUBESTORE_HOST`/
+`PORT`) pra cache/fila de queries — `/cubejs-api/v1/load` falhava com
+"Cube Store was specified as queue/cache driver". Resolvido com
+`CUBEJS_CACHE_AND_QUEUE_DRIVER=memory`, o driver documentado pra
+deployments single-instance pequenos (nosso caso: 1 serviço Cloud Run,
+sem necessidade de cache distribuído ainda). Reconsiderar se/quando houver
+múltiplas instâncias ou pre-agregações pesadas.
+
 ## Pontos abertos
 
 - **Deploy: self-hosted via Cloud Run — decidido em 2026-06-22**, com a

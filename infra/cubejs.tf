@@ -69,6 +69,16 @@ resource "google_cloud_run_service" "cubejs" {
           value = "production"
         }
 
+        # Sem isso, NODE_ENV=production faz o Cube exigir um cluster
+        # externo de Cube Store (CUBEJS_CUBESTORE_HOST/PORT) pra
+        # cache/fila de queries — desproporcional para 1 instância
+        # Cloud Run sem pre-agregação configurada ainda. "memory" é o
+        # driver documentado pra deployments single-instance pequenos.
+        env {
+          name  = "CUBEJS_CACHE_AND_QUEUE_DRIVER"
+          value = "memory"
+        }
+
         env {
           name  = "CUBEJS_DB_TYPE"
           value = "bigquery"

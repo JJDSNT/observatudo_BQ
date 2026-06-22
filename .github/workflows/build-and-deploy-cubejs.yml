@@ -66,4 +66,4 @@ jobs:
             --project $PROJECT_ID \
             --allow-unauthenticated \
             --service-account sa-observatudo-cubejs@observatudo-infra.iam.gserviceaccount.com \
-            --set-env-vars NODE_ENV=production,CUBEJS_DB_TYPE=bigquery,CUBEJS_DB_BQ_PROJECT_ID=observatudo-infra,CUBEJS_DB_EXPORT_BUCKET=observatudo-infra-www-data,CUBEJS_API_SECRET=${{ secrets.CUBEJS_API_SECRET }}
+            --set-env-vars NODE_ENV=production,CUBEJS_CACHE_AND_QUEUE_DRIVER=memory,CUBEJS_DB_TYPE=bigquery,CUBEJS_DB_BQ_PROJECT_ID=observatudo-infra,CUBEJS_DB_EXPORT_BUCKET=observatudo-infra-www-data,CUBEJS_API_SECRET=${{ secrets.CUBEJS_API_SECRET }}
