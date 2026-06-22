@@ -42,6 +42,20 @@ resource "google_cloud_run_service" "www_observatudo" {
           name  = "BIGQUERY_DATASET_ID"
           value = var.bigquery_dataset_id
         }
+
+        # Cube.js (apps/api) — uso server-side só nas rotas de API, ver
+        # apps/frontend/src/lib/cubejs/client.ts. URL real do serviço
+        # (não hardcoded) para não desincronizar se o Cloud Run do
+        # Cube.js for recriado.
+        env {
+          name  = "CUBEJS_API_URL"
+          value = google_cloud_run_service.cubejs.status[0].url
+        }
+
+        env {
+          name  = "CUBEJS_API_SECRET"
+          value = var.cubejs_api_secret
+        }
       }
     }
   }
