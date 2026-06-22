@@ -12,15 +12,6 @@ import {
   getInfoPais,
 } from "@/lib/analytics/localidadeUtils";
 
-export async function getIndicadoresPorRegiao(
-  categoria: string,
-  regiao: string,
-  periodo: { inicio: string; fim: string }
-) {
-  const query = IndicadorCivico.consultarPorRegiao(categoria, regiao, periodo);
-  return await query.execute();
-}
-
 /**
  * 🔒 Server-only: deve ser usado apenas por rotas de API.
  * Retorna os indicadores estruturados para município, estado e país.
