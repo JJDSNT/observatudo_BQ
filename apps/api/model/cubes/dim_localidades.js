@@ -6,6 +6,9 @@ cube(`dim_localidades`, {
       sql: `localidade_id`,
       type: `string`,
       primary_key: true,
+      // Mesmo motivo do indicador_id em dim_indicadores.js: frontend
+      // precisa filtrar por localidade_id diretamente.
+      public: true,
     },
     nome: { sql: `nome`, type: `string` },
     tipo: { sql: `tipo`, type: `string` },
