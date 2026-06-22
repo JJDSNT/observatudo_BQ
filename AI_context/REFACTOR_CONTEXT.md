@@ -135,11 +135,15 @@ descrição completa. Resumo:
    mapeando o dataset `gold`. Não inclui ainda migrar o frontend para
    consumi-lo. Depende da Fase 3 (precisa do `gold` materializado e
    estável).
-6. **Migrar o frontend rota a rota** — fechar autenticação/protocolo
-   (`docs/external/cubejs.md`, "Pontos abertos"; deploy self-hosted via
-   Cloud Run já decidido na Fase 5), então substituir
-   `src/app/api/indicadores/*` pelo consumo via Cube.js, um indicador por
-   vez. Depende da Fase 5.
+6. 🔄 **Migrar o frontend rota a rota** — protocolo fechado (proxy
+   server-side, ver Progresso); substituir `src/app/api/indicadores/*`
+   pelo consumo via Cube.js, uma rota por vez, até não restar acesso
+   direto ao BigQuery no frontend. Depende da Fase 5.
+   - ✅ `/api/indicadores/search`
+   - `/api/indicadores/nomeados`
+   - `/api/indicadores/localidade/[municipio_id]` (dashboard principal)
+   - Remover `lib/analytics/client.ts`/`query.ts` e a dependência
+     `@google-cloud/bigquery` do frontend depois das 3 rotas migradas.
 7. **Limpeza** — remover código/infra órfã do estado anterior (rotas de API
    substituídas, dataset `dados` antigo, etc.).
 
@@ -393,10 +397,40 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   `--set-env-vars` no deploy — não usa Secret Manager do GCP, esse
   recurso não foi criado.
 
+- **Fase 6 iniciada em 2026-06-22**: protocolo de consumo do Cube.js no
+  frontend fechado — proxy server-side. As rotas Next.js
+  (`src/app/api/indicadores/*`) continuam com o mesmo contrato pro
+  browser, mas por dentro passam a chamar o Cube.js via
+  `@cubejs-client/core` (`apps/frontend/src/lib/cubejs/client.ts`),
+  autenticando com um JWT assinado a partir de `CUBEJS_API_SECRET` no
+  servidor — o browser nunca vê esse secret nem fala com o Cube.js
+  direto. Evita reabrir a questão de autenticação de usuário (Firebase)
+  no Cube.js por agora. Antes de migrar, removido código morto sem
+  consumidor real (`/api/indicadores` bare, `/api/indicadores/list`,
+  `hooks/useIndicadores.ts`, `hooks/olduseIndicadoresDashboard.ts`,
+  exports não usados em `lib/analytics/dimensions/`+`measures/`) —
+  investigado via histórico do git antes de apagar, confirmado que cada
+  um foi criado para uma feature que não vingou.
+  - `/api/indicadores/search` migrado: `buscarIndicadores()` agora
+    consulta o cubo `dim_indicadores` via Cube.js (filtro `contains`
+    case-insensitive em nome/descrição + `equals` em indicador_id).
+  - Achado real durante a migração: `primary_key: true` deixa o membro
+    `public: false` por padrão no Cube — `indicador_id`/`localidade_id`
+    precisaram de `public: true` explícito em `apps/api/model/cubes/
+    {dim_indicadores,dim_localidades}.js` pro frontend conseguir
+    filtrar/selecionar por eles diretamente (não só usar como chave de
+    join interna).
+  - `infra/main.tf`: serviço Cloud Run do frontend ganhou `CUBEJS_API_URL`
+    (referência dinâmica ao serviço do Cube.js, não hardcoded) e
+    `CUBEJS_API_SECRET`; `.github/workflows/build-and-deploy.yml`
+    resolve a URL real via `gcloud run services describe` no deploy.
+  - **Cuidado registrado**: `var.cubejs_image_url` tinha um default
+    público (`cubejs/cube:latest`) que, se aplicado depois do CI já ter
+    publicado a imagem real, reverteria o deploy — default removido
+    (var agora obrigatória, mesmo padrão de `var.image_url`).
+
 ## Decisões abertas (bloqueiam issues downstream)
 
-- Autenticação e protocolo de consumo do Cube.js no frontend (deploy já
-  decidido: self-hosted via Cloud Run) — ver `docs/external/cubejs.md`.
 - **`run.invoker` do Cube.js está `allUsers`** (mesmo padrão do frontend,
   decisão consciente de manter assim por ora em 2026-06-22) — qualquer
   requisição chega no container (mesmo que rejeitada depois pelo

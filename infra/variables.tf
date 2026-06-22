@@ -16,8 +16,7 @@ variable "image_url" {
 
 variable "cubejs_image_url" {
   type        = string
-  default     = "cubejs/cube:latest"
-  description = "URL da imagem Docker do Cube.js. Bootstrap usa a imagem pública oficial; CI publica a imagem real (com model/ embutido) e passa essa var no apply seguinte."
+  description = "URL da imagem Docker do Cube.js publicada pelo CI (gcr.io/observatudo-infra/observatudo-cubejs). Sem default: usar o placeholder público (cubejs/cube:latest) por engano aqui reverte o deploy real feito pelo CI (já aconteceu uma vez)."
 }
 
 variable "cubejs_api_secret" {
