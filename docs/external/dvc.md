@@ -56,8 +56,16 @@ que já existe via Terraform (`infra/storage.tf`,
 
 - Os transformers (`observatudo/transformers/*.py`) ainda chamam
   `upload_to_bucket` manualmente em vez de o fluxo terminar em `dvc add` +
-  `dvc push` — migrar isso é um passo separado, não decidido se vale a pena
-  dado que `upload_to_bucket` já funciona.
+  `dvc push`. Decisão fechada em 2026-06-22: migrar para DVC; uma primeira
+  tentativa (chamar `dvc add`/`dvc push` via `subprocess` a cada execução,
+  num diretório inteiro) foi revertida — cada pasta de dados hoje mistura
+  três tipos de conteúdo com ciclos de vida diferentes (**raw** estável,
+  **cache/estado incremental do pipeline** — ex.: `cache/eixos_llm.json` —
+  e **output processado**, regenerado a cada run), e `dvc add <dir>` trata
+  tudo como uma coisa só. Falta decidir como separar essas categorias em
+  unidades DVC distintas antes de tentar de novo (ver
+  `AI_context/REFACTOR_CONTEXT.md`, "Decisões abertas", para o mapeamento
+  completo dos arquivos).
 - Se vale usar `dvc.yaml` (pipelines declarativos, com `dvc repro`) para
   orquestrar os transformers em vez de chamá-los manualmente via
   `scripts/preprocess_*.py` — não é necessário para o MVP de versionamento,
