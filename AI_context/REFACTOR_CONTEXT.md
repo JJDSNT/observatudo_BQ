@@ -347,6 +347,13 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   só para o índice CAPAG agregado (médias de razões percentuais segundo a
   metodologia do Tesouro Nacional). Pipeline gold reexecutado e validado
   via query real no BigQuery.
+- **SA órfã `sa-observatudo-dbt` excluída em 2026-06-22**: verificado via
+  API do GCP que não tinha referência em nenhum dataset BigQuery
+  (`raw`/`silver`/`gold`/`ops`) nem no bucket `*-www-data`; só restava o
+  binding de projeto `roles/bigquery.jobUser` e 2 chaves de acesso ainda
+  válidas (uma sem expiração, de 2025-05-17) — risco de credencial órfã
+  ainda funcional. Excluída a service account e removido o binding da
+  política IAM do projeto.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -363,8 +370,33 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   fica `null` até existir uma referência real de unidade por indicador
   (não existe em nenhuma fonte hoje); preencher exigiria curadoria manual
   ou um catálogo externo ainda não disponível.
-- Limpar a SA órfã `sa-observatudo-dbt` no GCP (não gerenciada por
-  nenhum `.tf` desde a Fase 3) — decisão: deletar manualmente ou deixar
-  até confirmar que a SA `pipeline` está 100% funcional.
+- Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
+  `upload_to_bucket` manual — reaberto em 2026-06-22: uma tentativa de
+  implementação (chamar `dvc add`/`dvc push` via `subprocess` de dentro do
+  transformer, a cada execução, num diretório inteiro) foi revertida por
+  parecer um fluxo estranho. Causa raiz identificada: cada pasta de dados
+  hoje mistura três tipos de conteúdo com ciclos de vida bem diferentes,
+  e `dvc add <dir>` trata tudo como uma coisa só (um hash por diretório):
+  - **raw** (entrada estável): `data/cidades-sustentaveis/indicadores.csv`;
+    `data/tesouro-nacional/capag/{estados,municipios}/*.xlsx` (várias
+    versões históricas 2018-2023, mas `capag.py` só lê 2 arquivos fixos —
+    o resto é histórico parado, sem uso no código).
+  - **cache/estado incremental do pipeline** (não é "dataset", é memória
+    de execuções anteriores): `data/cidades-sustentaveis/cache/
+    eixos_llm.json` (cresce run a run), `cache/classificacoes_invalidas.csv`
+    (sobrescrito a cada run), `cache/direcionalidade_capag.json` — esse
+    último é estado do pipeline do **CAPAG**, fisicamente dentro da pasta
+    do Cidades Sustentáveis só porque os dois transformers compartilham o
+    mesmo `CACHE_DIR` em `config.py`.
+  - **output processado** (regenerado a cada run, é o que alimenta o
+    BigQuery): `data/cidades-sustentaveis/indicadores_padronizados.csv`,
+    `data/tesouro-nacional/capag/preprocessed/indicadores_capag_2022.csv`.
+  - Lixo encontrado de passagem: `data/cidades-sustentaveis/
+    indicadores_utf16.csv` (38MB) não é lido por nenhum código.
+  Antes de tentar de novo, decidir: separar essas três categorias em
+  unidades DVC distintas (raw vs. cache vs. output, cada uma com seu
+  próprio ciclo de versionamento) e/ou mover `direcionalidade_capag.json`
+  para um cache do próprio domínio CAPAG; só então faz sentido desenhar
+  o fluxo de `dvc add`/`dvc push` automático.
 - Destino de `packages/` compartilhados (se vier a existir) entre frontend e
   API.
