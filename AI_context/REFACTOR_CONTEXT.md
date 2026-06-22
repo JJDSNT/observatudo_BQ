@@ -330,6 +330,23 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   - SA antiga `sa-observatudo-dbt` ficou órfã no GCP (não está em
     nenhum `.tf` mais, desde que a Fase 3 renomeou para `pipeline`) —
     não foi tocada/destruída automaticamente; limpeza manual futura.
+- **`gold.dim_indicadores` ganhou `unidade`/`fonte`/`periodicidade` em
+  2026-06-22** (branch `fix/dim-indicadores-unidade-fonte-periodicidade`):
+  colunas pedidas pelo frontend (`listarIndicadores()`) que nunca tinham
+  sido populadas no modelo dimensional. `fonte` e `periodicidade` vêm de
+  dado real: `fonte` já existia em `silver.cidades_sustentaveis`/
+  `silver.capag_agregado`, só não era propagada; `periodicidade` é
+  `'anual'` para as duas fontes — verificado estruturalmente (não
+  suposto) que `(indicador_id, localidade, ano)` é sempre único em
+  `cidades-sustentaveis/indicadores_padronizados.csv` (38495 linhas, 0
+  duplicatas), ou seja, no máximo 1 observação/ano por indicador mesmo
+  quando a fórmula calcula uma média mensal a partir do total anual
+  (ex.: "consumo per capita /12" — isso é só a fórmula, não a cadência de
+  amostragem). `unidade` ficou `null` para os ~500 indicadores do Cidades
+  Sustentáveis (sem essa informação em nenhuma fonte original) e `'%'`
+  só para o índice CAPAG agregado (médias de razões percentuais segundo a
+  metodologia do Tesouro Nacional). Pipeline gold reexecutado e validado
+  via query real no BigQuery.
 
 ## Decisões abertas (bloqueiam issues downstream)
 
@@ -342,17 +359,12 @@ roadmap** — só entra quando houver endpoints concretos a implementar
   /pipelines/` (já implementado na Fase 3) — ações/mutações (ex.:
   "reprocessar esta fonte") dependem de necessidade real ainda não
   surgida.
-- Repopular dados reais nas camadas `raw`/`silver`/`gold` — os datasets
-  existem desde o incidente de recuperação do state (ver Progresso), mas
-  estão vazios. Falta rodar `preprocess_capag.py`/
-  `preprocess_cidades_sustentaveis.py` (carregam `raw`) e
-  `scripts/run_pipeline.py` (popula `silver`/`gold`), além de
-  `carregar_localidades_ibge.py` (`gold.dim_localidades`).
+- `unidade` por indicador do Cidades Sustentáveis (~500 indicadores) —
+  fica `null` até existir uma referência real de unidade por indicador
+  (não existe em nenhuma fonte hoje); preencher exigiria curadoria manual
+  ou um catálogo externo ainda não disponível.
 - Limpar a SA órfã `sa-observatudo-dbt` no GCP (não gerenciada por
   nenhum `.tf` desde a Fase 3) — decisão: deletar manualmente ou deixar
   até confirmar que a SA `pipeline` está 100% funcional.
-- Migrar `transformers/*.py` para o fluxo `dvc add`/`dvc push` em vez de
-  `upload_to_bucket` manual — não decidido se compensa (ver
-  `docs/external/dvc.md`, "Pontos abertos").
 - Destino de `packages/` compartilhados (se vier a existir) entre frontend e
   API.
