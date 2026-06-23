@@ -1,7 +1,7 @@
 ---
 id: ISSUE-0021
 title: "Gráfico animado tipo Gapminder na página /world"
-status: backlog
+status: review
 priority: medium
 type: feature
 owner: agent
@@ -13,6 +13,7 @@ tags:
 related_files:
   - apps/frontend/src/app/world/page.tsx
   - apps/frontend/src/lib/analytics/mundo.ts
+  - apps/frontend/src/components/GapminderChart/GapminderChart.tsx
   - apps/frontend/package.json
 ---
 
@@ -38,34 +39,56 @@ Substituir a tabela de `/world` (ou complementá-la) por um scatter
 animado no estilo Gapminder, usando os dados já disponíveis via
 `lib/analytics/mundo.ts`/Cube.
 
+# O que foi feito
+
+- [x] Lib de visualização: SVG custom + `d3-scale` (só funções de escala —
+      log/linear/sqrt —, sem framework de gráfico). Nova dependência
+      `d3-scale`/`@types/d3-scale` em `apps/frontend/package.json`.
+- [x] Cor por região: `dim_localidades.regiao` direto (7 valores distintos
+      hoje em produção — taxonomia do World Bank), sem reclassificar para
+      os 6 continentes do vídeo do Hans Rosling.
+- [x] `mundo.ts` ganhou `buscarSerieHistoricaMundial()`: série completa
+      por país (todos os anos 1960–2024 em que os 3 indicadores têm valor
+      simultaneamente), sem o filtro de "últimos N anos" de
+      `buscarIndicadoresMundiais()`.
+- [x] `components/GapminderChart/GapminderChart.tsx` (novo, `"use
+      client"`): scatter SVG com bolha por país (raio ∝ √população, eixo
+      X = PIB per capita em escala log, eixo Y = expectativa de vida),
+      cor por região, play/pause (`setInterval` + cleanup em
+      `useEffect`), slider de ano (`<input type="range">`), transição CSS
+      entre anos (`transition: cx/cy/r`), legenda de regiões.
+- [x] Integrado em `app/world/page.tsx`, entre o vídeo e a tabela
+      existente (complementa, não substitui) — nota de "em construção"
+      removida.
+
 # O que falta fazer
 
-- [ ] Escolher a lib de visualização (ex.: visx+d3-scale vs. recharts vs.
-      uma solução SVG/canvas customizada) — decisão de arquitetura aberta,
-      não resolvida nesta issue.
-- [ ] Decidir a fonte de "cor por continente": `dim_localidades.regiao`
-      hoje carrega a taxonomia de região do World Bank (ex.: "Latin
-      America & Caribbean"), não os 6 continentes do vídeo do Hans
-      Rosling — pode precisar de uma reclassificação/mapeamento.
-- [ ] Estender `mundo.ts` para trazer série histórica (não só o ano mais
-      recente) — necessário para a linha do tempo animada.
-- [ ] Implementar o scatter (eixo X = renda, eixo Y = expectativa de
-      vida, raio = população, cor = região/continente) com transição
-      entre anos.
-- [ ] Decidir se o cobertura de anos fica limitada à disponibilidade real
-      do World Bank (em geral 1960+) ou se mantém a promessa textual de
-      "1800 → 2025" da página (que exigiria outra fonte de dados para o
-      período pré-1960).
+- [ ] Cobertura temporal real (1960+, não 1800 como o texto da página
+      promete) e tabela de eventos históricos — `ISSUE-0022`, fora de
+      escopo aqui.
+- [ ] Texto fixo "Período coberto: de 1800 até o presente" no `<aside>`
+      da `/world` continua desatualizado em relação ao gráfico (que cobre
+      1960+) — ajuste faz parte de `ISSUE-0022`.
 
 # Decisões tomadas
 
-Nenhuma ainda.
+- Domínios das escalas (PIB, expectativa de vida, população) calculados
+  uma vez sobre toda a série histórica, não por ano — evita que os eixos
+  "saltem" durante a animação.
+- Raio proporcional à raiz quadrada da população (`scaleSqrt`), não à
+  população direta — convenção padrão Gapminder de área proporcional, não
+  raio proporcional (que exageraria visualmente países grandes).
+- Tabela da `ISSUE-0019` mantida abaixo do gráfico, não removida — dado
+  tabular ainda é útil para inspeção/acessibilidade.
 
 # Critérios de aceite
 
-- [ ] Gráfico animado funcional na `/world`, com pelo menos os 3
-      indicadores de `ISSUE-0019` (renda, expectativa de vida, população)
-      e cor por região/continente.
+- [x] Gráfico animado funcional na `/world`, com os 3 indicadores de
+      `ISSUE-0019` (renda, expectativa de vida, população) e cor por
+      região — validado com `npm run dev` (192 bolhas no ano mais
+      recente, valores plausíveis: Índia $3k/72.2 anos, China
+      $13k/78 anos, EUA $85k/78.9 anos; slider 1960–2024; 7 regiões na
+      legenda).
 
 # Observações
 
@@ -77,4 +100,7 @@ do tempo do gráfico.
 
 # Log de execução
 
-(ainda não iniciada)
+2026-06-23 — Implementado gráfico animado completo (escalas, play/pause,
+slider, legenda), série histórica em `mundo.ts`, integrado na `/world`.
+Verificado com `tsc --noEmit`, `eslint` e `npm run dev` (inspeção do HTML
+renderizado — sem navegador gráfico disponível no ambiente).

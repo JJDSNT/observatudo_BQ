@@ -94,3 +94,102 @@ export async function buscarIndicadoresMundiais(): Promise<PaisIndicadores[]> {
     (a, b) => (b.pibPerCapita?.valor ?? 0) - (a.pibPerCapita?.valor ?? 0)
   );
 }
+
+export interface PontoSerieMundial {
+  ano: number;
+  pib: number;
+  expectativaVida: number;
+  populacao: number;
+}
+
+export interface PaisSerieHistorica {
+  codigoIso: string;
+  nome: string;
+  regiao: string;
+  serie: PontoSerieMundial[];
+}
+
+interface AnoParcial {
+  pib?: number;
+  expectativaVida?: number;
+  populacao?: number;
+}
+
+/**
+ * Série histórica completa (todos os anos disponíveis) dos 3 indicadores,
+ * por país — usada pelo gráfico animado tipo Gapminder (ISSUE-0021). Só
+ * mantém os anos em que os 3 indicadores têm valor: uma bolha precisa das
+ * 3 dimensões (renda, expectativa de vida, população) pra existir.
+ */
+export async function buscarSerieHistoricaMundial(): Promise<PaisSerieHistorica[]> {
+  const resultSet = await cubejsApi.load({
+    dimensions: [
+      "dim_localidades.codigo_iso",
+      "dim_localidades.nome",
+      "dim_localidades.regiao",
+      "dim_indicadores.indicador_id",
+      "fact_indicadores.ano",
+    ],
+    measures: ["fact_indicadores.valor_medio"],
+    filters: [
+      { member: "dim_localidades.tipo", operator: "equals", values: ["pais"] },
+      {
+        member: "dim_indicadores.indicador_id",
+        operator: "equals",
+        values: [INDICADOR_PIB, INDICADOR_EXPECTATIVA_VIDA, INDICADOR_POPULACAO],
+      },
+    ],
+    // ~40k linhas no total (217 países x 3 indicadores x ~65 anos) —
+    // acima do limite implícito de algumas instalações Cube, explícito
+    // aqui pra não depender do default do servidor.
+    limit: 50000,
+  });
+
+  const porPais = new Map<
+    string,
+    { nome: string; regiao: string; porAno: Map<number, AnoParcial> }
+  >();
+
+  for (const row of resultSet.rawData()) {
+    const valorBruto = row["fact_indicadores.valor_medio"];
+    if (valorBruto == null) continue;
+
+    const codigoIso = String(row["dim_localidades.codigo_iso"]);
+    const indicadorId = String(row["dim_indicadores.indicador_id"]);
+    const ano = Number(row["fact_indicadores.ano"]);
+    const valor = Number(valorBruto);
+
+    if (!porPais.has(codigoIso)) {
+      porPais.set(codigoIso, {
+        nome: String(row["dim_localidades.nome"] ?? codigoIso),
+        regiao: String(row["dim_localidades.regiao"] ?? ""),
+        porAno: new Map(),
+      });
+    }
+    const pais = porPais.get(codigoIso)!;
+    const anoParcial = pais.porAno.get(ano) ?? {};
+
+    if (indicadorId === INDICADOR_PIB) anoParcial.pib = valor;
+    else if (indicadorId === INDICADOR_EXPECTATIVA_VIDA) anoParcial.expectativaVida = valor;
+    else if (indicadorId === INDICADOR_POPULACAO) anoParcial.populacao = valor;
+
+    pais.porAno.set(ano, anoParcial);
+  }
+
+  const resultado: PaisSerieHistorica[] = [];
+
+  for (const [codigoIso, { nome, regiao, porAno }] of porPais) {
+    const serie: PontoSerieMundial[] = [];
+
+    for (const [ano, { pib, expectativaVida, populacao }] of porAno) {
+      if (pib == null || expectativaVida == null || populacao == null) continue;
+      serie.push({ ano, pib, expectativaVida, populacao });
+    }
+
+    if (serie.length === 0) continue;
+    serie.sort((a, b) => a.ano - b.ano);
+    resultado.push({ codigoIso, nome, regiao, serie });
+  }
+
+  return resultado;
+}

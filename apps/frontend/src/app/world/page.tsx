@@ -1,5 +1,6 @@
 // src/app/world/page.tsx
-import { buscarIndicadoresMundiais } from "@/lib/analytics/mundo";
+import { buscarIndicadoresMundiais, buscarSerieHistoricaMundial } from "@/lib/analytics/mundo";
+import { GapminderChart } from "@/components/GapminderChart/GapminderChart";
 
 function formatarMoeda(valor: number): string {
   return valor.toLocaleString("pt-BR", {
@@ -17,7 +18,10 @@ function formatarPopulacao(valor: number): string {
 }
 
 export default async function World() {
-  const paises = await buscarIndicadoresMundiais();
+  const [paises, serieHistorica] = await Promise.all([
+    buscarIndicadoresMundiais(),
+    buscarSerieHistoricaMundial(),
+  ]);
 
   return (
     <section className="max-w-6xl mx-auto px-6 py-12 space-y-10 text-zinc-800 dark:text-zinc-200">
@@ -40,12 +44,20 @@ export default async function World() {
         />
       </div>
 
+      {/* Gráfico animado renda x expectativa de vida (estilo Gapminder) */}
+      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-6 shadow-inner">
+        <p className="text-center text-zinc-500 dark:text-zinc-400 mb-4 text-sm">
+          Cada bolha é um país; tamanho = população, cor = região (fonte:
+          World Bank Open Data, 1960–{new Date().getFullYear()}).
+        </p>
+        <GapminderChart serie={serieHistorica} />
+      </div>
+
       {/* Tabela de indicadores internacionais (World Bank) */}
       <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-6 shadow-inner overflow-x-auto">
         <p className="text-center text-zinc-500 dark:text-zinc-400 mb-4 text-sm">
           Dados mais recentes disponíveis por país (fonte: World Bank Open
-          Data). O gráfico animado renda × expectativa de vida, com linha do
-          tempo, ainda está em construção (acompanhe em ISSUE-0021).
+          Data).
         </p>
         {paises.length === 0 ? (
           <p className="text-center text-sm italic text-zinc-400 py-8">
