@@ -1,5 +1,24 @@
 // src/app/world/page.tsx
-export default function World() {
+import { buscarIndicadoresMundiais } from "@/lib/analytics/mundo";
+
+function formatarMoeda(valor: number): string {
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+}
+
+function formatarPopulacao(valor: number): string {
+  if (valor >= 1_000_000_000) return (valor / 1_000_000_000).toFixed(2) + " bi";
+  if (valor >= 1_000_000) return (valor / 1_000_000).toFixed(1) + " mi";
+  if (valor >= 1_000) return (valor / 1_000).toFixed(1) + " mil";
+  return valor.toLocaleString("pt-BR");
+}
+
+export default async function World() {
+  const paises = await buscarIndicadoresMundiais();
+
   return (
     <section className="max-w-6xl mx-auto px-6 py-12 space-y-10 text-zinc-800 dark:text-zinc-200">
       <header className="text-center space-y-3">
@@ -21,16 +40,58 @@ export default function World() {
         />
       </div>
 
-      {/* Placeholder do gráfico animado */}
-      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-6 shadow-inner">
-        <p className="text-center text-zinc-500 dark:text-zinc-400 mb-4">
-          (Visualização em construção — animações por país, continentes e eventos globais)
+      {/* Tabela de indicadores internacionais (World Bank) */}
+      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-6 shadow-inner overflow-x-auto">
+        <p className="text-center text-zinc-500 dark:text-zinc-400 mb-4 text-sm">
+          Dados mais recentes disponíveis por país (fonte: World Bank Open
+          Data). O gráfico animado renda × expectativa de vida, com linha do
+          tempo, ainda está em construção (acompanhe em ISSUE-0021).
         </p>
-        <div className="h-96 flex items-center justify-center border border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg">
-          <span className="text-sm italic text-zinc-400">
-            Gráfico animado: Eixos de Renda x Expectativa de Vida | Cores por Continente | Linha do tempo: 1800 → 2025
-          </span>
-        </div>
+        {paises.length === 0 ? (
+          <p className="text-center text-sm italic text-zinc-400 py-8">
+            Nenhum dado internacional disponível ainda.
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left border-b border-zinc-300 dark:border-zinc-600">
+                <th className="py-2 pr-4">País</th>
+                <th className="py-2 pr-4">Região</th>
+                <th className="py-2 pr-4 text-right">PIB per capita</th>
+                <th className="py-2 pr-4 text-right">Expectativa de vida</th>
+                <th className="py-2 pr-4 text-right">População</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paises.map((pais) => (
+                <tr
+                  key={pais.codigoIso}
+                  className="border-b border-zinc-200 dark:border-zinc-700"
+                >
+                  <td className="py-2 pr-4 font-medium">{pais.nome}</td>
+                  <td className="py-2 pr-4 text-zinc-500 dark:text-zinc-400">
+                    {pais.regiao || "--"}
+                  </td>
+                  <td className="py-2 pr-4 text-right">
+                    {pais.pibPerCapita
+                      ? formatarMoeda(pais.pibPerCapita.valor)
+                      : "--"}
+                  </td>
+                  <td className="py-2 pr-4 text-right">
+                    {pais.expectativaVida
+                      ? `${pais.expectativaVida.valor.toFixed(1)} anos`
+                      : "--"}
+                  </td>
+                  <td className="py-2 pr-4 text-right">
+                    {pais.populacao
+                      ? formatarPopulacao(pais.populacao.valor)
+                      : "--"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Descrição das dimensões e contexto histórico */}

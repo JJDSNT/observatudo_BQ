@@ -82,6 +82,32 @@ with fonte as (
         esfera_poder,
         nota
     from `silver.capag_agregado`
+
+    UNION ALL
+
+    -- Indicadores internacionais (World Bank) — ISSUE-0019
+    select
+        indicador_id,
+        localidade_id,
+        ano,
+        valor,
+        justificativa,
+        data_insercao,
+        data_referencia,
+        fonte,
+        url_fonte,
+        metodologia_calculo,
+        data_coleta,
+        confiabilidade,
+        usuario_insercao,
+        processo_etl,
+        versao_metodologia,
+        flags,
+        metadados,
+        direcionalidade,
+        esfera_poder,
+        nota
+    from `silver.world_bank`
 )
 
 select * from fonte

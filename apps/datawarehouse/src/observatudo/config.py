@@ -10,6 +10,7 @@ BUCKET_NAME = os.getenv("GCS_BUCKET", "observatudo-infra-www-data")
 DADOS_DIR = "data/cidades-sustentaveis"
 CACHE_DIR = os.path.join(DADOS_DIR, "cache")
 IBGE_LOCALIDADES_DIR = "data/ibge/localidades"
+WORLD_BANK_DIR = "data/world_bank"
 MAPA_EIXOS_PATH = os.path.join(CACHE_DIR, "eixos_llm.json")
 INVALIDOS_PATH = os.path.join(CACHE_DIR, "classificacoes_invalidas.csv")
 MAPA_DIRECIONALIDADE_PATH = os.path.join(CACHE_DIR, "direcionalidade_capag.json")

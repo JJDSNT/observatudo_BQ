@@ -45,6 +45,54 @@ with source as (
       cast(null as string) as unidade,
       'anual' as periodicidade
   from `silver.capag_agregado`
+
+  union all
+
+  -- Indicadores internacionais (World Bank) — ISSUE-0019
+  select * from unnest([
+    struct(
+      'NY.GDP.PCAP.CD' as indicador_id,
+      'PIB per capita' as nome,
+      'Produto Interno Bruto dividido pela população, a preços correntes em dólares americanos. Fonte: World Bank Open Data.' as descricao,
+      cast(null as string) as eixo,
+      'Economia' as eixo_ia,
+      cast(null as string) as formula,
+      cast(null as string) as meta_ods,
+      cast(null as string) as numero_ods,
+      cast(null as string) as nome_ods,
+      'world_bank' as fonte,
+      'US$' as unidade,
+      'anual' as periodicidade
+    ),
+    struct(
+      'SP.DYN.LE00.IN',
+      'Expectativa de vida ao nascer',
+      'Número médio de anos que um recém-nascido viveria, mantidas as condições de mortalidade do ano de referência. Fonte: World Bank Open Data.',
+      cast(null as string),
+      'Saúde',
+      cast(null as string),
+      cast(null as string),
+      cast(null as string),
+      cast(null as string),
+      'world_bank',
+      'anos',
+      'anual'
+    ),
+    struct(
+      'SP.POP.TOTL',
+      'População total',
+      'População total do país, contagem de meio do ano (todos os residentes, independente de status legal ou cidadania). Fonte: World Bank Open Data.',
+      cast(null as string),
+      'Demografia',
+      cast(null as string),
+      cast(null as string),
+      cast(null as string),
+      cast(null as string),
+      'world_bank',
+      'habitantes',
+      'anual'
+    )
+  ])
 )
 
 select

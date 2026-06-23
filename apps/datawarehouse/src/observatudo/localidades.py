@@ -35,6 +35,15 @@ def _carregar_municipios() -> pd.DataFrame:
     return pd.read_csv(f"{config.IBGE_LOCALIDADES_DIR}/municipios_c_capital.csv")
 
 
+@lru_cache
+def _carregar_paises_mundo() -> pd.DataFrame:
+    # keep_default_na=False: o ISO 3166-1 alpha-2 da Namíbia é literalmente
+    # "NA" — sem isso, o pandas interpreta a sigla como valor nulo.
+    return pd.read_csv(
+        f"{config.WORLD_BANK_DIR}/paises.csv", keep_default_na=False
+    )
+
+
 def resolver_estado_por_sigla(sigla: str) -> str:
     """Normaliza a sigla bruta de uma UF (ex.: `" sp"`) para o
     `localidade_id` canônico de `dim_localidades` (ex.: `"BR-SP"`).
@@ -55,6 +64,22 @@ def resolver_municipio_por_codigo_ibge(codigo: str | int) -> str:
     if int(codigo_normalizado) not in municipios["codigo_ibge"].values:
         raise LocalidadeDesconhecidaError(
             f"Código IBGE de município desconhecido: {codigo!r}"
+        )
+    return codigo_normalizado
+
+
+def resolver_pais_por_iso(codigo_iso: str) -> str:
+    """Valida um código ISO 3166-1 alpha-2 de país (ex.: `"us"`) contra a
+    referência de `data/world_bank/paises.csv` e devolve o `localidade_id`
+    canônico — que para país coincide com o próprio `codigo_iso`, mesmo
+    padrão já usado para o Brasil (`"BR"`) em
+    `scripts/carregar_localidades_ibge.py`.
+    """
+    codigo_normalizado = codigo_iso.strip().upper()
+    paises = _carregar_paises_mundo()
+    if codigo_normalizado not in paises["codigo_iso"].values:
+        raise LocalidadeDesconhecidaError(
+            f"Código ISO de país desconhecido: {codigo_iso!r}"
         )
     return codigo_normalizado
 

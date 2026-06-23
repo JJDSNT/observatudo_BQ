@@ -14,6 +14,7 @@ PROJETO = "observatudo-infra"
 DATASET = "gold"
 TABELA = "dim_localidades"
 CAMINHO_DADOS = "data/ibge/localidades/"
+CAMINHO_MUNDO = "data/world_bank/paises.csv"
 CAMPO_CAPITAL = "é_capital"
 
 # === LEITURA DOS CSVs ===
@@ -51,6 +52,38 @@ for _, row in pais_df.iterrows():
         "populacao": row.get("populacao"),
         "codigo_ibge": None,
         "codigo_iso": row["sigla"],
+        "data_inclusao": AGORA_UTC,
+    })
+
+# === PAÍSES (mundo, World Bank) ===
+# `pais.csv` (IBGE) só cobre o Brasil. Os demais países vêm da referência
+# `data/world_bank/paises.csv` (gerada por
+# `scripts/buscar_paises_world_bank.py`); o Brasil é pulado aqui pra não
+# duplicar a linha acima, que já tem capital/latitude/longitude
+# resolvidos.
+# keep_default_na=False: o ISO 3166-1 alpha-2 da Namíbia é literalmente
+# "NA" — sem isso, o pandas interpreta a sigla como valor nulo.
+mundo_df = pd.read_csv(CAMINHO_MUNDO, keep_default_na=False)
+paises_ja_carregados = set(pais_df["sigla"])
+
+for _, row in mundo_df.iterrows():
+    if row["codigo_iso"] in paises_ja_carregados:
+        continue
+    localidade_id = loc.resolver_pais_por_iso(row["codigo_iso"])
+    localidades.append({
+        "localidade_id": localidade_id,
+        "nome": row["nome"],
+        "tipo": "pais",
+        "localidade_pai_id": None,
+        "sigla": localidade_id,
+        "regiao": row["regiao"],
+        CAMPO_CAPITAL: None,
+        "capital_localidade_id": None,
+        "latitude": None,
+        "longitude": None,
+        "populacao": None,
+        "codigo_ibge": None,
+        "codigo_iso": localidade_id,
         "data_inclusao": AGORA_UTC,
     })
 

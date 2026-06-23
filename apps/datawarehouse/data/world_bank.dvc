@@ -1,0 +1,6 @@
+outs:
+- md5: 3be77d45a30aba05080d1b2aa244de46.dir
+  size: 3053920
+  nfiles: 2
+  hash: md5
+  path: world_bank

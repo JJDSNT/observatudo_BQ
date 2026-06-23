@@ -37,6 +37,12 @@ STEPS: list[Step] = [
         dataset="silver",
         table="capag_agregado",
     ),
+    Step(
+        name="silver.world_bank",
+        sql_file="silver/world_bank.sql",
+        dataset="silver",
+        table="world_bank",
+    ),
     # Materializado como TABLE (não VIEW): a SA www_app só tem IAM em
     # `gold`, não em `silver`. Uma VIEW que lê `silver.*` falharia com
     # "Access Denied" para quem só pode ler `gold` (BigQuery resolve
