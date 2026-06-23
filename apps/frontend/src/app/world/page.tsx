@@ -2,6 +2,12 @@
 import { buscarIndicadoresMundiais, buscarSerieHistoricaMundial } from "@/lib/analytics/mundo";
 import { GapminderChart } from "@/components/GapminderChart/GapminderChart";
 
+// Busca dados via Cube em cada request (BigQuery muda a cada rodada do
+// pipeline) — sem isso o Next tenta pré-renderizar a página no build,
+// quando CUBEJS_API_SECRET ainda não está disponível (só existe em
+// runtime), e o build falha com "secretOrPrivateKey must have a value".
+export const dynamic = "force-dynamic";
+
 function formatarMoeda(valor: number): string {
   return valor.toLocaleString("pt-BR", {
     style: "currency",
