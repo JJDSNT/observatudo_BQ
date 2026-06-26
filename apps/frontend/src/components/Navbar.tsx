@@ -13,8 +13,8 @@ const links = [
   { label: "Indicadores", href: "/indicadores" },
   { label: "Global", href: "/world" },
   { label: "Sobre", href: "/sobre" },
-  { label: "Categorias", href: "/configuracoes/categorias" },
-  { label: "Configurações", href: "/configuracoes" },
+  { label: "Categorias", href: "/configuracoes/categorias", auth: true },
+  { label: "Configurações", href: "/configuracoes", auth: true },
 ];
 
 export default function Navbar() {
@@ -76,7 +76,7 @@ export default function Navbar() {
 
       {/* Navegação */}
       <nav className="flex flex-wrap gap-2 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
-        {links.map(({ label, href }) => {
+        {links.filter((l) => !l.auth || !!user).map(({ label, href }) => {
           const isActive = pathname === href;
           return (
             <Link

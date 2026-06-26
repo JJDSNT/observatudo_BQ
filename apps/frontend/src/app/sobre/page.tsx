@@ -1,3 +1,5 @@
+import { Github } from "lucide-react";
+
 export default function Sobre() {
   return (
     <section className="max-w-3xl mx-auto px-4 py-10 space-y-8 text-zinc-800 dark:text-zinc-200">
@@ -92,9 +94,20 @@ export default function Sobre() {
         </div>
       </article>
 
-      <footer className="pt-6 text-center text-sm text-zinc-500 dark:text-zinc-400 italic">
-        Esta plataforma está em desenvolvimento contínuo. Toda colaboração é
-        bem-vinda.
+      <footer className="pt-6 text-center text-sm text-zinc-500 dark:text-zinc-400 italic space-y-3">
+        <p>
+          Esta plataforma está em desenvolvimento contínuo. Toda colaboração é
+          bem-vinda.
+        </p>
+        <a
+          href="https://github.com/JJDSNT/observatudo_BQ"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 not-italic text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors font-medium"
+        >
+          <Github className="w-4 h-4" />
+          JJDSNT/observatudo_BQ
+        </a>
       </footer>
     </section>
   );
