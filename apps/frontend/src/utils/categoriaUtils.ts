@@ -106,3 +106,21 @@ export function removerIndicador(
     ),
   };
 }
+
+/**
+ * Adiciona um indicador a um subeixo (ignora duplicatas).
+ */
+export function adicionarIndicador(
+  categoria: Categoria,
+  subeixoId: string,
+  indicadorId: string
+): Categoria {
+  return {
+    ...categoria,
+    subeixos: categoria.subeixos.map((s) =>
+      s.id === subeixoId && !s.indicadores.includes(indicadorId)
+        ? { ...s, indicadores: [...s.indicadores, indicadorId] }
+        : s
+    ),
+  };
+}

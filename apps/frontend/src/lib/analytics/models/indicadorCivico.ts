@@ -6,6 +6,8 @@ export interface PontoSerieIndicador {
   indicadorId: string;
   localidadeId: string;
   indicadorNome: string;
+  descricao: string;
+  formula: string;
   unidade: string;
   fonte: string;
   data: string;
@@ -34,6 +36,8 @@ export class IndicadorCivico {
       dimensions: [
         "indicadores.indicador_id",
         "indicadores.nome",
+        "indicadores.descricao",
+        "indicadores.formula",
         "indicadores.unidade",
         "indicadores.fonte",
         "indicadores.dim_localidades_localidade_id",
@@ -65,6 +69,8 @@ export class IndicadorCivico {
       indicadorId: String(row["indicadores.indicador_id"]),
       localidadeId: String(row["indicadores.dim_localidades_localidade_id"]),
       indicadorNome: String(row["indicadores.nome"] ?? ""),
+      descricao: row["indicadores.descricao"] != null ? String(row["indicadores.descricao"]) : "",
+      formula: row["indicadores.formula"] != null ? String(row["indicadores.formula"]) : "",
       unidade:
         row["indicadores.unidade"] != null
           ? String(row["indicadores.unidade"])

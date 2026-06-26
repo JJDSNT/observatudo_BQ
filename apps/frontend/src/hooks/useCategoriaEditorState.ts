@@ -9,6 +9,7 @@ import {
   adicionarSubeixo,
   removerSubeixo,
   removerIndicador,
+  adicionarIndicador,
 } from '@/utils/categoriaUtils';
 
 export function useCategoriaEditorState() {
@@ -68,6 +69,17 @@ export function useCategoriaEditorState() {
     []
   );
 
+  const adicionarIndicadorSubeixo = useCallback(
+    (categoriaId: number, subeixoId: string, indicadorId: string) => {
+      setEdicaoLocal((prev) =>
+        prev.map((cat) =>
+          cat.id === categoriaId ? adicionarIndicador(cat, subeixoId, indicadorId) : cat
+        )
+      );
+    },
+    []
+  );
+
   const reordenarCategorias = useCallback((novaOrdem: number[]) => {
     setEdicaoLocal((prev) => {
       const novaLista: Categoria[] = novaOrdem
@@ -85,6 +97,7 @@ export function useCategoriaEditorState() {
     adicionarSubeixo: adicionarSubeixoLocal,
     removerSubeixo: removerSubeixoLocal,
     removerIndicadorSubeixo,
+    adicionarIndicadorSubeixo,
     salvarAlteracoes,
     reordenarCategorias,
     temAlteracoes: JSON.stringify(edicaoLocal) !== JSON.stringify(categoriasIndicadores),

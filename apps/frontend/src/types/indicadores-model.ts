@@ -11,13 +11,21 @@ export interface ValorSerie {
   nota?: string | null;
 }
 
+export type Direcionalidade =
+  | 'quanto maior, melhor'
+  | 'quanto menor, melhor'
+  | 'indiferente'
+  | 'a > b > c';
+
 export interface Indicador {
   id: string;
   nome: string;
   descricao?: string;
+  formula?: string;
   unidade?: string;
   fonte?: string;
   periodicidade?: string;
+  direcionalidade?: Direcionalidade | null;
   serie: ValorSerie[];
 }
 

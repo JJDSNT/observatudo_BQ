@@ -4,6 +4,7 @@ import { useMemo, useLayoutEffect } from "react";
 import ComboBoxLocalidades from "@/components/ComboBoxLocalidades";
 import Dashboard from "@/components/Dashboard";
 import CategoriaSelector from "@/components/CategoriaSelector";
+import { MetricCardSkeleton } from "@/components/MetricCard/MetricCardSkeleton";
 import { useIndicadoresSelecionados } from "@/hooks/useIndicadoresSelecionados";
 import { useCategorias } from "@/store/hooks/useCategorias";
 import { usePreferencesStore } from "@/store/preferencesStore";
@@ -18,6 +19,7 @@ export default function Home() {
   }, [initializeDefaultsIfNeeded]);
 
   const eixos = useMemo(() => categorias ?? [], [categorias]);
+  const cidade = usePreferencesStore((s) => s.selecionado.cidade);
   const { indicadores, loading, error } = useIndicadoresSelecionados(true);
 
   return (
@@ -31,9 +33,15 @@ export default function Home() {
         <p className="text-yellow-500">⚠️ Nenhuma categoria configurada.</p>
       )}
 
-      {loading && <p>⏳ Carregando indicadores...</p>}
+      {loading && cidade && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto px-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <MetricCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
       {error && <p className="text-red-500">❌ Erro: {error}</p>}
-      {indicadores && !loading && !error && <Dashboard payload={indicadores} />}
+      {indicadores && !loading && !error && cidade && <Dashboard payload={indicadores} />}
     </section>
     
   );

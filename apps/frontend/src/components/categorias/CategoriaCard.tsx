@@ -14,10 +14,11 @@ interface CategoriaCardProps {
   onAddSubeixo: (categoriaId: number) => void;
   onRemoveSubeixo: (categoriaId: number, subeixoId: string) => void;
   onRemoveIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
+  onAddIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
   onDelete: (id: number) => void;
   getNome: (id: string) => string;
   loading?: boolean;
-  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>; // 👈 novo
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
 }
 
 export function CategoriaCard({
@@ -28,6 +29,7 @@ export function CategoriaCard({
   onAddSubeixo,
   onRemoveSubeixo,
   onRemoveIndicador,
+  onAddIndicador,
   onDelete,
   getNome,
   loading = false,
@@ -118,6 +120,9 @@ export function CategoriaCard({
                 loading={loading}
                 onRemoveIndicador={(indicadorId) =>
                   onRemoveIndicador?.(categoria.id, subeixo.id, indicadorId)
+                }
+                onAddIndicador={(indicadorId) =>
+                  onAddIndicador?.(categoria.id, subeixo.id, indicadorId)
                 }
                 onUpdateNome={(novoNome) =>
                   onUpdateSubeixo?.(categoria.id, subeixo.id, novoNome)

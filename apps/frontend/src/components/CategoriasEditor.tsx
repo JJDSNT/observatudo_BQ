@@ -40,6 +40,7 @@ export default function CategoriasEditor() {
     adicionarSubeixo,
     removerSubeixo,
     removerIndicadorSubeixo,
+    adicionarIndicadorSubeixo,
     salvarAlteracoes,
     reordenarCategorias,
   } = useCategoriaEditorState();
@@ -112,6 +113,7 @@ export default function CategoriasEditor() {
                   atualizarCategoria(categoriaId, { subeixos: novosSubeixos });
                 }}
                 onRemoveIndicador={removerIndicadorSubeixo}
+                onAddIndicador={adicionarIndicadorSubeixo}
                 iconesDisponiveis={iconesDisponiveis}
                 onDelete={deletarCategoria}
                 onAddSubeixo={adicionarSubeixo}

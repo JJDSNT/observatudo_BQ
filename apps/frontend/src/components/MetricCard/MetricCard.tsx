@@ -1,248 +1,286 @@
-// src/components/MetricCard/MetricCard.tsx
-import React, { useMemo } from "react";
-import { Indicador } from "@/types";
-import { TrendingUp, TrendingDown, Minus, Info, Calendar } from "lucide-react";
+"use client";
+
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { GripVertical, Info, X } from "lucide-react";
+import type { Indicador } from "@/types";
+import { Sparkline } from "./Sparkline";
+
+export type ComparacaoGeo = {
+  municipio: number | null;
+  estado: number | null;
+  pais: number | null;
+};
+
+type Semaforo = "verde" | "vermelho" | "amarelo" | "cinza";
+
+const SEMAFORO: Record<Semaforo, { dot: string; sparkline: string; label: string }> = {
+  verde:    { dot: "bg-green-500",                  sparkline: "#16a34a", label: "Melhorando" },
+  vermelho: { dot: "bg-red-500",                    sparkline: "#dc2626", label: "Piorando" },
+  amarelo:  { dot: "bg-yellow-400",                 sparkline: "#ca8a04", label: "Estável" },
+  cinza:    { dot: "bg-gray-300 dark:bg-gray-600",  sparkline: "#9ca3af", label: "Sem referência" },
+};
+
+function calcularSemaforo(indicador: Indicador): Semaforo {
+  if (!indicador.direcionalidade) return "cinza";
+
+  const serie = indicador.serie.filter((p) => p.valor !== null);
+  const ultimo = serie.at(-1);
+  const penultimo = serie.at(-2);
+  if (ultimo?.valor == null || penultimo?.valor == null) return "cinza";
+
+  const delta = ultimo.valor - penultimo.valor;
+  const pct = Math.abs(delta / penultimo.valor) * 100;
+  if (pct < 1) return "amarelo";
+
+  const subiu = delta > 0;
+  if (indicador.direcionalidade === "quanto maior, melhor") return subiu ? "verde" : "vermelho";
+  if (indicador.direcionalidade === "quanto menor, melhor") return subiu ? "vermelho" : "verde";
+  return "amarelo";
+}
+
+function formatarValor(v: number | null | undefined, unidade?: string): string {
+  if (v == null) return "—";
+  if (Math.abs(v) >= 1_000_000) return (v / 1_000_000).toFixed(1) + "M";
+  if (Math.abs(v) >= 1_000) return (v / 1_000).toFixed(1) + "K";
+  const decimais = unidade === "%" ? 1 : v % 1 !== 0 ? 2 : 0;
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: decimais, maximumFractionDigits: decimais });
+}
 
 type MetricCardProps = {
   indicador: Indicador;
-  localidadeNome?: string;
-  variant?: "default" | "compact" | "detailed";
-  showTrend?: boolean;
-  showHistory?: boolean;
-  onClick?: () => void;
+  cor?: string;
+  comparacao?: ComparacaoGeo;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 };
 
-export const MetricCard: React.FC<MetricCardProps> = ({
-  indicador,
-  localidadeNome,
-  variant = "default",
-  showTrend = true,
-  showHistory = true,
-  onClick,
-}) => {
-  const dados = useMemo(() => {
-    // Alguns indicadores (ex.: nota CAPAG) só têm classificação
-    // categórica (`nota`), sem valor numérico — também contam como
-    // "tem dado".
-    const serie = indicador.serie.filter(
-      p => (p.valor !== null && p.valor !== undefined) || (p.nota != null && p.nota !== "")
-    );
-    const ultimaMedida = serie.at(-1);
-    const penultimaMedida = serie.at(-2);
-    const serieRecentes = serie.slice(-5);
-    
-    // Cálculo de tendência
-    let tendencia: "up" | "down" | "stable" | null = null;
-    let percentualMudanca: number | null = null;
-    
-    if (ultimaMedida && penultimaMedida && typeof ultimaMedida.valor === 'number' && typeof penultimaMedida.valor === 'number') {
-      const diferenca = ultimaMedida.valor - penultimaMedida.valor;
-      percentualMudanca = (diferenca / penultimaMedida.valor) * 100;
-      
-      if (Math.abs(percentualMudanca) < 0.1) {
-        tendencia = "stable";
-      } else if (diferenca > 0) {
-        tendencia = "up";
-      } else {
-        tendencia = "down";
+export function MetricCard({ indicador, cor, comparacao, dragHandleProps }: MetricCardProps) {
+  const [showInfo, setShowInfo] = useState(false);
+  const infoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showInfo) return;
+    function onMouseDown(e: MouseEvent) {
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+        setShowInfo(false);
       }
     }
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [showInfo]);
 
-    return {
-      ultimaMedida,
-      serieRecentes,
-      tendencia,
-      percentualMudanca,
-      temDados: serie.length > 0
-    };
-  }, [indicador.serie]);
+  const semaforo = useMemo(() => calcularSemaforo(indicador), [indicador]);
+  const colors = SEMAFORO[semaforo];
 
-  const formatarData = (data: unknown): string => {
-    if (!data) return "--";
+  const serieLimpa = useMemo(
+    () => indicador.serie.filter((p) => p.valor !== null || p.nota),
+    [indicador.serie]
+  );
+  const ultimoPonto = serieLimpa.at(-1);
+  const penultimoPonto = serieLimpa.at(-2);
 
-    if (typeof data === "object" && data !== null && "value" in data) {
-      const value = (data as { value?: string }).value;
-      return typeof value === "string" ? value : "--";
-    }
+  const sparklineValues = useMemo(
+    () => indicador.serie.map((p) => p.valor).filter((v): v is number => v !== null),
+    [indicador.serie]
+  );
 
-    if (typeof data === "string") {
-      // Tenta formatar como data se possível
-      const date = new Date(data);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString("pt-BR", { 
-          month: "short", 
-          year: "numeric" 
-        });
-      }
-      return data;
-    }
+  const variacao = useMemo(() => {
+    if (ultimoPonto?.valor == null || penultimoPonto?.valor == null) return null;
+    return ((ultimoPonto.valor - penultimoPonto.valor) / penultimoPonto.valor) * 100;
+  }, [ultimoPonto, penultimoPonto]);
 
-    return "--";
-  };
-
-  const formatarValor = (valor: number | null | undefined): string => {
-    if (valor === null || valor === undefined) return "--";
-    
-    // Formatação inteligente baseada no tamanho do número
-    if (Math.abs(valor) >= 1_000_000) {
-      return (valor / 1_000_000).toFixed(1) + "M";
-    } else if (Math.abs(valor) >= 1_000) {
-      return (valor / 1_000).toFixed(1) + "K";
-    } else if (valor % 1 !== 0) {
-      return valor.toFixed(2);
-    }
-    
-    return valor.toLocaleString("pt-BR");
-  };
-
-  const getTrendIcon = () => {
-    switch (dados.tendencia) {
-      case "up":
-        return <TrendingUp className="w-4 h-4 text-green-500" />;
-      case "down":
-        return <TrendingDown className="w-4 h-4 text-red-500" />;
-      case "stable":
-        return <Minus className="w-4 h-4 text-gray-400" />;
-      default:
-        return null;
-    }
-  };
-
-  const getTrendColor = () => {
-    switch (dados.tendencia) {
-      case "up": return "text-green-600";
-      case "down": return "text-red-600";
-      case "stable": return "text-gray-500";
-      default: return "text-gray-600";
-    }
-  };
-
-  if (variant === "compact") {
-    return (
-      <div 
-        className={`rounded-lg border border-gray-200 p-3 bg-white hover:shadow-md transition-all duration-200 ${
-          onClick ? "cursor-pointer hover:border-blue-300" : ""
-        }`}
-        onClick={onClick}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {indicador.nome || `Indicador ${indicador.id}`}
-            </div>
-            {localidadeNome && (
-              <div className="text-xs text-gray-500">{localidadeNome}</div>
-            )}
-          </div>
-          <div className="flex items-center gap-2 ml-3">
-            {showTrend && getTrendIcon()}
-            <div className="text-right">
-              <div className="text-lg font-bold text-gray-900">
-                {dados.ultimaMedida?.nota ?? formatarValor(dados.ultimaMedida?.valor)}
-                {!dados.ultimaMedida?.nota && indicador.unidade && (
-                  <span className="text-xs ml-1 text-gray-500 font-normal">
-                    {indicador.unidade}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const anoUltimo = ultimoPonto?.data ? parseInt(ultimoPonto.data.substring(0, 4)) : null;
+  const defasagemAnos = anoUltimo ? new Date().getFullYear() - anoUltimo : null;
+  const valorExibido = ultimoPonto?.nota ?? formatarValor(ultimoPonto?.valor, indicador.unidade);
+  const temInfo = !!(indicador.descricao?.trim() || indicador.formula?.trim() || indicador.fonte?.trim());
 
   return (
-    <div 
-      className={`rounded-xl border border-gray-200 p-5 bg-white hover:shadow-lg transition-all duration-300 ${
-        onClick ? "cursor-pointer hover:border-blue-300 hover:-translate-y-0.5" : ""
-      } ${variant === "detailed" ? "p-6" : ""}`}
-      onClick={onClick}
-    >
-      {/* Cabeçalho */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1 min-w-0">
-          {localidadeNome && (
-            <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
-              <span>{localidadeNome}</span>
-            </div>
-          )}
-          <div className="text-lg font-semibold text-gray-900 leading-tight mb-1">
-            {indicador.nome || `Indicador ${indicador.id}`}
+    <div className="relative group flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-visible">
+      {/* Acento semáforo */}
+      <div
+        className="w-1 flex-shrink-0 rounded-l-xl"
+        style={{ backgroundColor: colors.sparkline }}
+        title={colors.label}
+        aria-label={`Tendência: ${colors.label}`}
+      />
+
+      <div className="flex-1 p-4 min-w-0">
+        {/* Cabeçalho */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 leading-tight line-clamp-2">
+              {indicador.nome}
+            </h3>
           </div>
-          {indicador.descricao && variant === "detailed" && (
-            <div className="text-sm text-gray-600 line-clamp-2">
-              {indicador.descricao}
-            </div>
-          )}
-        </div>
-        
-        {/* Valor principal */}
-        <div className="text-right ml-4">
-          <div className="text-2xl font-bold text-gray-900 mb-1">
-            {dados.ultimaMedida?.nota ?? formatarValor(dados.ultimaMedida?.valor)}
-            {!dados.ultimaMedida?.nota && indicador.unidade && (
-              <span className="text-sm ml-2 text-gray-600 font-normal">
-                {indicador.unidade}
+
+          <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+            {defasagemAnos !== null && defasagemAnos > 2 && anoUltimo && (
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                  defasagemAnos > 4
+                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                    : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                }`}
+                title={`Último dado disponível: ${anoUltimo}`}
+              >
+                {anoUltimo}
               </span>
             )}
+
+            {temInfo && (
+              <div ref={infoRef} className="relative">
+                <button
+                  onClick={() => setShowInfo((v) => !v)}
+                  onKeyDown={(e) => e.key === "Enter" && setShowInfo((v) => !v)}
+                  className="p-0.5 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  aria-label="Ver descrição do indicador"
+                  aria-expanded={showInfo}
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+
+                {showInfo && (
+                  <div
+                    role="tooltip"
+                    className="absolute right-0 top-6 z-50 w-72 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 shadow-xl text-xs"
+                  >
+                    {/* Cabeçalho */}
+                    <div
+                      className="flex items-start justify-between gap-2 px-3 pt-3 pb-2 border-b border-gray-100 dark:border-gray-700"
+                      style={{ borderLeftColor: colors.sparkline }}
+                    >
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 leading-snug pr-4">
+                        {indicador.nome}
+                      </p>
+                      <button
+                        onClick={() => setShowInfo(false)}
+                        className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mt-0.5"
+                        aria-label="Fechar"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    <div className="px-3 py-2 space-y-2.5">
+                      {indicador.descricao?.trim() && (
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {indicador.descricao}
+                        </p>
+                      )}
+                      {indicador.formula?.trim() && (
+                        <div>
+                          <p className="text-gray-400 dark:text-gray-500 uppercase tracking-wide text-[10px] font-semibold mb-0.5">
+                            Fórmula
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
+                            {indicador.formula}
+                          </p>
+                        </div>
+                      )}
+                      {indicador.fonte?.trim() && (
+                        <p className="text-gray-400 dark:text-gray-500 italic border-t border-gray-100 dark:border-gray-700 pt-2">
+                          Fonte: {indicador.fonte}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {dragHandleProps && (
+              <button
+                {...dragHandleProps}
+                className="p-0.5 rounded text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity touch-none"
+                aria-label="Arrastar indicador"
+                tabIndex={0}
+              >
+                <GripVertical className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
-          
-          {/* Indicador de tendência */}
-          {showTrend && dados.tendencia && dados.percentualMudanca !== null && (
-            <div className={`flex items-center gap-1 text-sm ${getTrendColor()}`}>
-              {getTrendIcon()}
-              <span className="font-medium">
-                {dados.percentualMudanca > 0 ? "+" : ""}
-                {dados.percentualMudanca.toFixed(1)}%
-              </span>
-            </div>
+        </div>
+
+        {/* Valor principal */}
+        <div className="flex items-baseline gap-1.5 mb-0.5">
+          <span className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+            {valorExibido}
+          </span>
+          {indicador.unidade && !ultimoPonto?.nota && (
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {indicador.unidade}
+            </span>
+          )}
+          {variacao !== null && (
+            <span
+              className={`text-xs font-medium ml-auto tabular-nums ${
+                variacao > 0
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-red-600 dark:text-red-400"
+              }`}
+            >
+              {variacao > 0 ? "+" : ""}
+              {variacao.toFixed(1)}%
+            </span>
           )}
         </div>
-      </div>
 
-      {/* Última atualização */}
-      <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
-        <Calendar className="w-3 h-3" />
-        <span>Atualizado em {formatarData(dados.ultimaMedida?.data)}</span>
-      </div>
+        {indicador.periodicidade && (
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+            {indicador.periodicidade}
+          </p>
+        )}
 
-      {/* Histórico recente */}
-      {showHistory && dados.serieRecentes.length > 1 && (
-        <div className="border-t border-gray-100 pt-3">
-          <div className="text-xs font-medium text-gray-700 mb-2">
-            Histórico recente
+        {/* Sparkline */}
+        {sparklineValues.length >= 3 && (
+          <div className="mt-3 mb-1">
+            <Sparkline values={sparklineValues} color={colors.sparkline} />
           </div>
-          <div className="space-y-1">
-            {dados.serieRecentes.slice(-3).reverse().map((ponto, index) => (
-              <div 
-                key={`${formatarData(ponto.data)}-${index}`} 
-                className="flex justify-between items-center text-xs"
-              >
-                <span className="text-gray-600">{formatarData(ponto.data)}</span>
-                <span className="font-medium text-gray-900">
-                  {ponto.nota ?? formatarValor(ponto.valor)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
 
-      {/* Rodapé com fonte */}
-      {indicador.fonte && (
-        <div className="flex items-start gap-1 text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">
-          <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-          <span className="italic">Fonte: {indicador.fonte}</span>
-        </div>
-      )}
-
-      {/* Estado vazio */}
-      {!dados.temDados && (
-        <div className="text-center py-4 text-gray-500">
-          <div className="text-sm">Sem dados disponíveis</div>
-        </div>
-      )}
+        {/* Comparação geográfica */}
+        {comparacao && <ComparacaoGeografica comparacao={comparacao} unidade={indicador.unidade} />}
+      </div>
     </div>
   );
-};
+}
+
+function ComparacaoGeografica({
+  comparacao,
+  unidade,
+}: {
+  comparacao: ComparacaoGeo;
+  unidade?: string;
+}) {
+  const itens = [
+    { label: "MUN", valor: comparacao.municipio, destaque: true },
+    { label: "EST", valor: comparacao.estado,    destaque: false },
+    { label: "BR",  valor: comparacao.pais,      destaque: false },
+  ];
+
+  if (itens.every((i) => i.valor == null)) return null;
+
+  return (
+    <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+      {itens.map(({ label, valor, destaque }) => (
+        <div key={label} className="flex-1 min-w-0">
+          <div
+            className={`text-xs font-medium mb-0.5 ${
+              destaque ? "text-gray-700 dark:text-gray-200" : "text-gray-400 dark:text-gray-500"
+            }`}
+          >
+            {label}
+          </div>
+          <div
+            className={`text-xs tabular-nums truncate ${
+              destaque
+                ? "font-semibold text-gray-900 dark:text-white"
+                : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            {valor != null ? formatarValor(valor, unidade) : "—"}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

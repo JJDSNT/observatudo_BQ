@@ -24,6 +24,7 @@ view(`indicadores`, {
         `indicador_id`,
         `nome`,
         `descricao`,
+        `formula`,
         `eixo`,
         `eixo_ia`,
         `categoria`,

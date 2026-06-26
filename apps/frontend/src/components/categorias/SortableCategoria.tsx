@@ -13,6 +13,7 @@ interface SortableCategoriaProps {
   onUpdate: (id: number, atualizacao: Partial<Categoria>) => void;
   onUpdateSubeixo: (categoriaId: number, subeixoId: string, novoNome: string) => void;
   onRemoveIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
+  onAddIndicador: (categoriaId: number, subeixoId: string, indicadorId: string) => void;
   onDelete: (id: number) => void;
   onAddSubeixo: (categoriaId: number) => void;
   onRemoveSubeixo: (categoriaId: number, subeixoId: string) => void;
@@ -26,6 +27,7 @@ export function SortableCategoria({
   onUpdate,
   onUpdateSubeixo,
   onRemoveIndicador,
+  onAddIndicador,
   onDelete,
   onAddSubeixo,
   onRemoveSubeixo,
@@ -53,12 +55,13 @@ export function SortableCategoria({
         onUpdate={onUpdate}
         onUpdateSubeixo={onUpdateSubeixo}
         onRemoveIndicador={onRemoveIndicador}
+        onAddIndicador={onAddIndicador}
         onDelete={onDelete}
         onAddSubeixo={onAddSubeixo}
         onRemoveSubeixo={onRemoveSubeixo}
         getNome={getNome}
         loading={loading}
-        dragHandleProps={listeners} // 👈 usado no botão de arrastar
+        dragHandleProps={listeners}
       />
     </div>
   );
