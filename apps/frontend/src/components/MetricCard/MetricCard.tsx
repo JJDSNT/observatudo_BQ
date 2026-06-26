@@ -53,7 +53,7 @@ type MetricCardProps = {
   dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 };
 
-export function MetricCard({ indicador, cor, comparacao, dragHandleProps }: MetricCardProps) {
+export function MetricCard({ indicador, comparacao, dragHandleProps }: MetricCardProps) {
   const [showInfo, setShowInfo] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
 

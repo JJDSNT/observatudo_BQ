@@ -43,6 +43,7 @@ export default function ComboBoxLocalidades({
 
       onChange(cidadeSelecionada);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cidadeSelecionada, ufSelecionado]);
 
   const handleChangeEstado = (uf: string) => {
